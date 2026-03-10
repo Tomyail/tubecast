@@ -12,6 +12,7 @@ export type Job = {
   status: JobStatus;
   idempotencyKey: string | null;
   audioPath: string | null;
+  audioHref: string | null;
   audioUrl: string | null;
   errorMessage: string | null;
   createdAt: string;

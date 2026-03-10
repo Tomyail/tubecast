@@ -7,9 +7,11 @@ import {
   ActivityIndicator,
   Alert,
   Linking,
+  Platform,
   Pressable,
   SafeAreaView,
   ScrollView,
+  Settings,
   StyleSheet,
   Text,
   TextInput,
@@ -33,9 +35,24 @@ const DEFAULT_CONFIG: ServerConfig = {
   authToken: "",
 };
 
+const IOS_SERVER_BASE_URL_KEY = "ytAudio.serverBaseUrl";
+
+function getInitialServerConfig(): ServerConfig {
+  if (Platform.OS !== "ios") {
+    return DEFAULT_CONFIG;
+  }
+
+  const savedBaseUrl = Settings.get(IOS_SERVER_BASE_URL_KEY);
+  return {
+    ...DEFAULT_CONFIG,
+    baseUrl: typeof savedBaseUrl === "string" && savedBaseUrl.trim() ? savedBaseUrl : DEFAULT_CONFIG.baseUrl,
+  };
+}
+
 function AppShell() {
-  const [serverConfig, setServerConfig] = useState<ServerConfig>(DEFAULT_CONFIG);
-  const [draftBaseUrl, setDraftBaseUrl] = useState(DEFAULT_CONFIG.baseUrl);
+  const initialServerConfig = getInitialServerConfig();
+  const [serverConfig, setServerConfig] = useState<ServerConfig>(initialServerConfig);
+  const [draftBaseUrl, setDraftBaseUrl] = useState(initialServerConfig.baseUrl);
   const [draftToken, setDraftToken] = useState(DEFAULT_CONFIG.authToken);
   const [sourceUrl, setSourceUrl] = useState("");
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
@@ -103,10 +120,10 @@ function AppShell() {
   const playerStatus = useAudioPlayerStatus(player);
 
   useEffect(() => {
-    if (!activeJob?.audioUrl) {
+    if (!playableAudioUrl) {
       player.pause();
     }
-  }, [activeJob?.audioUrl, player]);
+  }, [playableAudioUrl, player]);
 
   useEffect(() => {
     if (!playableAudioUrl || !activeJob) {
@@ -169,10 +186,18 @@ function AppShell() {
           <Pressable
             style={styles.secondaryButton}
             onPress={() => {
-              setServerConfig({
+              const nextConfig = {
                 baseUrl: draftBaseUrl,
                 authToken: draftToken,
-              });
+              };
+
+              setServerConfig(nextConfig);
+
+              if (Platform.OS === "ios") {
+                Settings.set({
+                  [IOS_SERVER_BASE_URL_KEY]: draftBaseUrl,
+                });
+              }
             }}
           >
             <Text style={styles.secondaryButtonText}>Apply server config</Text>

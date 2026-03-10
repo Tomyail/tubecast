@@ -93,11 +93,24 @@ export async function createJob(
 }
 
 export function getPlayableAudioUrl(job: Job | null | undefined, config: ServerConfig) {
-  if (!job?.audioUrl) {
+  if (!job?.audioHref && !job?.audioUrl) {
     return null;
   }
 
-  const url = new URL(job.audioUrl);
+  const rawUrl = job.audioUrl || job.audioHref;
+  if (!rawUrl) {
+    return null;
+  }
+
+  const baseUrl = normalizeBaseUrl(config.baseUrl);
+  if (!baseUrl && !rawUrl.startsWith("http://") && !rawUrl.startsWith("https://")) {
+    return null;
+  }
+
+  const url = rawUrl.startsWith("http://") || rawUrl.startsWith("https://")
+    ? new URL(rawUrl)
+    : new URL(rawUrl, `${baseUrl}/`);
+
   if (config.authToken.trim()) {
     url.searchParams.set("token", config.authToken.trim());
   }
