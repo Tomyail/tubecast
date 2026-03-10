@@ -26,6 +26,7 @@ import {
   fetchJobs,
   formatDuration,
   getPlayableAudioUrl,
+  getYouTubeTimestampUrl,
   isJobTerminal,
   normalizeBaseUrl,
 } from "./src/api";
@@ -141,6 +142,7 @@ function AppShell() {
     keepAudioSessionActive: true,
   });
   const playerStatus = useAudioPlayerStatus(player);
+  const youtubeTimestampUrl = getYouTubeTimestampUrl(activeJob?.sourceUrl, playerStatus.currentTime || 0);
 
   useEffect(() => {
     if (!playableAudioUrl) {
@@ -374,6 +376,20 @@ function AppShell() {
                     }}
                   >
                     <Text style={styles.secondaryButtonText}>Open media URL</Text>
+                  </Pressable>
+                  <Pressable
+                    style={[styles.secondaryButton, !youtubeTimestampUrl && styles.buttonDisabled]}
+                    disabled={!youtubeTimestampUrl}
+                    onPress={async () => {
+                      if (!youtubeTimestampUrl) {
+                        return;
+                      }
+
+                      player.pause();
+                      await Linking.openURL(youtubeTimestampUrl);
+                    }}
+                  >
+                    <Text style={styles.secondaryButtonText}>Open on YouTube</Text>
                   </Pressable>
                 </View>
                 <Text style={styles.helperText}>

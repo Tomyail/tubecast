@@ -124,6 +124,36 @@ export function getPlayableAudioUrl(job: Job | null | undefined, config: ServerC
   return url.toString();
 }
 
+export function getYouTubeTimestampUrl(sourceUrl: string | null | undefined, currentTimeSeconds: number) {
+  if (!sourceUrl?.trim()) {
+    return null;
+  }
+
+  let url: URL;
+  try {
+    url = new URL(sourceUrl);
+  } catch {
+    return null;
+  }
+
+  const seconds = Math.max(0, Math.floor(currentTimeSeconds));
+  const hostname = url.hostname.toLowerCase();
+
+  if (
+    hostname === "youtu.be" ||
+    hostname === "www.youtu.be" ||
+    hostname === "youtube.com" ||
+    hostname === "www.youtube.com" ||
+    hostname === "m.youtube.com"
+  ) {
+    url.searchParams.delete("t");
+    url.searchParams.delete("start");
+    url.searchParams.set("t", String(seconds));
+  }
+
+  return url.toString();
+}
+
 export function formatDuration(totalSeconds: number | null | undefined) {
   if (!totalSeconds || Number.isNaN(totalSeconds)) {
     return "--:--";
