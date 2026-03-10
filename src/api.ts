@@ -92,6 +92,12 @@ export async function createJob(
   });
 }
 
+export async function deleteJob(config: ServerConfig, id: string): Promise<{ deleted: boolean; job: Job }> {
+  return request<{ deleted: boolean; job: Job }>(config, `/api/jobs/${id}`, {
+    method: "DELETE",
+  });
+}
+
 export function getPlayableAudioUrl(job: Job | null | undefined, config: ServerConfig) {
   if (!job?.audioHref && !job?.audioUrl) {
     return null;

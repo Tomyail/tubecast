@@ -1,12 +1,14 @@
 import { StatusBar } from "expo-status-bar";
 import { setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import { QueryClient, QueryClientProvider, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Animated,
   Linking,
+  PanResponder,
   Platform,
   Pressable,
   SafeAreaView,
@@ -19,6 +21,7 @@ import {
 } from "react-native";
 import {
   createJob,
+  deleteJob,
   fetchJob,
   fetchJobs,
   formatDuration,
@@ -108,6 +111,26 @@ function AppShell() {
     },
     onError: (error: unknown) => {
       Alert.alert("Request failed", error instanceof Error ? error.message : "Unable to create job");
+    },
+  });
+
+  const deleteJobMutation = useMutation({
+    mutationFn: async (jobId: string) => deleteJob(serverConfig, jobId),
+    onSuccess: async ({ job }) => {
+      const previousJobs = jobsQuery.data ?? [];
+      const nextJobs = previousJobs.filter((item) => item.id !== job.id);
+
+      queryCache.setQueryData<Job[]>(["jobs", serverConfig], nextJobs);
+      queryCache.removeQueries({ queryKey: ["job", serverConfig, job.id] });
+
+      if (effectiveSelectedJobId === job.id) {
+        setSelectedJobId(nextJobs[0]?.id ?? null);
+      }
+
+      await queryCache.invalidateQueries({ queryKey: ["jobs", serverConfig] });
+    },
+    onError: (error: unknown) => {
+      Alert.alert("Delete failed", error instanceof Error ? error.message : "Unable to delete job");
     },
   });
 
@@ -251,24 +274,29 @@ function AppShell() {
           ) : jobsQuery.data?.length ? (
             <View style={styles.jobList}>
               {jobsQuery.data.map((job) => (
-                <Pressable
+                <QueueJobRow
                   key={job.id}
-                  style={[
-                    styles.jobRow,
-                    job.id === effectiveSelectedJobId && styles.jobRowActive,
-                  ]}
+                  active={job.id === effectiveSelectedJobId}
+                  deleteDisabled={deleteJobMutation.isPending}
+                  job={job}
+                  onDelete={() => {
+                    Alert.alert(
+                      "Delete job?",
+                      "This removes the queue item and its stored audio from the server.",
+                      [
+                        { text: "Cancel", style: "cancel" },
+                        {
+                          text: "Delete",
+                          style: "destructive",
+                          onPress: () => {
+                            void deleteJobMutation.mutateAsync(job.id);
+                          },
+                        },
+                      ],
+                    );
+                  }}
                   onPress={() => setSelectedJobId(job.id)}
-                >
-                  <View style={styles.jobRowText}>
-                    <Text style={styles.jobTitle} numberOfLines={1}>
-                      {job.title || job.sourceUrl}
-                    </Text>
-                    <Text style={styles.jobMeta} numberOfLines={1}>
-                      {job.channelName || "Unknown channel"} · {job.status}
-                    </Text>
-                  </View>
-                  <StatusPill status={job.status} />
-                </Pressable>
+                />
               ))}
             </View>
           ) : (
@@ -448,6 +476,126 @@ function StatusPill({ status }: { status: Job["status"] }) {
   );
 }
 
+function QueueJobRow({
+  active,
+  deleteDisabled,
+  job,
+  onDelete,
+  onPress,
+}: {
+  active: boolean;
+  deleteDisabled: boolean;
+  job: Job;
+  onDelete: () => void;
+  onPress: () => void;
+}) {
+  const actionWidth = 88;
+  const translateX = useRef(new Animated.Value(0)).current;
+  const offsetRef = useRef(0);
+
+  const animateTo = (value: number) => {
+    offsetRef.current = value;
+    Animated.spring(translateX, {
+      toValue: value,
+      bounciness: 0,
+      speed: 18,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, gestureState) =>
+        Math.abs(gestureState.dx) > 8 && Math.abs(gestureState.dx) > Math.abs(gestureState.dy),
+      onPanResponderMove: (_, gestureState) => {
+        const nextValue = Math.max(-actionWidth, Math.min(0, offsetRef.current + gestureState.dx));
+        translateX.setValue(nextValue);
+      },
+      onPanResponderRelease: (_, gestureState) => {
+        const nextValue = offsetRef.current + gestureState.dx;
+        if (nextValue < -actionWidth / 2 || gestureState.vx < -0.35) {
+          animateTo(-actionWidth);
+          return;
+        }
+
+        animateTo(0);
+      },
+      onPanResponderTerminate: () => {
+        animateTo(offsetRef.current);
+      },
+    }),
+  ).current;
+
+  if (Platform.OS !== "ios") {
+    return (
+      <Pressable
+        style={[
+          styles.jobRow,
+          active && styles.jobRowActive,
+        ]}
+        onPress={onPress}
+      >
+        <QueueJobRowContent job={job} />
+      </Pressable>
+    );
+  }
+
+  return (
+    <View style={styles.jobRowSwipeShell}>
+      <View style={styles.jobDeleteActionWrap}>
+        <Pressable
+          disabled={deleteDisabled}
+          style={[styles.jobDeleteAction, deleteDisabled && styles.buttonDisabled]}
+          onPress={() => {
+            animateTo(0);
+            onDelete();
+          }}
+        >
+          <Text style={styles.jobDeleteActionText}>Delete</Text>
+        </Pressable>
+      </View>
+      <Animated.View
+        {...panResponder.panHandlers}
+        style={[
+          styles.jobRowAnimated,
+          {
+            transform: [{ translateX }],
+          },
+        ]}
+      >
+        <Pressable
+          style={[
+            styles.jobRow,
+            active && styles.jobRowActive,
+          ]}
+          onPress={() => {
+            animateTo(0);
+            onPress();
+          }}
+        >
+          <QueueJobRowContent job={job} />
+        </Pressable>
+      </Animated.View>
+    </View>
+  );
+}
+
+function QueueJobRowContent({ job }: { job: Job }) {
+  return (
+    <>
+      <View style={styles.jobRowText}>
+        <Text style={styles.jobTitle} numberOfLines={1}>
+          {job.title || job.sourceUrl}
+        </Text>
+        <Text style={styles.jobMeta} numberOfLines={1}>
+          {job.channelName || "Unknown channel"} · {job.status}
+        </Text>
+      </View>
+      <StatusPill status={job.status} />
+    </>
+  );
+}
+
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -583,6 +731,34 @@ const styles = StyleSheet.create({
   },
   jobList: {
     gap: 10,
+  },
+  jobRowSwipeShell: {
+    overflow: "hidden",
+    position: "relative",
+  },
+  jobDeleteActionWrap: {
+    alignItems: "stretch",
+    bottom: 0,
+    position: "absolute",
+    right: 0,
+    top: 0,
+    width: 88,
+  },
+  jobDeleteAction: {
+    alignItems: "center",
+    backgroundColor: "#bb3f36",
+    borderBottomRightRadius: 18,
+    borderTopRightRadius: 18,
+    flex: 1,
+    justifyContent: "center",
+  },
+  jobDeleteActionText: {
+    color: "#fff5f2",
+    fontSize: 14,
+    fontWeight: "800",
+  },
+  jobRowAnimated: {
+    zIndex: 1,
   },
   jobRow: {
     alignItems: "center",
