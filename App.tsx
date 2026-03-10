@@ -40,6 +40,7 @@ const DEFAULT_CONFIG: ServerConfig = {
 };
 
 const IOS_SERVER_BASE_URL_KEY = "ytAudio.serverBaseUrl";
+const IOS_PLAYBACK_PROGRESS_KEY = "ytAudio.playbackProgress";
 
 function getInitialServerConfig(): ServerConfig {
   if (Platform.OS !== "ios") {
@@ -51,6 +52,66 @@ function getInitialServerConfig(): ServerConfig {
     ...DEFAULT_CONFIG,
     baseUrl: typeof savedBaseUrl === "string" && savedBaseUrl.trim() ? savedBaseUrl : DEFAULT_CONFIG.baseUrl,
   };
+}
+
+function getPlaybackProgressStore(): Record<string, number> {
+  if (Platform.OS !== "ios") {
+    return {};
+  }
+
+  const raw = Settings.get(IOS_PLAYBACK_PROGRESS_KEY);
+  if (typeof raw !== "string" || !raw.trim()) {
+    return {};
+  }
+
+  try {
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function setPlaybackProgressStore(store: Record<string, number>) {
+  if (Platform.OS !== "ios") {
+    return;
+  }
+
+  Settings.set({
+    [IOS_PLAYBACK_PROGRESS_KEY]: JSON.stringify(store),
+  });
+}
+
+function getPlaybackProgressKey(job: Job | null | undefined) {
+  if (!job) {
+    return null;
+  }
+
+  return job.sourceKey || job.sourceId || job.sourceUrl || job.id;
+}
+
+function readSavedPlaybackPosition(key: string | null) {
+  if (!key) {
+    return 0;
+  }
+
+  const value = getPlaybackProgressStore()[key];
+  return typeof value === "number" && Number.isFinite(value) ? value : 0;
+}
+
+function writeSavedPlaybackPosition(key: string | null, seconds: number) {
+  if (!key) {
+    return;
+  }
+
+  const store = getPlaybackProgressStore();
+  if (seconds <= 0) {
+    delete store[key];
+  } else {
+    store[key] = seconds;
+  }
+
+  setPlaybackProgressStore(store);
 }
 
 function AppShell() {
@@ -120,6 +181,7 @@ function AppShell() {
     onSuccess: async ({ job }) => {
       const previousJobs = jobsQuery.data ?? [];
       const nextJobs = previousJobs.filter((item) => item.id !== job.id);
+      writeSavedPlaybackPosition(getPlaybackProgressKey(job), 0);
 
       queryCache.setQueryData<Job[]>(["jobs", serverConfig], nextJobs);
       queryCache.removeQueries({ queryKey: ["job", serverConfig, job.id] });
@@ -137,6 +199,7 @@ function AppShell() {
 
   const activeJob = selectedJobQuery.data ?? selectedJobSummary;
   const playableAudioUrl = getPlayableAudioUrl(activeJob, serverConfig);
+  const playbackProgressKey = getPlaybackProgressKey(activeJob);
   const player = useAudioPlayer(playableAudioUrl, {
     updateInterval: 500,
     keepAudioSessionActive: true,
@@ -146,12 +209,68 @@ function AppShell() {
   const playbackProgress = playerStatus.duration > 0
     ? Math.min(playerStatus.currentTime / playerStatus.duration, 1)
     : 0;
+  const restoredPlaybackKeyRef = useRef<string | null>(null);
+  const lastPersistedSecondRef = useRef(-1);
 
   useEffect(() => {
     if (!playableAudioUrl) {
       player.pause();
     }
   }, [playableAudioUrl, player]);
+
+  useEffect(() => {
+    restoredPlaybackKeyRef.current = null;
+    lastPersistedSecondRef.current = -1;
+  }, [playbackProgressKey]);
+
+  useEffect(() => {
+    if (!playableAudioUrl || !playbackProgressKey || !playerStatus.isLoaded) {
+      return;
+    }
+
+    if (restoredPlaybackKeyRef.current === playbackProgressKey) {
+      return;
+    }
+
+    restoredPlaybackKeyRef.current = playbackProgressKey;
+
+    const savedPosition = readSavedPlaybackPosition(playbackProgressKey);
+    if (savedPosition <= 0) {
+      return;
+    }
+
+    if (playerStatus.duration > 0 && savedPosition >= playerStatus.duration - 3) {
+      writeSavedPlaybackPosition(playbackProgressKey, 0);
+      return;
+    }
+
+    void player.seekTo(savedPosition);
+  }, [playableAudioUrl, playbackProgressKey, player, playerStatus.duration, playerStatus.isLoaded]);
+
+  useEffect(() => {
+    if (!playbackProgressKey || !playerStatus.isLoaded) {
+      return;
+    }
+
+    if (playerStatus.didJustFinish) {
+      writeSavedPlaybackPosition(playbackProgressKey, 0);
+      lastPersistedSecondRef.current = -1;
+      return;
+    }
+
+    const currentSecond = Math.floor(playerStatus.currentTime || 0);
+    if (currentSecond === lastPersistedSecondRef.current) {
+      return;
+    }
+
+    lastPersistedSecondRef.current = currentSecond;
+    writeSavedPlaybackPosition(playbackProgressKey, currentSecond);
+  }, [
+    playbackProgressKey,
+    playerStatus.currentTime,
+    playerStatus.didJustFinish,
+    playerStatus.isLoaded,
+  ]);
 
   useEffect(() => {
     if (!playableAudioUrl || !activeJob) {
@@ -379,6 +498,7 @@ function AppShell() {
                     style={[styles.secondaryButton, !playableAudioUrl && styles.buttonDisabled]}
                     disabled={!playableAudioUrl}
                     onPress={() => {
+                      writeSavedPlaybackPosition(playbackProgressKey, 0);
                       void player.seekTo(0);
                     }}
                   >
