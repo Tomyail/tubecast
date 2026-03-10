@@ -143,6 +143,9 @@ function AppShell() {
   });
   const playerStatus = useAudioPlayerStatus(player);
   const youtubeTimestampUrl = getYouTubeTimestampUrl(activeJob?.sourceUrl, playerStatus.currentTime || 0);
+  const playbackProgress = playerStatus.duration > 0
+    ? Math.min(playerStatus.currentTime / playerStatus.duration, 1)
+    : 0;
 
   useEffect(() => {
     if (!playableAudioUrl) {
@@ -336,6 +339,23 @@ function AppShell() {
                   <Text style={styles.playerTime}>
                     {formatDuration(Math.floor(playerStatus.currentTime || 0))} /{" "}
                     {formatDuration(Math.floor(playerStatus.duration || activeJob.durationSeconds || 0))}
+                  </Text>
+                </View>
+                <View style={styles.progressStack}>
+                  <View style={styles.progressTrack}>
+                    <View
+                      style={[
+                        styles.progressFill,
+                        { width: `${playbackProgress * 100}%` },
+                      ]}
+                    />
+                  </View>
+                  <Text style={styles.progressHint}>
+                    {playerStatus.isBuffering
+                      ? "Buffering audio..."
+                      : playableAudioUrl
+                        ? "Ready to play. The bar shows listened progress."
+                        : "Waiting for the stream to become playable."}
                   </Text>
                 </View>
                 <View style={styles.playerActions}>
@@ -868,6 +888,26 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     gap: 14,
     padding: 16,
+  },
+  progressStack: {
+    gap: 8,
+  },
+  progressTrack: {
+    backgroundColor: "#4b4038",
+    borderRadius: 999,
+    height: 10,
+    overflow: "hidden",
+  },
+  progressFill: {
+    backgroundColor: "#f7d8a0",
+    borderRadius: 999,
+    height: "100%",
+    minWidth: 0,
+  },
+  progressHint: {
+    color: "#d7c6b5",
+    fontSize: 12,
+    lineHeight: 18,
   },
   playerHeader: {
     alignItems: "center",
