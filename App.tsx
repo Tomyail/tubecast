@@ -8,6 +8,7 @@ import {
   Alert,
   Animated,
   Linking,
+  LayoutChangeEvent,
   PanResponder,
   Platform,
   Pressable,
@@ -211,6 +212,7 @@ function AppShell() {
     : 0;
   const restoredPlaybackKeyRef = useRef<string | null>(null);
   const lastPersistedSecondRef = useRef(-1);
+  const [progressTrackWidth, setProgressTrackWidth] = useState(0);
 
   useEffect(() => {
     if (!playableAudioUrl) {
@@ -290,6 +292,42 @@ function AppShell() {
   }, [activeJob, playableAudioUrl, player]);
 
   const submitDisabled = createJobMutation.isPending || !sourceUrl.trim() || !hasServerConfig;
+
+  const seekToRelativePosition = (ratio: number) => {
+    if (!playableAudioUrl || playerStatus.duration <= 0) {
+      return;
+    }
+
+    const boundedRatio = Math.max(0, Math.min(1, ratio));
+    const targetSeconds = boundedRatio * playerStatus.duration;
+    writeSavedPlaybackPosition(playbackProgressKey, Math.floor(targetSeconds));
+    void player.seekTo(targetSeconds);
+  };
+
+  const handleProgressTrackLayout = (event: LayoutChangeEvent) => {
+    setProgressTrackWidth(event.nativeEvent.layout.width);
+  };
+
+  const progressPanResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => !!playableAudioUrl && playerStatus.duration > 0,
+      onMoveShouldSetPanResponder: () => !!playableAudioUrl && playerStatus.duration > 0,
+      onPanResponderGrant: (event) => {
+        if (progressTrackWidth <= 0) {
+          return;
+        }
+
+        seekToRelativePosition(event.nativeEvent.locationX / progressTrackWidth);
+      },
+      onPanResponderMove: (event) => {
+        if (progressTrackWidth <= 0) {
+          return;
+        }
+
+        seekToRelativePosition(event.nativeEvent.locationX / progressTrackWidth);
+      },
+    }),
+  ).current;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -461,14 +499,32 @@ function AppShell() {
                   </Text>
                 </View>
                 <View style={styles.progressStack}>
-                  <View style={styles.progressTrack}>
+                  <Pressable
+                    disabled={!playableAudioUrl}
+                    onLayout={handleProgressTrackLayout}
+                    onPress={(event) => {
+                      if (progressTrackWidth <= 0) {
+                        return;
+                      }
+
+                      seekToRelativePosition(event.nativeEvent.locationX / progressTrackWidth);
+                    }}
+                    style={[styles.progressTrack, !playableAudioUrl && styles.buttonDisabled]}
+                  >
                     <View
                       style={[
                         styles.progressFill,
                         { width: `${playbackProgress * 100}%` },
                       ]}
                     />
-                  </View>
+                    <View
+                      {...progressPanResponder.panHandlers}
+                      style={[
+                        styles.progressThumb,
+                        { left: `${playbackProgress * 100}%` },
+                      ]}
+                    />
+                  </Pressable>
                   <Text style={styles.progressHint}>
                     {playerStatus.isBuffering
                       ? "Buffering audio..."
@@ -1023,6 +1079,17 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     height: "100%",
     minWidth: 0,
+  },
+  progressThumb: {
+    backgroundColor: "#fff4e0",
+    borderColor: "#b65a36",
+    borderRadius: 999,
+    borderWidth: 2,
+    height: 16,
+    marginLeft: -8,
+    position: "absolute",
+    top: -3,
+    width: 16,
   },
   progressHint: {
     color: "#d7c6b5",
