@@ -212,6 +212,7 @@ function AppShell() {
     : 0;
   const restoredPlaybackKeyRef = useRef<string | null>(null);
   const lastPersistedSecondRef = useRef(-1);
+  const pendingAutoPlayJobIdRef = useRef<string | null>(null);
   const [progressTrackWidth, setProgressTrackWidth] = useState(0);
 
   useEffect(() => {
@@ -219,6 +220,38 @@ function AppShell() {
       player.pause();
     }
   }, [playableAudioUrl, player]);
+
+  useEffect(() => {
+    if (!activeJob || activeJob.id !== effectiveSelectedJobId) {
+      pendingAutoPlayJobIdRef.current = null;
+      return;
+    }
+
+    if (activeJob.status === "processing") {
+      pendingAutoPlayJobIdRef.current = activeJob.id;
+      return;
+    }
+
+    if (activeJob.status === "failed") {
+      pendingAutoPlayJobIdRef.current = null;
+    }
+  }, [activeJob, effectiveSelectedJobId]);
+
+  useEffect(() => {
+    if (
+      !activeJob
+      || activeJob.status !== "ready"
+      || pendingAutoPlayJobIdRef.current !== activeJob.id
+      || !playableAudioUrl
+      || !playerStatus.isLoaded
+      || playerStatus.playing
+    ) {
+      return;
+    }
+
+    pendingAutoPlayJobIdRef.current = null;
+    player.play();
+  }, [activeJob, playableAudioUrl, player, playerStatus.isLoaded, playerStatus.playing]);
 
   useEffect(() => {
     restoredPlaybackKeyRef.current = null;
