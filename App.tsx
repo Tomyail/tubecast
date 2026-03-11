@@ -213,6 +213,7 @@ function AppShell() {
   const restoredPlaybackKeyRef = useRef<string | null>(null);
   const lastPersistedSecondRef = useRef(-1);
   const pendingAutoPlayJobIdRef = useRef<string | null>(null);
+  const handledFinishedJobIdRef = useRef<string | null>(null);
   const [progressTrackWidth, setProgressTrackWidth] = useState(0);
 
   useEffect(() => {
@@ -252,6 +253,35 @@ function AppShell() {
     pendingAutoPlayJobIdRef.current = null;
     player.play();
   }, [activeJob, playableAudioUrl, player, playerStatus.isLoaded, playerStatus.playing]);
+
+  useEffect(() => {
+    if (!activeJob || !playerStatus.didJustFinish) {
+      if (!playerStatus.didJustFinish) {
+        handledFinishedJobIdRef.current = null;
+      }
+      return;
+    }
+
+    if (handledFinishedJobIdRef.current === activeJob.id) {
+      return;
+    }
+
+    handledFinishedJobIdRef.current = activeJob.id;
+
+    const jobs = jobsQuery.data ?? [];
+    const currentIndex = jobs.findIndex((job) => job.id === activeJob.id);
+    if (currentIndex < 0) {
+      return;
+    }
+
+    const nextReadyJob = jobs.slice(currentIndex + 1).find((job) => job.status === "ready");
+    if (!nextReadyJob) {
+      return;
+    }
+
+    pendingAutoPlayJobIdRef.current = nextReadyJob.id;
+    setSelectedJobId(nextReadyJob.id);
+  }, [activeJob, jobsQuery.data, playerStatus.didJustFinish]);
 
   useEffect(() => {
     restoredPlaybackKeyRef.current = null;
