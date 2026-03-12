@@ -115,6 +115,33 @@ function writeSavedPlaybackPosition(key: string | null, seconds: number) {
   setPlaybackProgressStore(store);
 }
 
+function isMissingNativeSharedObjectError(error: unknown) {
+  return error instanceof Error && "code" in error && error.code === "ERR_NATIVE_SHARED_OBJECT_NOT_FOUND";
+}
+
+function safeClearLockScreenControls(player: ReturnType<typeof useAudioPlayer>) {
+  try {
+    player.clearLockScreenControls();
+  } catch (error) {
+    if (!isMissingNativeSharedObjectError(error)) {
+      throw error;
+    }
+  }
+}
+
+function safeSetActiveForLockScreen(
+  player: ReturnType<typeof useAudioPlayer>,
+  metadata: Parameters<ReturnType<typeof useAudioPlayer>["setActiveForLockScreen"]>[1],
+) {
+  try {
+    player.setActiveForLockScreen(true, metadata);
+  } catch (error) {
+    if (!isMissingNativeSharedObjectError(error)) {
+      throw error;
+    }
+  }
+}
+
 function AppShell() {
   const initialServerConfig = getInitialServerConfig();
   const [serverConfig, setServerConfig] = useState<ServerConfig>(initialServerConfig);
@@ -199,198 +226,7 @@ function AppShell() {
   });
 
   const activeJob = selectedJobQuery.data ?? selectedJobSummary;
-  const playableAudioUrl = getPlayableAudioUrl(activeJob, serverConfig);
-  const playbackProgressKey = getPlaybackProgressKey(activeJob);
-  const player = useAudioPlayer(playableAudioUrl, {
-    updateInterval: 500,
-    keepAudioSessionActive: true,
-  });
-  const playerStatus = useAudioPlayerStatus(player);
-  const youtubeTimestampUrl = getYouTubeTimestampUrl(activeJob?.sourceUrl, playerStatus.currentTime || 0);
-  const playbackProgress = playerStatus.duration > 0
-    ? Math.min(playerStatus.currentTime / playerStatus.duration, 1)
-    : 0;
-  const restoredPlaybackKeyRef = useRef<string | null>(null);
-  const lastPersistedSecondRef = useRef(-1);
-  const pendingAutoPlayJobIdRef = useRef<string | null>(null);
-  const handledFinishedJobIdRef = useRef<string | null>(null);
-  const [progressTrackWidth, setProgressTrackWidth] = useState(0);
-
-  useEffect(() => {
-    if (!playableAudioUrl) {
-      player.pause();
-    }
-  }, [playableAudioUrl, player]);
-
-  useEffect(() => {
-    if (!activeJob || activeJob.id !== effectiveSelectedJobId) {
-      pendingAutoPlayJobIdRef.current = null;
-      return;
-    }
-
-    if (activeJob.status === "processing") {
-      pendingAutoPlayJobIdRef.current = activeJob.id;
-      return;
-    }
-
-    if (activeJob.status === "failed") {
-      pendingAutoPlayJobIdRef.current = null;
-    }
-  }, [activeJob, effectiveSelectedJobId]);
-
-  useEffect(() => {
-    if (
-      !activeJob
-      || activeJob.status !== "ready"
-      || pendingAutoPlayJobIdRef.current !== activeJob.id
-      || !playableAudioUrl
-      || !playerStatus.isLoaded
-      || playerStatus.playing
-    ) {
-      return;
-    }
-
-    pendingAutoPlayJobIdRef.current = null;
-    player.play();
-  }, [activeJob, playableAudioUrl, player, playerStatus.isLoaded, playerStatus.playing]);
-
-  useEffect(() => {
-    if (!activeJob || !playerStatus.didJustFinish) {
-      if (!playerStatus.didJustFinish) {
-        handledFinishedJobIdRef.current = null;
-      }
-      return;
-    }
-
-    if (handledFinishedJobIdRef.current === activeJob.id) {
-      return;
-    }
-
-    handledFinishedJobIdRef.current = activeJob.id;
-
-    const jobs = jobsQuery.data ?? [];
-    const currentIndex = jobs.findIndex((job) => job.id === activeJob.id);
-    if (currentIndex < 0) {
-      return;
-    }
-
-    const nextReadyJob = jobs.slice(currentIndex + 1).find((job) => job.status === "ready");
-    if (!nextReadyJob) {
-      return;
-    }
-
-    pendingAutoPlayJobIdRef.current = nextReadyJob.id;
-    setSelectedJobId(nextReadyJob.id);
-  }, [activeJob, jobsQuery.data, playerStatus.didJustFinish]);
-
-  useEffect(() => {
-    restoredPlaybackKeyRef.current = null;
-    lastPersistedSecondRef.current = -1;
-  }, [playbackProgressKey]);
-
-  useEffect(() => {
-    if (!playableAudioUrl || !playbackProgressKey || !playerStatus.isLoaded) {
-      return;
-    }
-
-    if (restoredPlaybackKeyRef.current === playbackProgressKey) {
-      return;
-    }
-
-    restoredPlaybackKeyRef.current = playbackProgressKey;
-
-    const savedPosition = readSavedPlaybackPosition(playbackProgressKey);
-    if (savedPosition <= 0) {
-      return;
-    }
-
-    if (playerStatus.duration > 0 && savedPosition >= playerStatus.duration - 3) {
-      writeSavedPlaybackPosition(playbackProgressKey, 0);
-      return;
-    }
-
-    void player.seekTo(savedPosition);
-  }, [playableAudioUrl, playbackProgressKey, player, playerStatus.duration, playerStatus.isLoaded]);
-
-  useEffect(() => {
-    if (!playbackProgressKey || !playerStatus.isLoaded) {
-      return;
-    }
-
-    if (playerStatus.didJustFinish) {
-      writeSavedPlaybackPosition(playbackProgressKey, 0);
-      lastPersistedSecondRef.current = -1;
-      return;
-    }
-
-    const currentSecond = Math.floor(playerStatus.currentTime || 0);
-    if (currentSecond === lastPersistedSecondRef.current) {
-      return;
-    }
-
-    lastPersistedSecondRef.current = currentSecond;
-    writeSavedPlaybackPosition(playbackProgressKey, currentSecond);
-  }, [
-    playbackProgressKey,
-    playerStatus.currentTime,
-    playerStatus.didJustFinish,
-    playerStatus.isLoaded,
-  ]);
-
-  useEffect(() => {
-    if (!playableAudioUrl || !activeJob) {
-      player.clearLockScreenControls();
-      return;
-    }
-
-    player.setActiveForLockScreen(true, {
-      title: activeJob.title || "YT Audio",
-      artist: activeJob.channelName || "yt-audio",
-      artworkUrl: activeJob.thumbnailUrl || undefined,
-    });
-
-    return () => {
-      player.clearLockScreenControls();
-    };
-  }, [activeJob, playableAudioUrl, player]);
-
   const submitDisabled = createJobMutation.isPending || !sourceUrl.trim() || !hasServerConfig;
-
-  const seekToRelativePosition = (ratio: number) => {
-    if (!playableAudioUrl || playerStatus.duration <= 0) {
-      return;
-    }
-
-    const boundedRatio = Math.max(0, Math.min(1, ratio));
-    const targetSeconds = boundedRatio * playerStatus.duration;
-    writeSavedPlaybackPosition(playbackProgressKey, Math.floor(targetSeconds));
-    void player.seekTo(targetSeconds);
-  };
-
-  const handleProgressTrackLayout = (event: LayoutChangeEvent) => {
-    setProgressTrackWidth(event.nativeEvent.layout.width);
-  };
-
-  const progressPanResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => !!playableAudioUrl && playerStatus.duration > 0,
-      onMoveShouldSetPanResponder: () => !!playableAudioUrl && playerStatus.duration > 0,
-      onPanResponderGrant: (event) => {
-        if (progressTrackWidth <= 0) {
-          return;
-        }
-
-        seekToRelativePosition(event.nativeEvent.locationX / progressTrackWidth);
-      },
-      onPanResponderMove: (event) => {
-        if (progressTrackWidth <= 0) {
-          return;
-        }
-
-        seekToRelativePosition(event.nativeEvent.locationX / progressTrackWidth);
-      },
-    }),
-  ).current;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -553,110 +389,14 @@ function AppShell() {
                 <Text style={styles.errorText}>{activeJob.errorMessage}</Text>
               ) : null}
 
-              <View style={styles.playerCard}>
-                <View style={styles.playerHeader}>
-                  <Text style={styles.playerLabel}>Playback</Text>
-                  <Text style={styles.playerTime}>
-                    {formatDuration(Math.floor(playerStatus.currentTime || 0))} /{" "}
-                    {formatDuration(Math.floor(playerStatus.duration || activeJob.durationSeconds || 0))}
-                  </Text>
-                </View>
-                <View style={styles.progressStack}>
-                  <Pressable
-                    disabled={!playableAudioUrl}
-                    onLayout={handleProgressTrackLayout}
-                    onPress={(event) => {
-                      if (progressTrackWidth <= 0) {
-                        return;
-                      }
-
-                      seekToRelativePosition(event.nativeEvent.locationX / progressTrackWidth);
-                    }}
-                    style={[styles.progressTrack, !playableAudioUrl && styles.buttonDisabled]}
-                  >
-                    <View
-                      style={[
-                        styles.progressFill,
-                        { width: `${playbackProgress * 100}%` },
-                      ]}
-                    />
-                    <View
-                      {...progressPanResponder.panHandlers}
-                      style={[
-                        styles.progressThumb,
-                        { left: `${playbackProgress * 100}%` },
-                      ]}
-                    />
-                  </Pressable>
-                  <Text style={styles.progressHint}>
-                    {playerStatus.isBuffering
-                      ? "Buffering audio..."
-                      : playableAudioUrl
-                        ? "Ready to play. The bar shows listened progress."
-                        : "Waiting for the stream to become playable."}
-                  </Text>
-                </View>
-                <View style={styles.playerActions}>
-                  <Pressable
-                    style={[styles.secondaryButton, !playableAudioUrl && styles.buttonDisabled]}
-                    disabled={!playableAudioUrl}
-                    onPress={() => {
-                      if (playerStatus.playing) {
-                        player.pause();
-                        return;
-                      }
-
-                      player.play();
-                    }}
-                  >
-                    <Text style={styles.secondaryButtonText}>
-                      {playerStatus.playing ? "Pause" : "Play"}
-                    </Text>
-                  </Pressable>
-                  <Pressable
-                    style={[styles.secondaryButton, !playableAudioUrl && styles.buttonDisabled]}
-                    disabled={!playableAudioUrl}
-                    onPress={() => {
-                      writeSavedPlaybackPosition(playbackProgressKey, 0);
-                      void player.seekTo(0);
-                    }}
-                  >
-                    <Text style={styles.secondaryButtonText}>Restart</Text>
-                  </Pressable>
-                  <Pressable
-                    style={[styles.secondaryButton, !playableAudioUrl && styles.buttonDisabled]}
-                    disabled={!playableAudioUrl}
-                    onPress={() => {
-                      if (!playableAudioUrl) {
-                        return;
-                      }
-
-                      void Linking.openURL(playableAudioUrl);
-                    }}
-                  >
-                    <Text style={styles.secondaryButtonText}>Open media URL</Text>
-                  </Pressable>
-                  <Pressable
-                    style={[styles.secondaryButton, !youtubeTimestampUrl && styles.buttonDisabled]}
-                    disabled={!youtubeTimestampUrl}
-                    onPress={async () => {
-                      if (!youtubeTimestampUrl) {
-                        return;
-                      }
-
-                      player.pause();
-                      await Linking.openURL(youtubeTimestampUrl);
-                    }}
-                  >
-                    <Text style={styles.secondaryButtonText}>Open on YouTube</Text>
-                  </Pressable>
-                </View>
-                <Text style={styles.helperText}>
-                  {playableAudioUrl
-                    ? "Audio is ready. Playback uses expo-audio with background mode enabled."
-                    : "Waiting for the backend to finish processing before playback is available."}
-                </Text>
-              </View>
+              <PlaybackCard
+                key={getPlaybackProgressKey(activeJob) ?? activeJob.id}
+                activeJob={activeJob}
+                effectiveSelectedJobId={effectiveSelectedJobId}
+                jobs={jobsQuery.data ?? []}
+                serverConfig={serverConfig}
+                setSelectedJobId={setSelectedJobId}
+              />
             </View>
           ) : (
             <Text style={styles.emptyText}>Select a job to inspect it.</Text>
@@ -672,6 +412,314 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <AppShell />
     </QueryClientProvider>
+  );
+}
+
+function PlaybackCard({
+  activeJob,
+  effectiveSelectedJobId,
+  jobs,
+  serverConfig,
+  setSelectedJobId,
+}: {
+  activeJob: Job;
+  effectiveSelectedJobId: string | null;
+  jobs: Job[];
+  serverConfig: ServerConfig;
+  setSelectedJobId: (jobId: string | null) => void;
+}) {
+  const playableAudioUrl = getPlayableAudioUrl(activeJob, serverConfig);
+  const playbackProgressKey = getPlaybackProgressKey(activeJob);
+  const player = useAudioPlayer(playableAudioUrl, {
+    updateInterval: 500,
+    keepAudioSessionActive: true,
+  });
+  const playerStatus = useAudioPlayerStatus(player);
+  const youtubeTimestampUrl = getYouTubeTimestampUrl(activeJob.sourceUrl, playerStatus.currentTime || 0);
+  const playbackProgress = playerStatus.duration > 0
+    ? Math.min(playerStatus.currentTime / playerStatus.duration, 1)
+    : 0;
+  const restoredPlaybackKeyRef = useRef<string | null>(null);
+  const lastPersistedSecondRef = useRef(-1);
+  const pendingAutoPlayJobIdRef = useRef<string | null>(null);
+  const handledFinishedJobIdRef = useRef<string | null>(null);
+  const [progressTrackWidth, setProgressTrackWidth] = useState(0);
+
+  useEffect(() => {
+    if (!playableAudioUrl) {
+      player.pause();
+    }
+  }, [playableAudioUrl, player]);
+
+  useEffect(() => {
+    if (activeJob.id !== effectiveSelectedJobId) {
+      pendingAutoPlayJobIdRef.current = null;
+      return;
+    }
+
+    if (activeJob.status === "processing") {
+      pendingAutoPlayJobIdRef.current = activeJob.id;
+      return;
+    }
+
+    if (activeJob.status === "failed") {
+      pendingAutoPlayJobIdRef.current = null;
+    }
+  }, [activeJob, effectiveSelectedJobId]);
+
+  useEffect(() => {
+    if (
+      activeJob.status !== "ready"
+      || pendingAutoPlayJobIdRef.current !== activeJob.id
+      || !playableAudioUrl
+      || !playerStatus.isLoaded
+      || playerStatus.playing
+    ) {
+      return;
+    }
+
+    pendingAutoPlayJobIdRef.current = null;
+    player.play();
+  }, [activeJob, playableAudioUrl, player, playerStatus.isLoaded, playerStatus.playing]);
+
+  useEffect(() => {
+    if (!playerStatus.didJustFinish) {
+      handledFinishedJobIdRef.current = null;
+      return;
+    }
+
+    if (handledFinishedJobIdRef.current === activeJob.id) {
+      return;
+    }
+
+    handledFinishedJobIdRef.current = activeJob.id;
+
+    const currentIndex = jobs.findIndex((job) => job.id === activeJob.id);
+    if (currentIndex < 0) {
+      return;
+    }
+
+    const nextReadyJob = jobs.slice(currentIndex + 1).find((job) => job.status === "ready");
+    if (!nextReadyJob) {
+      return;
+    }
+
+    pendingAutoPlayJobIdRef.current = nextReadyJob.id;
+    setSelectedJobId(nextReadyJob.id);
+  }, [activeJob, jobs, playerStatus.didJustFinish, setSelectedJobId]);
+
+  useEffect(() => {
+    restoredPlaybackKeyRef.current = null;
+    lastPersistedSecondRef.current = -1;
+  }, [playbackProgressKey]);
+
+  useEffect(() => {
+    if (!playableAudioUrl || !playbackProgressKey || !playerStatus.isLoaded) {
+      return;
+    }
+
+    if (restoredPlaybackKeyRef.current === playbackProgressKey) {
+      return;
+    }
+
+    restoredPlaybackKeyRef.current = playbackProgressKey;
+
+    const savedPosition = readSavedPlaybackPosition(playbackProgressKey);
+    if (savedPosition <= 0) {
+      return;
+    }
+
+    if (playerStatus.duration > 0 && savedPosition >= playerStatus.duration - 3) {
+      writeSavedPlaybackPosition(playbackProgressKey, 0);
+      return;
+    }
+
+    void player.seekTo(savedPosition);
+  }, [playableAudioUrl, playbackProgressKey, player, playerStatus.duration, playerStatus.isLoaded]);
+
+  useEffect(() => {
+    if (!playbackProgressKey || !playerStatus.isLoaded) {
+      return;
+    }
+
+    if (playerStatus.didJustFinish) {
+      writeSavedPlaybackPosition(playbackProgressKey, 0);
+      lastPersistedSecondRef.current = -1;
+      return;
+    }
+
+    const currentSecond = Math.floor(playerStatus.currentTime || 0);
+    if (currentSecond === lastPersistedSecondRef.current) {
+      return;
+    }
+
+    lastPersistedSecondRef.current = currentSecond;
+    writeSavedPlaybackPosition(playbackProgressKey, currentSecond);
+  }, [
+    playbackProgressKey,
+    playerStatus.currentTime,
+    playerStatus.didJustFinish,
+    playerStatus.isLoaded,
+  ]);
+
+  useEffect(() => {
+    if (!playableAudioUrl) {
+      safeClearLockScreenControls(player);
+      return;
+    }
+
+    safeSetActiveForLockScreen(player, {
+      title: activeJob.title || "YT Audio",
+      artist: activeJob.channelName || "yt-audio",
+      artworkUrl: activeJob.thumbnailUrl || undefined,
+    });
+
+    return () => {
+      safeClearLockScreenControls(player);
+    };
+  }, [activeJob, playableAudioUrl, player]);
+
+  const seekToRelativePosition = (ratio: number) => {
+    if (!playableAudioUrl || playerStatus.duration <= 0) {
+      return;
+    }
+
+    const boundedRatio = Math.max(0, Math.min(1, ratio));
+    const targetSeconds = boundedRatio * playerStatus.duration;
+    writeSavedPlaybackPosition(playbackProgressKey, Math.floor(targetSeconds));
+    void player.seekTo(targetSeconds);
+  };
+
+  const handleProgressTrackLayout = (event: LayoutChangeEvent) => {
+    setProgressTrackWidth(event.nativeEvent.layout.width);
+  };
+
+  const progressPanResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => !!playableAudioUrl && playerStatus.duration > 0,
+      onMoveShouldSetPanResponder: () => !!playableAudioUrl && playerStatus.duration > 0,
+      onPanResponderGrant: (event) => {
+        if (progressTrackWidth <= 0) {
+          return;
+        }
+
+        seekToRelativePosition(event.nativeEvent.locationX / progressTrackWidth);
+      },
+      onPanResponderMove: (event) => {
+        if (progressTrackWidth <= 0) {
+          return;
+        }
+
+        seekToRelativePosition(event.nativeEvent.locationX / progressTrackWidth);
+      },
+    }),
+  ).current;
+
+  return (
+    <View style={styles.playerCard}>
+      <View style={styles.playerHeader}>
+        <Text style={styles.playerLabel}>Playback</Text>
+        <Text style={styles.playerTime}>
+          {formatDuration(Math.floor(playerStatus.currentTime || 0))} /{" "}
+          {formatDuration(Math.floor(playerStatus.duration || activeJob.durationSeconds || 0))}
+        </Text>
+      </View>
+      <View style={styles.progressStack}>
+        <Pressable
+          disabled={!playableAudioUrl}
+          onLayout={handleProgressTrackLayout}
+          onPress={(event) => {
+            if (progressTrackWidth <= 0) {
+              return;
+            }
+
+            seekToRelativePosition(event.nativeEvent.locationX / progressTrackWidth);
+          }}
+          style={[styles.progressTrack, !playableAudioUrl && styles.buttonDisabled]}
+        >
+          <View
+            style={[
+              styles.progressFill,
+              { width: `${playbackProgress * 100}%` },
+            ]}
+          />
+          <View
+            {...progressPanResponder.panHandlers}
+            style={[
+              styles.progressThumb,
+              { left: `${playbackProgress * 100}%` },
+            ]}
+          />
+        </Pressable>
+        <Text style={styles.progressHint}>
+          {playerStatus.isBuffering
+            ? "Buffering audio..."
+            : playableAudioUrl
+              ? "Ready to play. The bar shows listened progress."
+              : "Waiting for the stream to become playable."}
+        </Text>
+      </View>
+      <View style={styles.playerActions}>
+        <Pressable
+          style={[styles.secondaryButton, !playableAudioUrl && styles.buttonDisabled]}
+          disabled={!playableAudioUrl}
+          onPress={() => {
+            if (playerStatus.playing) {
+              player.pause();
+              return;
+            }
+
+            player.play();
+          }}
+        >
+          <Text style={styles.secondaryButtonText}>
+            {playerStatus.playing ? "Pause" : "Play"}
+          </Text>
+        </Pressable>
+        <Pressable
+          style={[styles.secondaryButton, !playableAudioUrl && styles.buttonDisabled]}
+          disabled={!playableAudioUrl}
+          onPress={() => {
+            writeSavedPlaybackPosition(playbackProgressKey, 0);
+            void player.seekTo(0);
+          }}
+        >
+          <Text style={styles.secondaryButtonText}>Restart</Text>
+        </Pressable>
+        <Pressable
+          style={[styles.secondaryButton, !playableAudioUrl && styles.buttonDisabled]}
+          disabled={!playableAudioUrl}
+          onPress={() => {
+            if (!playableAudioUrl) {
+              return;
+            }
+
+            void Linking.openURL(playableAudioUrl);
+          }}
+        >
+          <Text style={styles.secondaryButtonText}>Open media URL</Text>
+        </Pressable>
+        <Pressable
+          style={[styles.secondaryButton, !youtubeTimestampUrl && styles.buttonDisabled]}
+          disabled={!youtubeTimestampUrl}
+          onPress={async () => {
+            if (!youtubeTimestampUrl) {
+              return;
+            }
+
+            player.pause();
+            await Linking.openURL(youtubeTimestampUrl);
+          }}
+        >
+          <Text style={styles.secondaryButtonText}>Open on YouTube</Text>
+        </Pressable>
+      </View>
+      <Text style={styles.helperText}>
+        {playableAudioUrl
+          ? "Audio is ready. Playback uses expo-audio with background mode enabled."
+          : "Waiting for the backend to finish processing before playback is available."}
+      </Text>
+    </View>
   );
 }
 
