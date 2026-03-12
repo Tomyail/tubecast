@@ -1,7 +1,8 @@
 import { useNavigation } from "@react-navigation/native";
 import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { useState } from "react";
+import * as Clipboard from "expo-clipboard";
+import { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import type { RootStackParamList, RootTabParamList } from "../app/navigation/types";
 import JobCard from "../components/JobCard";
@@ -10,10 +11,15 @@ import { useCreateJob, useJobsList } from "../features/jobs/hooks";
 import { usePlayer } from "../features/player/context";
 import { useServerConfig } from "../features/settings/context";
 
+function looksLikeYouTubeUrl(value: string) {
+  return /(?:youtube\.com|youtu\.be)/i.test(value);
+}
+
 export default function HomeScreen() {
   const stackNavigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const tabNavigation = useNavigation<BottomTabNavigationProp<RootTabParamList>>();
   const [sourceUrl, setSourceUrl] = useState("");
+  const [clipboardUrl, setClipboardUrl] = useState("");
   const { hasServerConfig, normalizedBaseUrl } = useServerConfig();
   const jobsQuery = useJobsList();
   const createJobMutation = useCreateJob();
@@ -21,6 +27,15 @@ export default function HomeScreen() {
   const latestJob = jobsQuery.data?.[0] ?? null;
 
   const submitDisabled = createJobMutation.isPending || !sourceUrl.trim() || !hasServerConfig;
+
+  useEffect(() => {
+    void Clipboard.getStringAsync().then((value) => {
+      const trimmed = value.trim();
+      if (trimmed && looksLikeYouTubeUrl(trimmed)) {
+        setClipboardUrl(trimmed);
+      }
+    });
+  }, []);
 
   return (
     <Screen>
@@ -58,6 +73,14 @@ export default function HomeScreen() {
               style={styles.input}
               value={sourceUrl}
             />
+            {clipboardUrl && clipboardUrl !== sourceUrl ? (
+              <Pressable
+                style={styles.secondaryButton}
+                onPress={() => setSourceUrl(clipboardUrl)}
+              >
+                <Text style={styles.secondaryButtonText}>粘贴剪贴板中的 YouTube 链接</Text>
+              </Pressable>
+            ) : null}
             <Pressable
               disabled={submitDisabled}
               style={[styles.primaryButton, submitDisabled && styles.buttonDisabled]}
@@ -90,7 +113,12 @@ export default function HomeScreen() {
         ) : latestJob ? (
           <JobCard
             job={latestJob}
-            onPress={() => stackNavigation.navigate("Player", { jobId: latestJob.id })}
+            onPress={() => {
+              if (latestJob.status === "ready") {
+                setActiveJob(latestJob, jobsQuery.data ?? [latestJob]);
+              }
+              stackNavigation.navigate("Player", { jobId: latestJob.id });
+            }}
             footer={(
               <Text style={styles.helperText}>
                 {latestJob.status === "ready"
