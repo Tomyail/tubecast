@@ -15,10 +15,11 @@ export default function MiniPlayer() {
 
   return (
     <View style={styles.shell}>
-      <Pressable
-        style={styles.card}
-        onPress={() => navigation.navigate("Player", { jobId: activeJob.id })}
-      >
+      <View style={styles.card}>
+        <Pressable
+          style={styles.tapArea}
+          onPress={() => navigation.navigate("Player", { jobId: activeJob.id })}
+        >
         <View style={styles.textWrap}>
           <Text style={styles.title} numberOfLines={1}>
             {activeJob.title || activeJob.sourceUrl}
@@ -27,10 +28,11 @@ export default function MiniPlayer() {
             {formatDuration(currentTime)} / {formatDuration(duration)}
           </Text>
         </View>
-        <Pressable style={styles.button} onPress={togglePlayback}>
+        </Pressable>
+        <Pressable hitSlop={8} style={styles.button} onPress={togglePlayback}>
           <Text style={styles.buttonText}>{isPlaying ? "暂停" : "播放"}</Text>
         </Pressable>
-      </Pressable>
+      </View>
     </View>
   );
 }
@@ -51,8 +53,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
   },
-  textWrap: {
+  tapArea: {
     flex: 1,
+  },
+  textWrap: {
     gap: 4,
   },
   title: {

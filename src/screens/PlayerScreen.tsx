@@ -54,6 +54,26 @@ export default function PlayerScreen({ route }: Props) {
             </Text>
           </View>
 
+          {job.status !== "ready" ? (
+            <View style={styles.noticeCard}>
+              <Text style={styles.noticeTitle}>
+                {job.status === "failed" ? "这次转换失败了" : "音频还没有准备好"}
+              </Text>
+              <Text style={styles.noticeText}>
+                {job.status === "failed"
+                  ? job.errorMessage || "服务端返回了失败状态，后续可以在媒体库里补重试操作。"
+                  : "当前页面会继续跟踪这个任务，等任务转成可播放后这里会直接切到音频控制。"}
+              </Text>
+            </View>
+          ) : null}
+
+          {job.status === "ready" && !isCurrentJob ? (
+            <View style={styles.noticeCard}>
+              <Text style={styles.noticeTitle}>这条音频已经可播放</Text>
+              <Text style={styles.noticeText}>点击下面主按钮后，会把它切换成当前播放内容。</Text>
+            </View>
+          ) : null}
+
           <View style={styles.playerCard}>
             <View style={styles.progressHeader}>
               <Text style={styles.progressText}>
@@ -75,9 +95,22 @@ export default function PlayerScreen({ route }: Props) {
               <Pressable
                 style={[styles.primaryButton, job.status !== "ready" && styles.buttonDisabled]}
                 disabled={job.status !== "ready" || !isLoaded}
-                onPress={togglePlayback}
+                onPress={() => {
+                  if (!job || job.status !== "ready") {
+                    return;
+                  }
+
+                  if (!isCurrentJob) {
+                    setActiveJob(job, jobsQuery.data ?? [job]);
+                    return;
+                  }
+
+                  togglePlayback();
+                }}
               >
-                <Text style={styles.primaryButtonText}>{isPlaying && isCurrentJob ? "暂停" : "播放"}</Text>
+                <Text style={styles.primaryButtonText}>
+                  {isCurrentJob ? (isPlaying ? "暂停" : "播放") : "播放这条音频"}
+                </Text>
               </Pressable>
               <Pressable style={styles.secondaryButton} onPress={playNext}>
                 <Text style={styles.secondaryButtonText}>下一首</Text>
@@ -147,6 +180,24 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     gap: 16,
     padding: 18,
+  },
+  noticeCard: {
+    backgroundColor: "#fff4e7",
+    borderColor: "#ecd3ad",
+    borderRadius: 20,
+    borderWidth: 1,
+    gap: 6,
+    padding: 16,
+  },
+  noticeTitle: {
+    color: "#6d371f",
+    fontSize: 16,
+    fontWeight: "800",
+  },
+  noticeText: {
+    color: "#7c5b45",
+    fontSize: 14,
+    lineHeight: 20,
   },
   progressHeader: {
     flexDirection: "row",
