@@ -15,7 +15,7 @@ export default function Screen({
     <View style={styles.staticContent}>{children}</View>
   );
 
-  return <SafeAreaView edges={["left", "right"]} style={styles.safeArea}>{content}</SafeAreaView>;
+  return <SafeAreaView edges={["top", "left", "right"]} style={styles.safeArea}>{content}</SafeAreaView>;
 }
 
 const styles = StyleSheet.create({
@@ -27,11 +27,13 @@ const styles = StyleSheet.create({
     gap: 16,
     padding: 18,
     paddingBottom: 120,
+    paddingTop: 12,
   },
   staticContent: {
     flex: 1,
     gap: 16,
     padding: 18,
     paddingBottom: 120,
+    paddingTop: 12,
   },
 });
