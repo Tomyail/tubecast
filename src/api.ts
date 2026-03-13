@@ -1,4 +1,11 @@
-import type { CreateJobResult, Job, JobStatus, ServerConfig } from "./types";
+import type {
+  CreateJobResult,
+  GenerateSummaryResult,
+  Job,
+  JobStatus,
+  ServerConfig,
+  SummaryStreamEvent,
+} from "./types";
 
 function buildHeaders(config: ServerConfig, extras?: Record<string, string>) {
   const headers: Record<string, string> = {
@@ -24,6 +31,18 @@ function buildUrl(config: ServerConfig, pathname: string) {
   }
 
   return `${baseUrl}${pathname}`;
+}
+
+function parseJsonText(text: string) {
+  if (!text.trim()) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
 }
 
 async function readJson(response: Response) {
@@ -96,6 +115,118 @@ export async function deleteJob(config: ServerConfig, id: string): Promise<{ del
   return request<{ deleted: boolean; job: Job }>(config, `/api/jobs/${id}`, {
     method: "DELETE",
   });
+}
+
+export async function generateJobSummary(config: ServerConfig, id: string): Promise<GenerateSummaryResult> {
+  return request<GenerateSummaryResult>(config, `/api/jobs/${id}/summary`, {
+    method: "POST",
+  });
+}
+
+export function streamJobSummary(
+  config: ServerConfig,
+  id: string,
+  callbacks: {
+    onEvent: (event: SummaryStreamEvent) => void;
+    onError?: (message: string) => void;
+    onClose?: () => void;
+  },
+) {
+  const xhr = new XMLHttpRequest();
+  let cursor = 0;
+  let buffer = "";
+  let closed = false;
+
+  function closeOnce() {
+    if (closed) {
+      return;
+    }
+
+    closed = true;
+    callbacks.onClose?.();
+  }
+
+  function emitError(message: string) {
+    callbacks.onError?.(message);
+  }
+
+  function processBuffer() {
+    const incoming = xhr.responseText.slice(cursor);
+    cursor = xhr.responseText.length;
+    buffer += incoming;
+
+    while (true) {
+      const boundary = buffer.indexOf("\n\n");
+      if (boundary === -1) {
+        return;
+      }
+
+      const rawEvent = buffer.slice(0, boundary);
+      buffer = buffer.slice(boundary + 2);
+
+      const dataLines = rawEvent
+        .split(/\r?\n/)
+        .filter((line) => line.startsWith("data:"))
+        .map((line) => line.slice(5).trim());
+
+      if (dataLines.length === 0) {
+        continue;
+      }
+
+      const payload = parseJsonText(dataLines.join("\n"));
+      if (payload) {
+        callbacks.onEvent(payload as SummaryStreamEvent);
+      }
+    }
+  }
+
+  xhr.open("POST", buildUrl(config, `/api/jobs/${id}/summary/stream`));
+
+  for (const [key, value] of Object.entries(buildHeaders(config, {
+    Accept: "text/event-stream",
+  }))) {
+    xhr.setRequestHeader(key, value);
+  }
+
+  xhr.onreadystatechange = () => {
+    if (xhr.readyState !== XMLHttpRequest.DONE) {
+      return;
+    }
+
+    processBuffer();
+
+    if (xhr.status < 200 || xhr.status >= 300) {
+      const payload = parseJsonText(xhr.responseText);
+      emitError(
+        payload && typeof payload.error === "string"
+          ? payload.error
+          : `Request failed with status ${xhr.status}`,
+      );
+    }
+
+    closeOnce();
+  };
+
+  xhr.onprogress = () => {
+    processBuffer();
+  };
+
+  xhr.onerror = () => {
+    emitError("Network request failed");
+    closeOnce();
+  };
+
+  xhr.onabort = () => {
+    closeOnce();
+  };
+
+  xhr.send();
+
+  return {
+    abort() {
+      xhr.abort();
+    },
+  };
 }
 
 export function getPlayableAudioUrl(job: Job | null | undefined, config: ServerConfig) {

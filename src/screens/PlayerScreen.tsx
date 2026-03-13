@@ -1,11 +1,14 @@
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Linking, Pressable, StyleSheet, Text, View } from "react-native";
-import { formatDuration, getYouTubeTimestampUrl } from "../api";
+import { formatDuration, getYouTubeTimestampUrl, streamJobSummary } from "../api";
 import Screen from "../components/Screen";
+import SummaryMarkdown from "../components/SummaryMarkdown";
 import type { RootStackParamList } from "../app/navigation/types";
 import { useJobDetail, useJobsList } from "../features/jobs/hooks";
 import { usePlayer } from "../features/player/context";
+import { useServerConfig } from "../features/settings/context";
+import type { SummaryStreamEvent } from "../types";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Player">;
 
@@ -13,6 +16,12 @@ export default function PlayerScreen({ route }: Props) {
   const jobId = route.params.jobId;
   const jobsQuery = useJobsList();
   const jobQuery = useJobDetail(jobId);
+  const { serverConfig } = useServerConfig();
+  const [streamedSummary, setStreamedSummary] = useState("");
+  const [isSummaryStreaming, setIsSummaryStreaming] = useState(false);
+  const [summaryStreamError, setSummaryStreamError] = useState<string | null>(null);
+  const [isSummaryComplete, setIsSummaryComplete] = useState(false);
+  const summaryStreamRef = useRef<{ abort: () => void } | null>(null);
   const {
     activeJob,
     currentTime,
@@ -33,12 +42,59 @@ export default function PlayerScreen({ route }: Props) {
   const effectiveDuration = isCurrentJob ? duration : job?.durationSeconds || 0;
   const progress = isCurrentJob ? playbackProgress : 0;
   const youtubeTimestampUrl = getYouTubeTimestampUrl(job?.sourceUrl, effectiveCurrentTime);
+  const canGenerateSummary = !!job && !isSummaryStreaming && job.summaryStatus !== "processing";
+  const displayedSummary = streamedSummary || job?.summaryText || "";
+  const displayedSummaryError = summaryStreamError || job?.summaryErrorMessage || null;
 
   useEffect(() => {
     if (job?.status === "ready" && activeJob?.id !== job.id) {
       setActiveJob(job, jobsQuery.data ?? [job]);
     }
   }, [activeJob?.id, job, jobsQuery.data, setActiveJob]);
+
+  useEffect(() => {
+    if (isSummaryStreaming) {
+      return;
+    }
+
+    setStreamedSummary(job?.summaryText || "");
+    setSummaryStreamError(job?.summaryErrorMessage || null);
+    setIsSummaryComplete(job?.summaryStatus === "ready");
+  }, [isSummaryStreaming, job?.summaryErrorMessage, job?.summaryStatus, job?.summaryText]);
+
+  useEffect(() => () => {
+    summaryStreamRef.current?.abort();
+  }, []);
+
+  function handleSummaryEvent(event: SummaryStreamEvent) {
+    if (event.type === "start") {
+      setStreamedSummary("");
+      setSummaryStreamError(null);
+      setIsSummaryComplete(false);
+      return;
+    }
+
+    if (event.type === "delta") {
+      setStreamedSummary(event.text);
+      return;
+    }
+
+    if (event.type === "complete") {
+      setStreamedSummary(event.job.summaryText || "");
+      setSummaryStreamError(null);
+      setIsSummaryStreaming(false);
+      setIsSummaryComplete(true);
+      void jobsQuery.refetch();
+      void jobQuery.refetch();
+      return;
+    }
+
+    setSummaryStreamError(event.error);
+    setIsSummaryStreaming(false);
+    setIsSummaryComplete(true);
+    void jobsQuery.refetch();
+    void jobQuery.refetch();
+  }
 
   return (
     <Screen>
@@ -143,6 +199,61 @@ export default function PlayerScreen({ route }: Props) {
               >
                 <Text style={styles.secondaryButtonText}>+15 秒</Text>
               </Pressable>
+            </View>
+
+            <View style={styles.summaryCard}>
+              <View style={styles.summaryHeader}>
+                <Text style={styles.summaryTitle}>视频总结</Text>
+                <Pressable
+                  style={[styles.summaryButton, !canGenerateSummary && styles.buttonDisabled]}
+                  disabled={!canGenerateSummary}
+                  onPress={() => {
+                    if (!job) {
+                      return;
+                    }
+
+                    summaryStreamRef.current?.abort();
+                    setIsSummaryStreaming(true);
+                    setIsSummaryComplete(false);
+                    setStreamedSummary("");
+                    setSummaryStreamError(null);
+
+                    summaryStreamRef.current = streamJobSummary(serverConfig, job.id, {
+                      onEvent: handleSummaryEvent,
+                      onError: (message) => {
+                        setSummaryStreamError(message);
+                        setIsSummaryStreaming(false);
+                        setIsSummaryComplete(true);
+                      },
+                      onClose: () => {
+                        summaryStreamRef.current = null;
+                      },
+                    });
+                  }}
+                >
+                  {isSummaryStreaming ? (
+                    <ActivityIndicator color="#fff7ef" />
+                  ) : (
+                    <Text style={styles.summaryButtonText}>
+                      {displayedSummary ? "重新生成" : "生成总结"}
+                    </Text>
+                  )}
+                </Pressable>
+              </View>
+
+              {isSummaryStreaming || job.summaryStatus === "processing" ? (
+                <Text style={styles.summaryBody}>Gemini 正在流式生成总结，下面会实时追加内容。</Text>
+              ) : null}
+
+              {displayedSummaryError ? (
+                <Text style={styles.summaryError}>{displayedSummaryError}</Text>
+              ) : null}
+
+              {displayedSummary ? (
+                <SummaryMarkdown content={displayedSummary} isComplete={isSummaryComplete && !isSummaryStreaming} />
+              ) : job.summaryStatus === "idle" ? (
+                <Text style={styles.summaryPlaceholder}>点击按钮后，服务端会按需生成视频总结。</Text>
+              ) : null}
             </View>
           </View>
         </>
@@ -258,5 +369,53 @@ const styles = StyleSheet.create({
   errorText: {
     color: "#b23f3f",
     fontSize: 14,
+  },
+  summaryCard: {
+    backgroundColor: "#fff4e7",
+    borderColor: "#ecd3ad",
+    borderRadius: 20,
+    borderWidth: 1,
+    gap: 10,
+    padding: 16,
+  },
+  summaryHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12,
+    justifyContent: "space-between",
+  },
+  summaryTitle: {
+    color: "#6d371f",
+    fontSize: 17,
+    fontWeight: "800",
+  },
+  summaryButton: {
+    alignItems: "center",
+    backgroundColor: "#b65a36",
+    borderRadius: 14,
+    justifyContent: "center",
+    minHeight: 40,
+    minWidth: 104,
+    paddingHorizontal: 14,
+  },
+  summaryButtonText: {
+    color: "#fff7ef",
+    fontSize: 14,
+    fontWeight: "800",
+  },
+  summaryBody: {
+    color: "#5d4536",
+    fontSize: 14,
+    lineHeight: 22,
+  },
+  summaryPlaceholder: {
+    color: "#7c5b45",
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  summaryError: {
+    color: "#b23f3f",
+    fontSize: 14,
+    lineHeight: 20,
   },
 });
