@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { getPlayableAudioUrl } from "../../api";
 import type { Job } from "../../types";
+import { useJobsList } from "../jobs/hooks";
 import { useServerConfig } from "../settings/context";
 import { loadPlaybackProgress, savePlaybackProgress } from "./storage";
 
@@ -63,6 +64,7 @@ function safeSetActiveForLockScreen(
 
 export function PlayerProvider({ children }: { children: ReactNode }) {
   const { serverConfig } = useServerConfig();
+  const jobsQuery = useJobsList();
   const [activeJob, setActiveJobState] = useState<Job | null>(null);
   const [queue, setQueueState] = useState<Job[]>([]);
   const playableAudioUrl = getPlayableAudioUrl(activeJob, serverConfig);
@@ -74,6 +76,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const lastPersistedSecondRef = useRef(-1);
   const restoredPlaybackKeyRef = useRef<string | null>(null);
   const handledFinishedJobIdRef = useRef<string | null>(null);
+  const hasHydratedReadyJobsRef = useRef(false);
+  const knownReadyJobIdsRef = useRef<Set<string>>(new Set());
+  const pendingAutoPlayJobIdRef = useRef<string | null>(null);
   const playbackProgressKey = getPlaybackProgressKey(activeJob);
 
   useEffect(() => {
@@ -83,6 +88,35 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       interruptionMode: "doNotMix",
     });
   }, []);
+
+  useEffect(() => {
+    const jobs = jobsQuery.data;
+    if (!jobs) {
+      return;
+    }
+
+    setQueueState(jobs);
+
+    const readyJobs = jobs.filter((job) => job.status === "ready");
+    const nextReadyJobIds = new Set(readyJobs.map((job) => job.id));
+
+    if (!hasHydratedReadyJobsRef.current) {
+      hasHydratedReadyJobsRef.current = true;
+      knownReadyJobIdsRef.current = nextReadyJobIds;
+      return;
+    }
+
+    const newReadyJobs = readyJobs.filter((job) => !knownReadyJobIdsRef.current.has(job.id));
+    knownReadyJobIdsRef.current = nextReadyJobIds;
+
+    if (!newReadyJobs.length || status.playing || status.isBuffering) {
+      return;
+    }
+
+    const latestReadyJob = newReadyJobs[0];
+    pendingAutoPlayJobIdRef.current = latestReadyJob.id;
+    setActiveJobState(latestReadyJob);
+  }, [jobsQuery.data, status.isBuffering, status.playing]);
 
   useEffect(() => {
     if (!playableAudioUrl) {
@@ -132,6 +166,15 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, [playableAudioUrl, playbackProgressKey, player, status.duration, status.isLoaded]);
 
   useEffect(() => {
+    if (!activeJob || pendingAutoPlayJobIdRef.current !== activeJob.id || !status.isLoaded) {
+      return;
+    }
+
+    player.play();
+    pendingAutoPlayJobIdRef.current = null;
+  }, [activeJob, player, status.isLoaded]);
+
+  useEffect(() => {
     if (!playbackProgressKey || !status.isLoaded) {
       return;
     }
@@ -170,6 +213,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
     const nextReadyJob = queue.slice(currentIndex + 1).find((job) => job.status === "ready");
     if (nextReadyJob) {
+      pendingAutoPlayJobIdRef.current = nextReadyJob.id;
       setActiveJobState(nextReadyJob);
     }
   }, [activeJob, queue, status.didJustFinish]);
@@ -193,6 +237,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       if (nextQueue) {
         setQueueState(nextQueue);
       }
+      pendingAutoPlayJobIdRef.current = null;
       setActiveJobState(job);
     },
     togglePlayback: () => {
