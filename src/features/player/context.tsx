@@ -16,7 +16,6 @@ type PlayerContextValue = {
   currentTime: number;
   duration: number;
   playbackProgress: number;
-  setQueue: (jobs: Job[]) => void;
   setActiveJob: (job: Job | null, queue?: Job[]) => void;
   playJob: (job: Job, queue?: Job[]) => void;
   togglePlayback: () => void;
@@ -27,6 +26,10 @@ type PlayerContextValue = {
 };
 
 const PlayerContext = createContext<PlayerContextValue | null>(null);
+type PendingAutoPlay = {
+  jobId: string;
+  playbackKey: string | null;
+} | null;
 
 function getPlaybackProgressKey(job: Job | null) {
   if (!job) {
@@ -63,6 +66,33 @@ function safeSetActiveForLockScreen(
   }
 }
 
+function findNextReadyJob(queue: Job[], activeJobId: string) {
+  const currentIndex = queue.findIndex((job) => job.id === activeJobId);
+  if (currentIndex < 0) {
+    return null;
+  }
+
+  return queue.slice(currentIndex + 1).find((job) => job.status === "ready") ?? null;
+}
+
+function findPreviousReadyJob(queue: Job[], activeJobId: string) {
+  const currentIndex = queue.findIndex((job) => job.id === activeJobId);
+  if (currentIndex <= 0) {
+    return null;
+  }
+
+  const previousReadyJobs = queue.slice(0, currentIndex).filter((job) => job.status === "ready");
+  return previousReadyJobs[previousReadyJobs.length - 1] ?? null;
+}
+
+function getReadyJobIds(jobs: Job[]) {
+  return new Set(jobs.filter((job) => job.status === "ready").map((job) => job.id));
+}
+
+function findNewReadyJob(jobs: Job[], knownReadyJobIds: Set<string>) {
+  return jobs.find((job) => job.status === "ready" && !knownReadyJobIds.has(job.id)) ?? null;
+}
+
 export function PlayerProvider({ children }: { children: ReactNode }) {
   const { serverConfig } = useServerConfig();
   const jobsQuery = useJobsList();
@@ -79,17 +109,36 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const handledFinishedJobIdRef = useRef<string | null>(null);
   const hasHydratedReadyJobsRef = useRef(false);
   const knownReadyJobIdsRef = useRef<Set<string>>(new Set());
-  const pendingAutoPlayJobIdRef = useRef<string | null>(null);
-  const pendingAutoPlayPlaybackKeyRef = useRef<string | null>(null);
+  const pendingAutoPlayRef = useRef<PendingAutoPlay>(null);
   const playbackProgressKey = getPlaybackProgressKey(activeJob);
 
-  function setCurrentJob(job: Job | null, nextQueue?: Job[], shouldAutoPlay = false) {
+  function setPendingAutoPlay(job: Job | null) {
+    pendingAutoPlayRef.current = job
+      ? { jobId: job.id, playbackKey: getPlaybackProgressKey(job) }
+      : null;
+  }
+
+  function shouldAutoPlayCurrentJob(job: Job | null, currentPlaybackKey: string | null) {
+    return !!job &&
+      pendingAutoPlayRef.current?.jobId === job.id &&
+      pendingAutoPlayRef.current?.playbackKey === currentPlaybackKey;
+  }
+
+  function clearPendingAutoPlay() {
+    pendingAutoPlayRef.current = null;
+  }
+
+  function setCurrentJob(job: Job | null, nextQueue?: Job[], options?: { autoPlay?: boolean }) {
     if (nextQueue) {
       setQueueState(nextQueue);
     }
 
-    pendingAutoPlayJobIdRef.current = shouldAutoPlay ? job?.id ?? null : null;
-    pendingAutoPlayPlaybackKeyRef.current = shouldAutoPlay ? getPlaybackProgressKey(job) : null;
+    if (options?.autoPlay) {
+      setPendingAutoPlay(job);
+    } else {
+      clearPendingAutoPlay();
+    }
+
     setActiveJobState(job);
   }
 
@@ -108,9 +157,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     }
 
     setQueueState(jobs);
-
-    const readyJobs = jobs.filter((job) => job.status === "ready");
-    const nextReadyJobIds = new Set(readyJobs.map((job) => job.id));
+    const nextReadyJobIds = getReadyJobIds(jobs);
 
     if (!hasHydratedReadyJobsRef.current) {
       hasHydratedReadyJobsRef.current = true;
@@ -118,17 +165,14 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    const newReadyJobs = readyJobs.filter((job) => !knownReadyJobIdsRef.current.has(job.id));
+    const newReadyJob = findNewReadyJob(jobs, knownReadyJobIdsRef.current);
     knownReadyJobIdsRef.current = nextReadyJobIds;
 
-    if (!newReadyJobs.length || status.playing || status.isBuffering) {
+    if (!newReadyJob || status.playing || status.isBuffering) {
       return;
     }
 
-    const latestReadyJob = newReadyJobs[0];
-    pendingAutoPlayJobIdRef.current = latestReadyJob.id;
-    pendingAutoPlayPlaybackKeyRef.current = getPlaybackProgressKey(latestReadyJob);
-    setActiveJobState(latestReadyJob);
+    setCurrentJob(newReadyJob, undefined, { autoPlay: true });
   }, [jobsQuery.data, status.isBuffering, status.playing]);
 
   useEffect(() => {
@@ -166,13 +210,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     restoredPlaybackKeyRef.current = playbackProgressKey;
     void loadPlaybackProgress(playbackProgressKey).then(async (savedPosition) => {
       if (savedPosition <= 0) {
-        if (
-          pendingAutoPlayJobIdRef.current === activeJob?.id &&
-          pendingAutoPlayPlaybackKeyRef.current === playbackProgressKey
-        ) {
+        if (shouldAutoPlayCurrentJob(activeJob, playbackProgressKey)) {
           player.play();
-          pendingAutoPlayJobIdRef.current = null;
-          pendingAutoPlayPlaybackKeyRef.current = null;
+          clearPendingAutoPlay();
         }
         return;
       }
@@ -183,13 +223,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         await player.seekTo(savedPosition);
       }
 
-      if (
-        pendingAutoPlayJobIdRef.current === activeJob?.id &&
-        pendingAutoPlayPlaybackKeyRef.current === playbackProgressKey
-      ) {
+      if (shouldAutoPlayCurrentJob(activeJob, playbackProgressKey)) {
         player.play();
-        pendingAutoPlayJobIdRef.current = null;
-        pendingAutoPlayPlaybackKeyRef.current = null;
+        clearPendingAutoPlay();
       }
     });
   }, [activeJob?.id, playableAudioUrl, playbackProgressKey, player, status.duration, status.isLoaded]);
@@ -226,16 +262,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
     handledFinishedJobIdRef.current = activeJob.id;
 
-    const currentIndex = queue.findIndex((job) => job.id === activeJob.id);
-    if (currentIndex < 0) {
-      return;
-    }
-
-    const nextReadyJob = queue.slice(currentIndex + 1).find((job) => job.status === "ready");
+    const nextReadyJob = findNextReadyJob(queue, activeJob.id);
     if (nextReadyJob) {
-      pendingAutoPlayJobIdRef.current = nextReadyJob.id;
-      pendingAutoPlayPlaybackKeyRef.current = getPlaybackProgressKey(nextReadyJob);
-      setActiveJobState(nextReadyJob);
+      setCurrentJob(nextReadyJob, undefined, { autoPlay: true });
     }
   }, [activeJob, queue, status.didJustFinish]);
 
@@ -251,14 +280,11 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       status.duration && status.duration > 0
         ? Math.min((status.currentTime || 0) / status.duration, 1)
         : 0,
-    setQueue: (jobs) => {
-      setQueueState(jobs);
-    },
     setActiveJob: (job, nextQueue) => {
-      setCurrentJob(job, nextQueue, false);
+      setCurrentJob(job, nextQueue);
     },
     playJob: (job, nextQueue) => {
-      setCurrentJob(job, nextQueue, true);
+      setCurrentJob(job, nextQueue, { autoPlay: true });
     },
     togglePlayback: () => {
       if (!playableAudioUrl) {
@@ -292,14 +318,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const currentIndex = queue.findIndex((job) => job.id === activeJob.id);
-      if (currentIndex < 0) {
-        return;
-      }
-
-      const nextReadyJob = queue.slice(currentIndex + 1).find((job) => job.status === "ready");
+      const nextReadyJob = findNextReadyJob(queue, activeJob.id);
       if (nextReadyJob) {
-        setActiveJobState(nextReadyJob);
+        setCurrentJob(nextReadyJob);
       }
     },
     playPrevious: () => {
@@ -307,15 +328,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const currentIndex = queue.findIndex((job) => job.id === activeJob.id);
-      if (currentIndex <= 0) {
-        return;
-      }
-
-      const previousReadyJobs = queue.slice(0, currentIndex).filter((job) => job.status === "ready");
-      const previousReadyJob = previousReadyJobs[previousReadyJobs.length - 1];
+      const previousReadyJob = findPreviousReadyJob(queue, activeJob.id);
       if (previousReadyJob) {
-        setActiveJobState(previousReadyJob);
+        setCurrentJob(previousReadyJob);
       }
     },
   }), [

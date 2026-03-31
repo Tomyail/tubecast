@@ -118,13 +118,6 @@ export default function PlayerScreen({ route }: Props) {
             </View>
           ) : null}
 
-          {job.status === "ready" && !isCurrentJob ? (
-            <View style={styles.noticeCard}>
-              <Text style={styles.noticeTitle}>这条音频已经可播放</Text>
-              <Text style={styles.noticeText}>点击下面主按钮后，会把它切换成当前播放内容。</Text>
-            </View>
-          ) : null}
-
           <View style={styles.playerCard}>
             <View style={styles.progressHeader}>
               <Text style={styles.progressText}>
