@@ -30,10 +30,10 @@ export default function PlayerScreen({ route }: Props) {
     isLoaded,
     isPlaying,
     playbackProgress,
+    playJob,
     playNext,
     playPrevious,
     seekBy,
-    setActiveJob,
     togglePlayback,
   } = usePlayer();
   const job = jobQuery.data ?? jobsQuery.data?.find((item) => item.id === jobId) ?? null;
@@ -41,16 +41,11 @@ export default function PlayerScreen({ route }: Props) {
   const effectiveCurrentTime = isCurrentJob ? currentTime : 0;
   const effectiveDuration = isCurrentJob ? duration : job?.durationSeconds || 0;
   const progress = isCurrentJob ? playbackProgress : 0;
+  const isPlayButtonDisabled = job?.status !== "ready" || (isCurrentJob && !isLoaded);
   const youtubeTimestampUrl = getYouTubeTimestampUrl(job?.sourceUrl, effectiveCurrentTime);
   const canGenerateSummary = !!job && !isSummaryStreaming && job.summaryStatus !== "processing";
   const displayedSummary = streamedSummary || job?.summaryText || "";
   const displayedSummaryError = summaryStreamError || job?.summaryErrorMessage || null;
-
-  useEffect(() => {
-    if (job?.status === "ready" && activeJob?.id !== job.id) {
-      setActiveJob(job, jobsQuery.data ?? [job]);
-    }
-  }, [activeJob?.id, job, jobsQuery.data, setActiveJob]);
 
   useEffect(() => {
     if (isSummaryStreaming) {
@@ -149,15 +144,15 @@ export default function PlayerScreen({ route }: Props) {
                 <Text style={styles.secondaryButtonText}>上一首</Text>
               </Pressable>
               <Pressable
-                style={[styles.primaryButton, job.status !== "ready" && styles.buttonDisabled]}
-                disabled={job.status !== "ready" || !isLoaded}
+                style={[styles.primaryButton, isPlayButtonDisabled && styles.buttonDisabled]}
+                disabled={isPlayButtonDisabled}
                 onPress={() => {
                   if (!job || job.status !== "ready") {
                     return;
                   }
 
                   if (!isCurrentJob) {
-                    setActiveJob(job, jobsQuery.data ?? [job]);
+                    playJob(job, jobsQuery.data ?? [job]);
                     return;
                   }
 
@@ -165,7 +160,7 @@ export default function PlayerScreen({ route }: Props) {
                 }}
               >
                 <Text style={styles.primaryButtonText}>
-                  {isCurrentJob ? (isPlaying ? "暂停" : "播放") : "播放这条音频"}
+                  {isCurrentJob && isPlaying ? "暂停" : "播放"}
                 </Text>
               </Pressable>
               <Pressable style={styles.secondaryButton} onPress={playNext}>

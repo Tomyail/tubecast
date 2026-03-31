@@ -23,7 +23,7 @@ export default function HomeScreen() {
   const { hasServerConfig, normalizedBaseUrl } = useServerConfig();
   const jobsQuery = useJobsList();
   const createJobMutation = useCreateJob();
-  const { setActiveJob } = usePlayer();
+  const { playJob } = usePlayer();
   const latestJob = jobsQuery.data?.[0] ?? null;
 
   const submitDisabled = createJobMutation.isPending || !sourceUrl.trim() || !hasServerConfig;
@@ -88,7 +88,7 @@ export default function HomeScreen() {
                 void createJobMutation.mutateAsync({ sourceUrl }).then((result) => {
                     setSourceUrl("");
                   if (result.job.status === "ready") {
-                    setActiveJob(result.job, jobsQuery.data ?? [result.job]);
+                    playJob(result.job, jobsQuery.data ?? [result.job]);
                     stackNavigation.navigate("Player", { jobId: result.job.id });
                   }
                 }).catch((error: unknown) => {
@@ -114,9 +114,6 @@ export default function HomeScreen() {
           <JobCard
             job={latestJob}
             onPress={() => {
-              if (latestJob.status === "ready") {
-                setActiveJob(latestJob, jobsQuery.data ?? [latestJob]);
-              }
               stackNavigation.navigate("Player", { jobId: latestJob.id });
             }}
             footer={(

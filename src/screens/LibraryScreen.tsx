@@ -6,7 +6,6 @@ import type { RootStackParamList } from "../app/navigation/types";
 import JobCard from "../components/JobCard";
 import Screen from "../components/Screen";
 import { useDeleteJob, useJobsList } from "../features/jobs/hooks";
-import { usePlayer } from "../features/player/context";
 import type { JobStatus } from "../types";
 
 type LibraryFilter = "all" | JobStatus;
@@ -23,7 +22,6 @@ export default function LibraryScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const jobsQuery = useJobsList();
   const deleteJobMutation = useDeleteJob();
-  const { setActiveJob } = usePlayer();
   const [filter, setFilter] = useState<LibraryFilter>("all");
   const filteredJobs = useMemo(() => {
     const jobs = jobsQuery.data ?? [];
@@ -57,9 +55,6 @@ export default function LibraryScreen() {
             key={job.id}
             job={job}
             onPress={() => {
-              if (job.status === "ready") {
-                setActiveJob(job, jobsQuery.data ?? []);
-              }
               navigation.navigate("Player", { jobId: job.id });
             }}
             footer={(
