@@ -9,7 +9,7 @@ type SettingsContextValue = {
   serverConfig: ServerConfig;
   normalizedBaseUrl: string;
   hasServerConfig: boolean;
-  updateServerConfig: (config: ServerConfig) => Promise<void>;
+  updateServerConfig: (config: Pick<ServerConfig, "baseUrl" | "authToken">) => Promise<void>;
 };
 
 const SettingsContext = createContext<SettingsContextValue | null>(null);
@@ -44,8 +44,12 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       normalizedBaseUrl,
       hasServerConfig: normalizedBaseUrl.length > 0,
       updateServerConfig: async (config) => {
-        setServerConfig(config);
-        await saveServerConfig(config);
+        const nextConfig = {
+          ...serverConfig,
+          ...config,
+        };
+        setServerConfig(nextConfig);
+        await saveServerConfig(nextConfig);
       },
     };
   }, [isLoaded, serverConfig]);

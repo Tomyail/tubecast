@@ -17,6 +17,10 @@ function buildHeaders(config: ServerConfig, extras?: Record<string, string>) {
     headers.Authorization = `Bearer ${config.authToken.trim()}`;
   }
 
+  if (config.deviceId.trim()) {
+    headers["X-Device-Id"] = config.deviceId.trim();
+  }
+
   return headers;
 }
 

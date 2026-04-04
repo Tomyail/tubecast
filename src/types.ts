@@ -16,9 +16,12 @@ export type Job = {
   summaryErrorMessage: string | null;
   summaryUpdatedAt: string | null;
   idempotencyKey: string | null;
+  requestedDeviceIdHash?: string | null;
   audioPath: string | null;
   audioHref: string | null;
   audioUrl: string | null;
+  audioExpiresAt?: string | null;
+  audioDeletedAt?: string | null;
   errorMessage: string | null;
   createdAt: string;
   updatedAt: string;
@@ -62,4 +65,5 @@ export type SummaryStreamEvent =
 export type ServerConfig = {
   baseUrl: string;
   authToken: string;
+  deviceId: string;
 };
