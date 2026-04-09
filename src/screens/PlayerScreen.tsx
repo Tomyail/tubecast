@@ -5,7 +5,7 @@ import { formatDuration, getYouTubeTimestampUrl, streamJobSummary } from "../api
 import Screen from "../components/Screen";
 import SummaryMarkdown from "../components/SummaryMarkdown";
 import type { RootStackParamList } from "../app/navigation/types";
-import { useJobDetail, useJobsList } from "../features/jobs/hooks";
+import { useJobDetail, useLibraryList, useMarkLibraryItemPlayed } from "../features/jobs/hooks";
 import { usePlayer } from "../features/player/context";
 import { useServerConfig } from "../features/settings/context";
 import type { SummaryStreamEvent } from "../types";
@@ -14,8 +14,9 @@ type Props = NativeStackScreenProps<RootStackParamList, "Player">;
 
 export default function PlayerScreen({ route }: Props) {
   const jobId = route.params.jobId;
-  const jobsQuery = useJobsList();
+  const jobsQuery = useLibraryList();
   const jobQuery = useJobDetail(jobId);
+  const markPlayedMutation = useMarkLibraryItemPlayed();
   const { serverConfig } = useServerConfig();
   const [streamedSummary, setStreamedSummary] = useState("");
   const [isSummaryStreaming, setIsSummaryStreaming] = useState(false);
@@ -146,6 +147,7 @@ export default function PlayerScreen({ route }: Props) {
 
                   if (!isCurrentJob) {
                     playJob(job, jobsQuery.data ?? [job]);
+                    void markPlayedMutation.mutate(job.id);
                     return;
                   }
 

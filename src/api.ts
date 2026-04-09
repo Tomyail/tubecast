@@ -3,6 +3,7 @@ import type {
   GenerateSummaryResult,
   Job,
   JobStatus,
+  LibraryJob,
   ServerConfig,
   SummaryStreamEvent,
 } from "./types";
@@ -19,6 +20,10 @@ function buildHeaders(config: ServerConfig, extras?: Record<string, string>) {
 
   if (config.deviceId.trim()) {
     headers["X-Device-Id"] = config.deviceId.trim();
+  }
+
+  if (config.viewerId.trim()) {
+    headers["X-Viewer-Id"] = config.viewerId.trim();
   }
 
   return headers;
@@ -84,11 +89,6 @@ async function request<T>(config: ServerConfig, pathname: string, init?: Request
   return payload as T;
 }
 
-export async function fetchJobs(config: ServerConfig): Promise<Job[]> {
-  const payload = await request<{ jobs: Job[] }>(config, "/api/jobs?limit=25");
-  return payload.jobs;
-}
-
 export async function fetchJob(config: ServerConfig, id: string): Promise<Job> {
   const payload = await request<{ job: Job }>(config, `/api/jobs/${id}`);
   return payload.job;
@@ -115,9 +115,20 @@ export async function createJob(
   });
 }
 
-export async function deleteJob(config: ServerConfig, id: string): Promise<{ deleted: boolean; job: Job }> {
-  return request<{ deleted: boolean; job: Job }>(config, `/api/jobs/${id}`, {
+export async function fetchLibrary(config: ServerConfig): Promise<LibraryJob[]> {
+  const payload = await request<{ jobs: LibraryJob[] }>(config, "/api/library?limit=50");
+  return payload.jobs;
+}
+
+export async function hideLibraryItem(config: ServerConfig, jobId: string): Promise<{ hidden: boolean }> {
+  return request<{ hidden: boolean }>(config, `/api/library/${jobId}`, {
     method: "DELETE",
+  });
+}
+
+export async function markLibraryItemPlayed(config: ServerConfig, jobId: string): Promise<{ updated: boolean }> {
+  return request<{ updated: boolean }>(config, `/api/library/${jobId}/played`, {
+    method: "POST",
   });
 }
 

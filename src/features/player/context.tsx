@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { getPlayableAudioUrl } from "../../api";
 import type { Job } from "../../types";
-import { useJobsList } from "../jobs/hooks";
+import { useLibraryList } from "../jobs/hooks";
 import { useServerConfig } from "../settings/context";
 import { loadPlaybackProgress, savePlaybackProgress } from "./storage";
 
@@ -95,7 +95,7 @@ function findNewReadyJob(jobs: Job[], knownReadyJobIds: Set<string>) {
 
 export function PlayerProvider({ children }: { children: ReactNode }) {
   const { serverConfig } = useServerConfig();
-  const jobsQuery = useJobsList();
+  const jobsQuery = useLibraryList();
   const [activeJob, setActiveJobState] = useState<Job | null>(null);
   const [queue, setQueueState] = useState<Job[]>([]);
   const playableAudioUrl = getPlayableAudioUrl(activeJob, serverConfig);

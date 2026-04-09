@@ -66,4 +66,10 @@ export type ServerConfig = {
   baseUrl: string;
   authToken: string;
   deviceId: string;
+  viewerId: string;
+};
+
+export type LibraryJob = Job & {
+  libraryCreatedAt: string;
+  lastPlayedAt: string | null;
 };

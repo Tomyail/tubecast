@@ -5,7 +5,7 @@ import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import type { RootStackParamList } from "../app/navigation/types";
 import JobCard from "../components/JobCard";
 import Screen from "../components/Screen";
-import { useDeleteJob, useJobsList } from "../features/jobs/hooks";
+import { useHideLibraryItem, useLibraryList } from "../features/jobs/hooks";
 import type { JobStatus } from "../types";
 
 type LibraryFilter = "all" | JobStatus;
@@ -20,8 +20,8 @@ const FILTERS: Array<{ key: LibraryFilter; label: string }> = [
 
 export default function LibraryScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const jobsQuery = useJobsList();
-  const deleteJobMutation = useDeleteJob();
+  const jobsQuery = useLibraryList();
+  const hideLibraryItemMutation = useHideLibraryItem();
   const [filter, setFilter] = useState<LibraryFilter>("all");
   const filteredJobs = useMemo(() => {
     const jobs = jobsQuery.data ?? [];
@@ -61,21 +61,21 @@ export default function LibraryScreen() {
               <View style={styles.footer}>
                 <Text style={styles.footerText}>{job.sourceUrl}</Text>
                 <Pressable
-                  disabled={deleteJobMutation.isPending}
+                  disabled={hideLibraryItemMutation.isPending}
                   onPress={() => {
-                    Alert.alert("删除任务？", "这会删除任务记录和对应音频文件。", [
+                    Alert.alert("移出列表？", "任务记录和音频文件不会被删除，只从你的列表中移除。", [
                       { text: "取消", style: "cancel" },
                       {
-                        text: "删除",
+                        text: "移出",
                         style: "destructive",
                         onPress: () => {
-                          void deleteJobMutation.mutateAsync(job.id);
+                          void hideLibraryItemMutation.mutateAsync(job.id);
                         },
                       },
                     ]);
                   }}
                 >
-                  <Text style={styles.deleteText}>删除</Text>
+                  <Text style={styles.deleteText}>移出列表</Text>
                 </Pressable>
               </View>
             )}

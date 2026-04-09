@@ -7,7 +7,7 @@ import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, TextInput, View 
 import type { RootStackParamList, RootTabParamList } from "../app/navigation/types";
 import JobCard from "../components/JobCard";
 import Screen from "../components/Screen";
-import { useCreateJob, useJobsList } from "../features/jobs/hooks";
+import { useCreateJob, useLibraryList } from "../features/jobs/hooks";
 import { usePlayer } from "../features/player/context";
 import { useServerConfig } from "../features/settings/context";
 
@@ -21,7 +21,7 @@ export default function HomeScreen() {
   const [sourceUrl, setSourceUrl] = useState("");
   const [clipboardUrl, setClipboardUrl] = useState("");
   const { hasServerConfig, normalizedBaseUrl } = useServerConfig();
-  const jobsQuery = useJobsList();
+  const jobsQuery = useLibraryList();
   const createJobMutation = useCreateJob();
   const { playJob } = usePlayer();
   const latestJob = jobsQuery.data?.[0] ?? null;
