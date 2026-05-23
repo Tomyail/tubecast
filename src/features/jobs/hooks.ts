@@ -63,7 +63,7 @@ export function useDownloadReadyJob(jobId: string | null) {
     setDownloadError(null);
   }, []);
 
-  return { downloadState, downloadError, retry };
+  return { downloadState, downloadError, retry, job };
 }
 
 export function useLibraryList() {

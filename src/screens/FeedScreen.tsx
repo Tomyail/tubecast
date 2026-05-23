@@ -4,7 +4,10 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import Screen from "../components/Screen";
 import { useSettings } from "../features/settings/context";
 import { useFeedVideos, useSubscribedChannels, useRemoveChannel } from "../features/youtubeFeed/hooks";
-import { useSubmitJob, useJobStatus } from "../features/jobs/hooks";
+import { useSubmitJob, useDownloadReadyJob } from "../features/jobs/hooks";
+import { usePlaylist } from "../features/playlist/context";
+import { usePlayer } from "../features/player/context";
+import type { Track } from "../features/playlist/storage";
 import type { FeedVideoWithStatus } from "../features/youtubeFeed/types";
 import type { RootStackParamList } from "../app/navigation/types";
 import { useState } from "react";
@@ -20,6 +23,8 @@ export default function FeedScreen() {
   const [submittedJobs, setSubmittedJobs] = useState<Record<string, string>>({});
   const removeChannel = useRemoveChannel();
   const submitJob = useSubmitJob();
+  const { tracks } = usePlaylist();
+  const { playTrack } = usePlayer();
 
   const filteredVideos = selectedChannel
     ? videos.filter((v) => v.channelId === selectedChannel)
@@ -127,8 +132,12 @@ export default function FeedScreen() {
             <VideoCard
               video={item}
               jobId={submittedJobs[item.videoId] ?? null}
+              allTracks={tracks}
               onConvert={handleConvert}
-              onPlay={(jobId) => navigation.navigate("Player", { jobId })}
+              onPlay={(track) => {
+                playTrack(track, tracks);
+                navigation.navigate("Player", { jobId: track.jobId });
+              }}
               isSubmitting={submitJob.isPending}
             />
           )}
@@ -145,21 +154,24 @@ export default function FeedScreen() {
 function VideoCard({
   video,
   jobId,
+  allTracks,
   onConvert,
   onPlay,
   isSubmitting,
 }: {
   video: FeedVideoWithStatus;
   jobId: string | null;
+  allTracks: Track[];
   onConvert: (v: FeedVideoWithStatus) => void;
-  onPlay: (jobId: string) => void;
+  onPlay: (track: Track) => void;
   isSubmitting: boolean;
 }) {
-  const { data: job } = useJobStatus(jobId);
+  const { downloadState, job } = useDownloadReadyJob(jobId);
+  const track = jobId ? allTracks.find((t) => t.jobId === jobId) ?? null : null;
 
   const status = jobId
-    ? job?.status === "ready" ? "ready"
-    : job?.status === "failed" ? "failed"
+    ? track !== null ? "ready"
+    : job?.status === "failed" || downloadState === "error" ? "failed"
     : "converting"
     : video.status;
 
@@ -183,10 +195,10 @@ function VideoCard({
           <ActivityIndicator size="small" />
         </View>
       )}
-      {status === "ready" && jobId && (
+      {status === "ready" && track && (
         <Pressable
           style={[styles.actionButton, styles.playButton]}
-          onPress={() => onPlay(jobId)}
+          onPress={() => onPlay(track)}
         >
           <Text style={styles.actionText}>Play</Text>
         </Pressable>
