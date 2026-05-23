@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { PanResponder, Pressable, StyleSheet, Text, View } from "react-native";
+import { Linking, PanResponder, Pressable, StyleSheet, Text, View } from "react-native";
 import Screen from "../components/Screen";
 import { usePlayer } from "../features/player/context";
 
@@ -33,7 +33,13 @@ export default function PlayerScreen() {
   return (
     <Screen>
       <View style={styles.container}>
-        <Text style={styles.title} numberOfLines={2}>{activeTrack.title}</Text>
+        <Pressable onPress={() => {
+          const t = Math.floor(currentTime);
+          const url = `${activeTrack.sourceUrl}${activeTrack.sourceUrl.includes("?") ? "&" : "?"}t=${t}`;
+          Linking.openURL(url);
+        }}>
+          <Text style={styles.title} numberOfLines={2}>{activeTrack.title}</Text>
+        </Pressable>
         <Text style={styles.time}>
           {formatTime(currentTime)} / {formatTime(duration)}
         </Text>
