@@ -35,7 +35,11 @@ export function PlaylistProvider({ children }: { children: ReactNode }) {
   const addTrack = useCallback(async (track: Track) => {
     await saveTrack(track);
     const updated = await addTrackToPlaylist(track.id);
-    setTracks((prev) => [...prev, track]);
+    setTracks((prev) =>
+      prev.some((t) => t.id === track.id)
+        ? prev.map((t) => (t.id === track.id ? track : t))
+        : [...prev, track]
+    );
     setPlaylist(updated);
   }, []);
 
