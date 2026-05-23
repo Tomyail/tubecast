@@ -4,7 +4,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import Screen from "../components/Screen";
 import { useSettings } from "../features/settings/context";
 import { useFeedVideos, useSubscribedChannels, useRemoveChannel } from "../features/youtubeFeed/hooks";
-import { useSubmitJob } from "../features/jobs/hooks";
+import { useSubmitJob, useJobStatus } from "../features/jobs/hooks";
 import type { FeedVideoWithStatus } from "../features/youtubeFeed/types";
 import type { RootStackParamList } from "../app/navigation/types";
 import { useState } from "react";
@@ -17,6 +17,7 @@ export default function FeedScreen() {
   const { data: videos = [], isLoading, error, refetch } = useFeedVideos(settings.youtubeApiKey || null);
   const [selectedChannel, setSelectedChannel] = useState<string | null>(null);
   const [showAddChannel, setShowAddChannel] = useState(false);
+  const [submittedJobs, setSubmittedJobs] = useState<Record<string, string>>({});
   const removeChannel = useRemoveChannel();
   const submitJob = useSubmitJob();
 
@@ -26,8 +27,8 @@ export default function FeedScreen() {
 
   const handleConvert = async (video: FeedVideoWithStatus) => {
     try {
-      await submitJob.mutateAsync(video.watchUrl);
-      refetch();
+      const result = await submitJob.mutateAsync(video.watchUrl);
+      setSubmittedJobs((prev) => ({ ...prev, [video.videoId]: result.id }));
     } catch (err: any) {
       Alert.alert("Error", err.message);
     }
@@ -125,10 +126,9 @@ export default function FeedScreen() {
           renderItem={({ item }) => (
             <VideoCard
               video={item}
+              jobId={submittedJobs[item.videoId] ?? null}
               onConvert={handleConvert}
-              onPlay={(video) => {
-                if (video.jobId) navigation.navigate("Player", { jobId: video.jobId });
-              }}
+              onPlay={(jobId) => navigation.navigate("Player", { jobId })}
               isSubmitting={submitJob.isPending}
             />
           )}
@@ -144,22 +144,32 @@ export default function FeedScreen() {
 
 function VideoCard({
   video,
+  jobId,
   onConvert,
   onPlay,
   isSubmitting,
 }: {
   video: FeedVideoWithStatus;
+  jobId: string | null;
   onConvert: (v: FeedVideoWithStatus) => void;
-  onPlay: (v: FeedVideoWithStatus) => void;
+  onPlay: (jobId: string) => void;
   isSubmitting: boolean;
 }) {
+  const { data: job } = useJobStatus(jobId);
+
+  const status = jobId
+    ? job?.status === "ready" ? "ready"
+    : job?.status === "failed" ? "failed"
+    : "converting"
+    : video.status;
+
   return (
     <View style={styles.card}>
       <View style={styles.cardContent}>
         <Text style={styles.cardTitle} numberOfLines={2}>{video.title}</Text>
         <Text style={styles.cardMeta}>{video.channelTitle} · {formatRelativeTime(video.publishedAt)}</Text>
       </View>
-      {video.status === "new" && (
+      {status === "new" && (
         <Pressable
           style={[styles.actionButton, styles.convertButton, isSubmitting && styles.disabled]}
           onPress={() => onConvert(video)}
@@ -168,17 +178,25 @@ function VideoCard({
           <Text style={styles.actionText}>Convert</Text>
         </Pressable>
       )}
-      {video.status === "converting" && (
+      {status === "converting" && (
         <View style={styles.actionButton}>
           <ActivityIndicator size="small" />
         </View>
       )}
-      {video.status === "ready" && video.jobId && (
+      {status === "ready" && jobId && (
         <Pressable
           style={[styles.actionButton, styles.playButton]}
-          onPress={() => onPlay(video)}
+          onPress={() => onPlay(jobId)}
         >
           <Text style={styles.actionText}>Play</Text>
+        </Pressable>
+      )}
+      {status === "failed" && (
+        <Pressable
+          style={[styles.actionButton, styles.convertButton]}
+          onPress={() => onConvert(video)}
+        >
+          <Text style={styles.actionText}>Retry</Text>
         </Pressable>
       )}
     </View>
