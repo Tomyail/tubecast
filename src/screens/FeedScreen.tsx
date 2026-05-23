@@ -67,6 +67,9 @@ export default function FeedScreen() {
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyTitle}>No Subscriptions</Text>
           <Text style={styles.emptyText}>Add a YouTube channel to start browsing.</Text>
+          <Pressable style={styles.addChannelButton} onPress={() => setShowAddChannel(true)}>
+            <Text style={styles.addChannelButtonText}>+ Add Channel</Text>
+          </Pressable>
         </View>
       </Screen>
     );
@@ -217,4 +220,6 @@ const styles = StyleSheet.create({
   playButton: { backgroundColor: "#4CAF50" },
   actionText: { color: "#fff", fontSize: 13, fontWeight: "600" },
   disabled: { opacity: 0.5 },
+  addChannelButton: { marginTop: 20, backgroundColor: "#FF6B35", paddingHorizontal: 28, paddingVertical: 12, borderRadius: 8 },
+  addChannelButtonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
 });
