@@ -7,9 +7,9 @@ import { usePlayer } from "../features/player/context";
 
 export default function MiniPlayer() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { activeJob, currentTime, duration, isPlaying, togglePlayback } = usePlayer();
+  const { activeTrack, currentTime, duration, isPlaying, togglePlayback } = usePlayer();
 
-  if (!activeJob) {
+  if (!activeTrack) {
     return null;
   }
 
@@ -18,11 +18,11 @@ export default function MiniPlayer() {
       <View style={styles.card}>
         <Pressable
           style={styles.tapArea}
-          onPress={() => navigation.navigate("Player", { jobId: activeJob.id })}
+          onPress={() => navigation.navigate("Player", { jobId: activeTrack.jobId })}
         >
         <View style={styles.textWrap}>
           <Text style={styles.title} numberOfLines={1}>
-            {activeJob.title || activeJob.sourceUrl}
+            {activeTrack.title || activeTrack.sourceUrl}
           </Text>
           <Text style={styles.meta} numberOfLines={1}>
             {formatDuration(currentTime)} / {formatDuration(duration)}

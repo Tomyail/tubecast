@@ -1,358 +1,146 @@
 import { setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
+import { Directory, File, Paths } from "expo-file-system";
 import type { ReactNode } from "react";
-import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { getPlayableAudioUrl } from "../../api";
-import type { Job } from "../../types";
-import { useLibraryList } from "../jobs/hooks";
-import { useServerConfig } from "../settings/context";
-import { loadPlaybackProgress, savePlaybackProgress } from "./storage";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import type { Track } from "../playlist/storage";
+import { usePlaylist } from "../playlist/context";
 
 type PlayerContextValue = {
-  activeJob: Job | null;
-  queue: Job[];
-  isLoaded: boolean;
+  activeTrack: Track | null;
+  queue: Track[];
   isPlaying: boolean;
   isBuffering: boolean;
   currentTime: number;
   duration: number;
-  playbackProgress: number;
-  setActiveJob: (job: Job | null, queue?: Job[]) => void;
-  playJob: (job: Job, queue?: Job[]) => void;
+  playTrack: (track: Track, queue?: Track[]) => void;
   togglePlayback: () => void;
   seekTo: (seconds: number) => void;
-  seekBy: (deltaSeconds: number) => void;
   playNext: () => void;
   playPrevious: () => void;
 };
 
 const PlayerContext = createContext<PlayerContextValue | null>(null);
-type PendingAutoPlay = {
-  jobId: string;
-  playbackKey: string | null;
-} | null;
+const PROGRESS_KEY = "player_progress_";
+const SAVE_INTERVAL = 5000;
 
-function getPlaybackProgressKey(job: Job | null) {
-  if (!job) {
-    return null;
+function resolveTrackUri(track: Track): string {
+  const filename = track.localFilename || decodeURIComponent(track.localPath.split("/").pop() || "");
+  if (filename) {
+    const file = new File(new Directory(Paths.document, "audio"), filename);
+    if (file.exists) return file.uri;
   }
-
-  return job.sourceKey || job.sourceId || job.sourceUrl || job.id;
-}
-
-function isMissingNativeSharedObjectError(error: unknown) {
-  return error instanceof Error && "code" in error && error.code === "ERR_NATIVE_SHARED_OBJECT_NOT_FOUND";
-}
-
-function safeClearLockScreenControls(player: ReturnType<typeof useAudioPlayer>) {
-  try {
-    player.clearLockScreenControls();
-  } catch (error) {
-    if (!isMissingNativeSharedObjectError(error)) {
-      throw error;
-    }
-  }
-}
-
-function safeSetActiveForLockScreen(
-  player: ReturnType<typeof useAudioPlayer>,
-  metadata: Parameters<ReturnType<typeof useAudioPlayer>["setActiveForLockScreen"]>[1],
-) {
-  try {
-    player.setActiveForLockScreen(true, metadata);
-  } catch (error) {
-    if (!isMissingNativeSharedObjectError(error)) {
-      throw error;
-    }
-  }
-}
-
-function findNextReadyJob(queue: Job[], activeJobId: string) {
-  const currentIndex = queue.findIndex((job) => job.id === activeJobId);
-  if (currentIndex < 0) {
-    return null;
-  }
-
-  return queue.slice(currentIndex + 1).find((job) => job.status === "ready") ?? null;
-}
-
-function findPreviousReadyJob(queue: Job[], activeJobId: string) {
-  const currentIndex = queue.findIndex((job) => job.id === activeJobId);
-  if (currentIndex <= 0) {
-    return null;
-  }
-
-  const previousReadyJobs = queue.slice(0, currentIndex).filter((job) => job.status === "ready");
-  return previousReadyJobs[previousReadyJobs.length - 1] ?? null;
-}
-
-function getReadyJobIds(jobs: Job[]) {
-  return new Set(jobs.filter((job) => job.status === "ready").map((job) => job.id));
-}
-
-function findNewReadyJob(jobs: Job[], knownReadyJobIds: Set<string>) {
-  return jobs.find((job) => job.status === "ready" && !knownReadyJobIds.has(job.id)) ?? null;
+  return track.localPath;
 }
 
 export function PlayerProvider({ children }: { children: ReactNode }) {
-  const { serverConfig } = useServerConfig();
-  const jobsQuery = useLibraryList();
-  const [activeJob, setActiveJobState] = useState<Job | null>(null);
-  const [queue, setQueueState] = useState<Job[]>([]);
-  const playableAudioUrl = getPlayableAudioUrl(activeJob, serverConfig);
-  const player = useAudioPlayer(playableAudioUrl, {
-    updateInterval: 500,
-    keepAudioSessionActive: true,
-  });
+  const { tracks, incrementPlayCount } = usePlaylist();
+  const [activeTrack, setActiveTrack] = useState<Track | null>(null);
+  const [queue, setQueue] = useState<Track[]>([]);
+  const player = useAudioPlayer("");
   const status = useAudioPlayerStatus(player);
-  const lastPersistedSecondRef = useRef(-1);
-  const restoredPlaybackKeyRef = useRef<string | null>(null);
-  const handledFinishedJobIdRef = useRef<string | null>(null);
-  const hasHydratedReadyJobsRef = useRef(false);
-  const knownReadyJobIdsRef = useRef<Set<string>>(new Set());
-  const pendingAutoPlayRef = useRef<PendingAutoPlay>(null);
-  const playbackProgressKey = getPlaybackProgressKey(activeJob);
+  const lastSaveRef = useRef(0);
+  const playRequestRef = useRef(0);
 
-  function setPendingAutoPlay(job: Job | null) {
-    pendingAutoPlayRef.current = job
-      ? { jobId: job.id, playbackKey: getPlaybackProgressKey(job) }
-      : null;
-  }
+  const isPlaying = status?.playing ?? false;
+  const isBuffering = status?.isBuffering ?? false;
+  const currentTime = status?.currentTime ?? 0;
+  const duration = status?.duration ?? 0;
 
-  function shouldAutoPlayCurrentJob(job: Job | null, currentPlaybackKey: string | null) {
-    return !!job &&
-      pendingAutoPlayRef.current?.jobId === job.id &&
-      pendingAutoPlayRef.current?.playbackKey === currentPlaybackKey;
-  }
-
-  function clearPendingAutoPlay() {
-    pendingAutoPlayRef.current = null;
-  }
-
-  function setCurrentJob(job: Job | null, nextQueue?: Job[], options?: { autoPlay?: boolean }) {
-    if (nextQueue) {
-      setQueueState(nextQueue);
-    }
-
-    if (options?.autoPlay) {
-      setPendingAutoPlay(job);
-    } else {
-      clearPendingAutoPlay();
-    }
-
-    setActiveJobState(job);
-  }
-
+  // Save progress periodically
   useEffect(() => {
-    void setAudioModeAsync({
+    if (!activeTrack || !isPlaying) return;
+    const now = Date.now();
+    if (now - lastSaveRef.current < SAVE_INTERVAL) return;
+    lastSaveRef.current = now;
+    AsyncStorage.setItem(`${PROGRESS_KEY}${activeTrack.id}`, JSON.stringify({ position: currentTime }));
+  }, [activeTrack, currentTime, isPlaying]);
+
+  // Auto-advance on completion
+  useEffect(() => {
+    if (!activeTrack || !status) return;
+    if (status.didJustFinish) {
+      incrementPlayCount(activeTrack.id);
+      playNext();
+    }
+  }, [status?.didJustFinish]);
+
+  const playTrack = useCallback(async (track: Track, newQueue?: Track[]) => {
+    const requestId = ++playRequestRef.current;
+    if (newQueue) setQueue(newQueue);
+    setActiveTrack(track);
+
+    // Resume from saved position
+    let position = 0;
+    try {
+      const raw = await AsyncStorage.getItem(`${PROGRESS_KEY}${track.id}`);
+      if (raw) position = JSON.parse(raw).position || 0;
+    } catch {}
+
+    await setAudioModeAsync({
       playsInSilentMode: true,
       shouldPlayInBackground: true,
       interruptionMode: "doNotMix",
     });
-  }, []);
+    if (requestId !== playRequestRef.current) return;
 
-  useEffect(() => {
-    const jobs = jobsQuery.data;
-    if (!jobs) {
-      return;
-    }
+    try { player.pause(); } catch {}
+    try { player.clearLockScreenControls(); } catch {}
 
-    setQueueState(jobs);
-    const nextReadyJobIds = getReadyJobIds(jobs);
+    player.replace(resolveTrackUri(track));
+    if (requestId !== playRequestRef.current) return;
 
-    if (!hasHydratedReadyJobsRef.current) {
-      hasHydratedReadyJobsRef.current = true;
-      knownReadyJobIdsRef.current = nextReadyJobIds;
-      return;
-    }
-
-    const newReadyJob = findNewReadyJob(jobs, knownReadyJobIdsRef.current);
-    knownReadyJobIdsRef.current = nextReadyJobIds;
-
-    if (!newReadyJob || status.playing || status.isBuffering) {
-      return;
-    }
-
-    setCurrentJob(newReadyJob, undefined, { autoPlay: true });
-  }, [jobsQuery.data, status.isBuffering, status.playing]);
-
-  useEffect(() => {
-    if (!playableAudioUrl) {
-      player.pause();
-      safeClearLockScreenControls(player);
-      return;
-    }
-
-    safeSetActiveForLockScreen(player, {
-      title: activeJob?.title || "YT Audio",
-      artist: activeJob?.channelName || "yt-audio",
-      artworkUrl: activeJob?.thumbnailUrl || undefined,
+    player.setActiveForLockScreen(true, {
+      title: track.title || "Untitled",
+      artist: "YT Audio",
+      artworkUrl: track.thumbnailUrl || undefined,
+    }, {
+      showSeekForward: true,
+      showSeekBackward: true,
     });
+    if (position > 0) player.seekTo(position);
+    if (requestId !== playRequestRef.current) return;
+    player.play();
+  }, [player]);
 
-    return () => {
-      safeClearLockScreenControls(player);
-    };
-  }, [activeJob, playableAudioUrl, player]);
+  const togglePlayback = useCallback(() => {
+    if (isPlaying) player.pause();
+    else player.play();
+  }, [player, isPlaying]);
 
-  useEffect(() => {
-    restoredPlaybackKeyRef.current = null;
-    lastPersistedSecondRef.current = -1;
-  }, [playbackProgressKey]);
+  const seekTo = useCallback((seconds: number) => {
+    player.seekTo(seconds);
+  }, [player]);
 
-  useEffect(() => {
-    if (!playableAudioUrl || !playbackProgressKey || !status.isLoaded) {
-      return;
+  const currentIndex = useMemo(() => {
+    if (!activeTrack) return -1;
+    return queue.findIndex((t) => t.id === activeTrack.id);
+  }, [activeTrack, queue]);
+
+  const playNext = useCallback(() => {
+    if (currentIndex < queue.length - 1) {
+      playTrack(queue[currentIndex + 1]);
     }
+  }, [currentIndex, queue, playTrack]);
 
-    if (restoredPlaybackKeyRef.current === playbackProgressKey) {
-      return;
+  const playPrevious = useCallback(() => {
+    if (currentTime > 3) {
+      player.seekTo(0);
+    } else if (currentIndex > 0) {
+      playTrack(queue[currentIndex - 1]);
     }
-
-    restoredPlaybackKeyRef.current = playbackProgressKey;
-    void loadPlaybackProgress(playbackProgressKey).then(async (savedPosition) => {
-      if (savedPosition <= 0) {
-        if (shouldAutoPlayCurrentJob(activeJob, playbackProgressKey)) {
-          player.play();
-          clearPendingAutoPlay();
-        }
-        return;
-      }
-
-      if (status.duration > 0 && savedPosition >= status.duration - 3) {
-        await savePlaybackProgress(playbackProgressKey, 0);
-      } else {
-        await player.seekTo(savedPosition);
-      }
-
-      if (shouldAutoPlayCurrentJob(activeJob, playbackProgressKey)) {
-        player.play();
-        clearPendingAutoPlay();
-      }
-    });
-  }, [activeJob?.id, playableAudioUrl, playbackProgressKey, player, status.duration, status.isLoaded]);
-
-  useEffect(() => {
-    if (!playbackProgressKey || !status.isLoaded) {
-      return;
-    }
-
-    if (status.didJustFinish) {
-      void savePlaybackProgress(playbackProgressKey, 0);
-      lastPersistedSecondRef.current = -1;
-      return;
-    }
-
-    const currentSecond = Math.floor(status.currentTime || 0);
-    if (currentSecond === lastPersistedSecondRef.current || currentSecond % 5 !== 0) {
-      return;
-    }
-
-    lastPersistedSecondRef.current = currentSecond;
-    void savePlaybackProgress(playbackProgressKey, currentSecond);
-  }, [playbackProgressKey, status.currentTime, status.didJustFinish, status.isLoaded]);
-
-  useEffect(() => {
-    if (!status.didJustFinish || !activeJob) {
-      handledFinishedJobIdRef.current = null;
-      return;
-    }
-
-    if (handledFinishedJobIdRef.current === activeJob.id) {
-      return;
-    }
-
-    handledFinishedJobIdRef.current = activeJob.id;
-
-    const nextReadyJob = findNextReadyJob(queue, activeJob.id);
-    if (nextReadyJob) {
-      setCurrentJob(nextReadyJob, undefined, { autoPlay: true });
-    }
-  }, [activeJob, queue, status.didJustFinish]);
+  }, [currentIndex, queue, playTrack, currentTime, player]);
 
   const value = useMemo<PlayerContextValue>(() => ({
-    activeJob,
-    queue,
-    isLoaded: status.isLoaded,
-    isPlaying: status.playing,
-    isBuffering: status.isBuffering,
-    currentTime: status.currentTime || 0,
-    duration: status.duration || activeJob?.durationSeconds || 0,
-    playbackProgress:
-      status.duration && status.duration > 0
-        ? Math.min((status.currentTime || 0) / status.duration, 1)
-        : 0,
-    setActiveJob: (job, nextQueue) => {
-      setCurrentJob(job, nextQueue);
-    },
-    playJob: (job, nextQueue) => {
-      setCurrentJob(job, nextQueue, { autoPlay: true });
-    },
-    togglePlayback: () => {
-      if (!playableAudioUrl) {
-        return;
-      }
-
-      if (status.playing) {
-        player.pause();
-        return;
-      }
-
-      player.play();
-    },
-    seekTo: (seconds) => {
-      if (!playableAudioUrl) {
-        return;
-      }
-
-      void player.seekTo(Math.max(0, seconds));
-    },
-    seekBy: (deltaSeconds) => {
-      if (!playableAudioUrl) {
-        return;
-      }
-
-      const nextTime = Math.max(0, (status.currentTime || 0) + deltaSeconds);
-      void player.seekTo(nextTime);
-    },
-    playNext: () => {
-      if (!activeJob) {
-        return;
-      }
-
-      const nextReadyJob = findNextReadyJob(queue, activeJob.id);
-      if (nextReadyJob) {
-        setCurrentJob(nextReadyJob);
-      }
-    },
-    playPrevious: () => {
-      if (!activeJob) {
-        return;
-      }
-
-      const previousReadyJob = findPreviousReadyJob(queue, activeJob.id);
-      if (previousReadyJob) {
-        setCurrentJob(previousReadyJob);
-      }
-    },
-  }), [
-    activeJob,
-    playableAudioUrl,
-    player,
-    queue,
-    status.currentTime,
-    status.duration,
-    status.isBuffering,
-    status.isLoaded,
-    status.playing,
-  ]);
+    activeTrack, queue, isPlaying, isBuffering, currentTime, duration,
+    playTrack, togglePlayback, seekTo, playNext, playPrevious,
+  }), [activeTrack, queue, isPlaying, isBuffering, currentTime, duration, playTrack, togglePlayback, seekTo, playNext, playPrevious]);
 
   return <PlayerContext.Provider value={value}>{children}</PlayerContext.Provider>;
 }
 
 export function usePlayer() {
-  const context = useContext(PlayerContext);
-  if (!context) {
-    throw new Error("usePlayer must be used within PlayerProvider");
-  }
-
-  return context;
+  const ctx = useContext(PlayerContext);
+  if (!ctx) throw new Error("usePlayer must be used within PlayerProvider");
+  return ctx;
 }

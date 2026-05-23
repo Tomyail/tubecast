@@ -4,7 +4,8 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
 import type { RootStackParamList, RootTabParamList } from "./types";
 import HomeScreen from "../../screens/HomeScreen";
-import LibraryScreen from "../../screens/LibraryScreen";
+import FeedScreen from "../../screens/FeedScreen";
+import PlaylistScreen from "../../screens/PlaylistScreen";
 import PlayerScreen from "../../screens/PlayerScreen";
 import SettingsScreen from "../../screens/SettingsScreen";
 import MiniPlayer from "../../components/MiniPlayer";
@@ -30,9 +31,10 @@ function Tabs() {
           },
         }}
       >
-        <Tab.Screen name="Home" component={HomeScreen} options={{ title: "首页" }} />
-        <Tab.Screen name="Library" component={LibraryScreen} options={{ title: "媒体库" }} />
-        <Tab.Screen name="Settings" component={SettingsScreen} options={{ title: "设置" }} />
+        <Tab.Screen name="Home" component={HomeScreen} options={{ title: "Home" }} />
+        <Tab.Screen name="Feed" component={FeedScreen} options={{ title: "Feed" }} />
+        <Tab.Screen name="Playlist" component={PlaylistScreen} options={{ title: "Playlist" }} />
+        <Tab.Screen name="Settings" component={SettingsScreen} options={{ title: "Settings" }} />
       </Tab.Navigator>
       <MiniPlayer />
     </View>
@@ -58,17 +60,13 @@ export default function RootNavigator() {
       <Stack.Navigator
         screenOptions={{
           headerShadowVisible: false,
-          headerStyle: {
-            backgroundColor: "#fff9f3",
-          },
+          headerStyle: { backgroundColor: "#fff9f3" },
           headerTintColor: "#241a12",
-          contentStyle: {
-            backgroundColor: "#f4ede2",
-          },
+          contentStyle: { backgroundColor: "#f4ede2" },
         }}
       >
         <Stack.Screen name="Tabs" component={Tabs} options={{ headerShown: false }} />
-        <Stack.Screen name="Player" component={PlayerScreen} options={{ title: "播放" }} />
+        <Stack.Screen name="Player" component={PlayerScreen} options={{ title: "Now Playing" }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

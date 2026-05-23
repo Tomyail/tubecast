@@ -1,113 +1,82 @@
 import { useState } from "react";
 import { Alert, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import Screen from "../components/Screen";
-import { useServerConfig } from "../features/settings/context";
+import { useSettings } from "../features/settings/context";
+import { getAllTracks } from "../features/playlist/storage";
 
 export default function SettingsScreen() {
-  const { isLoaded, normalizedBaseUrl, serverConfig, updateServerConfig } = useServerConfig();
-  const [baseUrl, setBaseUrl] = useState(serverConfig.baseUrl);
-  const [authToken, setAuthToken] = useState(serverConfig.authToken);
+  const { settings, updateSettings } = useSettings();
+  const [serverUrl, setServerUrl] = useState(settings.serverUrl);
+  const [authToken, setAuthToken] = useState(settings.authToken);
+  const [youtubeApiKey, setYoutubeApiKey] = useState(settings.youtubeApiKey);
+  const [storageInfo, setStorageInfo] = useState<string>("");
+
+  const handleSave = async () => {
+    await updateSettings({ serverUrl, authToken, youtubeApiKey });
+    Alert.alert("Saved", "Settings updated");
+  };
+
+  const checkStorage = async () => {
+    const tracks = await getAllTracks();
+    const totalBytes = tracks.reduce((sum, t) => sum + (t.fileSize || 0), 0);
+    setStorageInfo(`${tracks.length} tracks, ${formatFileSize(totalBytes)}`);
+  };
 
   return (
     <Screen>
-      <View style={styles.header}>
-        <Text style={styles.title}>设置</Text>
-        <Text style={styles.subtitle}>把后端连接配置从主流程挪出来，后续这里再补连通性检测和缓存管理。</Text>
-      </View>
-
-      <View style={styles.card}>
-        <Text style={styles.label}>Base URL</Text>
-        <TextInput
-          autoCapitalize="none"
-          autoCorrect={false}
-          keyboardType="url"
-          onChangeText={setBaseUrl}
-          placeholder="http://192.168.1.100:3000"
-          placeholderTextColor="#8b8478"
-          style={styles.input}
-          value={baseUrl}
-        />
-        <Text style={styles.label}>Bearer Token</Text>
-        <TextInput
-          autoCapitalize="none"
-          autoCorrect={false}
-          onChangeText={setAuthToken}
-          placeholder="Optional AUTH_TOKEN"
-          placeholderTextColor="#8b8478"
-          style={styles.input}
-          value={authToken}
-        />
-        <Pressable
-          disabled={!isLoaded}
-          style={styles.button}
-          onPress={() => {
-            void updateServerConfig({ baseUrl, authToken }).then(() => {
-              Alert.alert("已保存", "服务端配置已更新。");
-            });
-          }}
-        >
-          <Text style={styles.buttonText}>保存配置</Text>
-        </Pressable>
-        <Text style={styles.helperText}>当前生效地址：{normalizedBaseUrl || "未配置"}</Text>
-      </View>
+      <Text style={styles.title}>Settings</Text>
+      <Text style={styles.label}>Server URL</Text>
+      <TextInput
+        style={styles.input}
+        value={serverUrl}
+        onChangeText={setServerUrl}
+        placeholder="https://your-worker.workers.dev"
+        autoCapitalize="none"
+        autoCorrect={false}
+        keyboardType="url"
+      />
+      <Text style={styles.label}>Auth Token</Text>
+      <TextInput
+        style={styles.input}
+        value={authToken}
+        onChangeText={setAuthToken}
+        placeholder="Your auth token"
+        autoCapitalize="none"
+        autoCorrect={false}
+        secureTextEntry
+      />
+      <Text style={styles.label}>YouTube API Key</Text>
+      <TextInput
+        style={styles.input}
+        value={youtubeApiKey}
+        onChangeText={setYoutubeApiKey}
+        placeholder="Your YouTube Data API key"
+        autoCapitalize="none"
+        autoCorrect={false}
+      />
+      <Pressable style={styles.saveButton} onPress={handleSave}>
+        <Text style={styles.saveText}>Save</Text>
+      </Pressable>
+      <Pressable style={styles.storageButton} onPress={checkStorage}>
+        <Text style={styles.storageText}>Check Storage</Text>
+      </Pressable>
+      {storageInfo ? <Text style={styles.storageInfo}>{storageInfo}</Text> : null}
     </Screen>
   );
 }
 
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 const styles = StyleSheet.create({
-  header: {
-    gap: 6,
-  },
-  title: {
-    color: "#241a12",
-    fontSize: 28,
-    fontWeight: "800",
-  },
-  subtitle: {
-    color: "#6f6256",
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  card: {
-    backgroundColor: "#fff9f3",
-    borderColor: "#d8c9b8",
-    borderRadius: 24,
-    borderWidth: 1,
-    gap: 14,
-    padding: 18,
-  },
-  label: {
-    color: "#5f4c3f",
-    fontSize: 13,
-    fontWeight: "700",
-    textTransform: "uppercase",
-  },
-  input: {
-    backgroundColor: "#f6eee2",
-    borderColor: "#dac8b1",
-    borderRadius: 18,
-    borderWidth: 1,
-    color: "#1f1812",
-    fontSize: 16,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-  },
-  button: {
-    alignItems: "center",
-    backgroundColor: "#b65a36",
-    borderRadius: 18,
-    justifyContent: "center",
-    minHeight: 52,
-    paddingHorizontal: 18,
-  },
-  buttonText: {
-    color: "#fff7ef",
-    fontSize: 16,
-    fontWeight: "800",
-  },
-  helperText: {
-    color: "#6f6256",
-    fontSize: 13,
-    lineHeight: 19,
-  },
+  title: { fontSize: 24, fontWeight: "bold", marginBottom: 24 },
+  label: { fontSize: 14, fontWeight: "500", marginBottom: 4, color: "#555" },
+  input: { borderWidth: 1, borderColor: "#ccc", borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10, fontSize: 16, marginBottom: 16 },
+  saveButton: { backgroundColor: "#FF6B35", paddingVertical: 14, borderRadius: 8, alignItems: "center", marginBottom: 16 },
+  saveText: { color: "#fff", fontSize: 16, fontWeight: "600" },
+  storageButton: { backgroundColor: "#eee", paddingVertical: 12, borderRadius: 8, alignItems: "center" },
+  storageText: { fontSize: 14, color: "#555" },
+  storageInfo: { textAlign: "center", marginTop: 12, fontSize: 16, color: "#333" },
 });

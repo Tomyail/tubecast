@@ -33,6 +33,34 @@ export function normalizeBaseUrl(value: string) {
   return value.trim().replace(/\/+$/, "");
 }
 
+function mapJob(raw: Record<string, unknown>): Job {
+  return {
+    id: raw.id as string,
+    sourceUrl: (raw.sourceUrl ?? raw.source_url ?? "") as string,
+    sourceKey: (raw.sourceKey ?? raw.source_key ?? null) as string | null,
+    sourceId: (raw.sourceId ?? raw.source_id ?? null) as string | null,
+    title: (raw.title ?? null) as string | null,
+    channelName: null,
+    thumbnailUrl: (raw.thumbnailUrl ?? raw.thumbnail_url ?? null) as string | null,
+    durationSeconds: (raw.durationSeconds ?? raw.duration_seconds ?? null) as number | null,
+    status: (raw.status ?? "queued") as JobStatus,
+    summaryStatus: "idle",
+    summaryText: null,
+    summaryErrorMessage: null,
+    summaryUpdatedAt: null,
+    idempotencyKey: null,
+    audioPath: null,
+    audioHref: null,
+    audioUrl: null,
+    audioExpiresAt: (raw.audioExpiresAt ?? raw.audio_expires_at ?? null) as string | null,
+    audioDeletedAt: null,
+    errorMessage: (raw.errorMessage ?? raw.error_message ?? null) as string | null,
+    createdAt: (raw.createdAt ?? raw.created_at ?? "") as string,
+    updatedAt: (raw.updatedAt ?? raw.updated_at ?? "") as string,
+    filename: null,
+  };
+}
+
 function buildUrl(config: ServerConfig, pathname: string) {
   const baseUrl = normalizeBaseUrl(config.baseUrl);
   if (!baseUrl) {
@@ -90,8 +118,8 @@ async function request<T>(config: ServerConfig, pathname: string, init?: Request
 }
 
 export async function fetchJob(config: ServerConfig, id: string): Promise<Job> {
-  const payload = await request<{ job: Job }>(config, `/api/jobs/${id}`);
-  return payload.job;
+  const payload = await request<Record<string, unknown>>(config, `/api/jobs/${id}`);
+  return mapJob(payload);
 }
 
 export async function createJob(
@@ -106,13 +134,19 @@ export async function createJob(
     headers["Idempotency-Key"] = input.idempotencyKey.trim();
   }
 
-  return request<CreateJobResult>(config, "/api/jobs", {
+  const payload = await request<Record<string, unknown>>(config, "/api/jobs", {
     method: "POST",
     headers,
     body: JSON.stringify({
       sourceUrl: input.sourceUrl.trim(),
     }),
   });
+
+  return {
+    job: mapJob(payload),
+    created: payload.status === "queued",
+    reason: null,
+  };
 }
 
 export async function fetchLibrary(config: ServerConfig): Promise<LibraryJob[]> {

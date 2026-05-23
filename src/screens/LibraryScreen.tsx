@@ -3,12 +3,12 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useMemo, useState } from "react";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import type { RootStackParamList } from "../app/navigation/types";
-import JobCard from "../components/JobCard";
 import Screen from "../components/Screen";
 import { useHideLibraryItem, useLibraryList } from "../features/jobs/hooks";
-import type { JobStatus } from "../types";
+import type { JobResponse } from "../features/jobs/api";
+import { formatDuration } from "../api";
 
-type LibraryFilter = "all" | JobStatus;
+type LibraryFilter = "all" | JobResponse["status"];
 
 const FILTERS: Array<{ key: LibraryFilter; label: string }> = [
   { key: "all", label: "全部" },
@@ -25,7 +25,7 @@ export default function LibraryScreen() {
   const [filter, setFilter] = useState<LibraryFilter>("all");
   const filteredJobs = useMemo(() => {
     const jobs = jobsQuery.data ?? [];
-    return filter === "all" ? jobs : jobs.filter((job) => job.status === filter);
+    return filter === "all" ? jobs : jobs.filter((job: JobResponse) => job.status === filter);
   }, [filter, jobsQuery.data]);
 
   return (
@@ -50,14 +50,21 @@ export default function LibraryScreen() {
       </View>
 
       <View style={styles.list}>
-        {filteredJobs.map((job) => (
-          <JobCard
+        {filteredJobs.map((job: JobResponse) => (
+          <Pressable
             key={job.id}
-            job={job}
-            onPress={() => {
-              navigation.navigate("Player", { jobId: job.id });
-            }}
-            footer={(
+            style={styles.card}
+            onPress={() => navigation.navigate("Player", { jobId: job.id })}
+          >
+            <View style={styles.cardHeader}>
+              <View style={styles.textWrap}>
+                <Text style={styles.cardTitle} numberOfLines={1}>
+                  {job.title || job.sourceUrl}
+                </Text>
+                <Text style={styles.cardMeta} numberOfLines={1}>
+                  {formatDuration(job.durationSeconds)} · {job.status}
+                </Text>
+              </View>
               <View style={styles.footer}>
                 <Text style={styles.footerText}>{job.sourceUrl}</Text>
                 <Pressable
@@ -78,8 +85,8 @@ export default function LibraryScreen() {
                   <Text style={styles.deleteText}>移出列表</Text>
                 </Pressable>
               </View>
-            )}
-          />
+            </View>
+          </Pressable>
         ))}
         {!filteredJobs.length ? (
           <Text style={styles.empty}>
@@ -129,6 +136,33 @@ const styles = StyleSheet.create({
   },
   filterChipTextActive: {
     color: "#fff7ef",
+  },
+  card: {
+    backgroundColor: "#fff9f3",
+    borderColor: "#d8c9b8",
+    borderRadius: 22,
+    borderWidth: 1,
+    gap: 12,
+    padding: 16,
+  },
+  cardHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12,
+    justifyContent: "space-between",
+  },
+  textWrap: {
+    flex: 1,
+    gap: 4,
+  },
+  cardTitle: {
+    color: "#241a12",
+    fontSize: 16,
+    fontWeight: "800",
+  },
+  cardMeta: {
+    color: "#706353",
+    fontSize: 13,
   },
   footer: {
     alignItems: "center",

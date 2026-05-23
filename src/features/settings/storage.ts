@@ -1,55 +1,56 @@
+import * as SecureStore from "expo-secure-store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import type { ServerConfig } from "../../types";
 
-const SERVER_CONFIG_KEY = "ytAudio.serverConfig";
+declare const __DEV__: boolean;
 
-function createDeviceId() {
-  const randomPart = Math.random().toString(36).slice(2, 10);
-  const timestampPart = Date.now().toString(36);
-  return `anon-${timestampPart}-${randomPart}`;
-}
-
-function createViewerId() {
-  const randomPart = Math.random().toString(36).slice(2, 10);
-  const timestampPart = Date.now().toString(36);
-  return `viewer-${timestampPart}-${randomPart}`;
-}
-
-export const DEFAULT_SERVER_CONFIG: ServerConfig = {
-  baseUrl: "http://192.168.1.100:3000",
-  authToken: "",
-  deviceId: createDeviceId(),
-  viewerId: createViewerId(),
+const KEYS = {
+  serverUrl: "settings_serverUrl",
+  authToken: "settings_authToken",
+  deviceId: "settings_deviceId",
+  youtubeApiKey: "settings_youtubeApiKey",
 };
 
-export async function loadServerConfig() {
-  const raw = await AsyncStorage.getItem(SERVER_CONFIG_KEY);
-  if (!raw) {
-    return DEFAULT_SERVER_CONFIG;
-  }
+export async function getServerUrl(): Promise<string> {
+  const stored = await AsyncStorage.getItem(KEYS.serverUrl);
+  if (stored) return stored;
+  return __DEV__ ? process.env.EXPO_PUBLIC_DEV_SERVER_URL || "" : "";
+}
 
-  try {
-    const parsed = JSON.parse(raw) as Partial<ServerConfig>;
-    const needsViewerId = typeof parsed.viewerId !== "string" || !parsed.viewerId.trim();
-    const config = {
-      baseUrl: typeof parsed.baseUrl === "string" ? parsed.baseUrl : DEFAULT_SERVER_CONFIG.baseUrl,
-      authToken: typeof parsed.authToken === "string" ? parsed.authToken : DEFAULT_SERVER_CONFIG.authToken,
-      deviceId: typeof parsed.deviceId === "string" && parsed.deviceId.trim()
-        ? parsed.deviceId.trim()
-        : createDeviceId(),
-      viewerId: needsViewerId ? createViewerId() : (parsed.viewerId as string).trim(),
-    };
+export async function setServerUrl(url: string): Promise<void> {
+  await AsyncStorage.setItem(KEYS.serverUrl, url);
+}
 
-    if (needsViewerId) {
-      await saveServerConfig(config);
-    }
+export async function getAuthToken(): Promise<string> {
+  const stored = await SecureStore.getItemAsync(KEYS.authToken);
+  if (stored) return stored;
+  return __DEV__ ? process.env.EXPO_PUBLIC_DEV_AUTH_TOKEN || "" : "";
+}
 
-    return config;
-  } catch {
-    return DEFAULT_SERVER_CONFIG;
+export async function setAuthToken(token: string): Promise<void> {
+  if (token) {
+    await SecureStore.setItemAsync(KEYS.authToken, token);
+  } else {
+    await SecureStore.deleteItemAsync(KEYS.authToken);
   }
 }
 
-export async function saveServerConfig(config: ServerConfig) {
-  await AsyncStorage.setItem(SERVER_CONFIG_KEY, JSON.stringify(config));
+export async function getYouTubeApiKey(): Promise<string> {
+  return (await AsyncStorage.getItem(KEYS.youtubeApiKey)) || "";
+}
+
+export async function setYouTubeApiKey(key: string): Promise<void> {
+  if (key) {
+    await AsyncStorage.setItem(KEYS.youtubeApiKey, key);
+  } else {
+    await AsyncStorage.removeItem(KEYS.youtubeApiKey);
+  }
+}
+
+export async function getDeviceId(): Promise<string> {
+  let id = await AsyncStorage.getItem(KEYS.deviceId);
+  if (!id) {
+    id = `dev-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+    await AsyncStorage.setItem(KEYS.deviceId, id);
+  }
+  return id;
 }

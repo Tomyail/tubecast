@@ -1,70 +1,84 @@
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createJob, fetchJob, fetchLibrary, hideLibraryItem, isJobTerminal, markLibraryItemPlayed } from "../../api";
-import type { CreateJobResult, Job } from "../../types";
-import { useServerConfig } from "../settings/context";
+import { submitJob, getJob, fetchLibrary, hideLibraryItem } from "./api";
+import { downloadAndSaveTrack } from "./download";
+import { usePlaylist } from "../playlist/context";
 
-export function useJobDetail(jobId: string | null) {
-  const { serverConfig, hasServerConfig } = useServerConfig();
-
-  return useQuery({
-    queryKey: ["job", serverConfig, jobId],
-    queryFn: () => fetchJob(serverConfig, jobId as string),
-    enabled: hasServerConfig && !!jobId,
-    refetchInterval: (query) => {
-      const job = query.state.data;
-      return job && isJobTerminal(job.status) ? false : 2000;
-    },
+export function useSubmitJob() {
+  return useMutation({
+    mutationFn: (sourceUrl: string) => submitJob(sourceUrl),
   });
 }
 
-export function useCreateJob() {
-  const { serverConfig } = useServerConfig();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ sourceUrl }: { sourceUrl: string }) => createJob(serverConfig, {
-      sourceUrl,
-      idempotencyKey: `mobile-${Date.now()}`,
-    }),
-    onSuccess: async (result: CreateJobResult) => {
-      await queryClient.invalidateQueries({ queryKey: ["job", serverConfig, result.job.id] });
-      await queryClient.invalidateQueries({ queryKey: ["library", serverConfig] });
+export function useJobStatus(jobId: string | null) {
+  return useQuery({
+    queryKey: ["job", jobId],
+    queryFn: () => getJob(jobId!),
+    enabled: !!jobId,
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      if (!data) return 3000;
+      if (data.status === "ready" || data.status === "failed" || data.status === "expired") return false;
+      return 3000;
     },
+    staleTime: 0,
   });
+}
+
+export type DownloadState = "idle" | "downloading" | "done" | "error";
+
+export function useDownloadReadyJob(jobId: string | null) {
+  const { data: job } = useJobStatus(jobId);
+  const { addTrack } = usePlaylist();
+  const [downloadState, setDownloadState] = useState<DownloadState>("idle");
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+  const downloadedRef = useRef(false);
+
+  const doDownload = useCallback(async () => {
+    if (!job || job.status !== "ready" || downloadedRef.current) return;
+    downloadedRef.current = true;
+    setDownloadState("downloading");
+    setDownloadError(null);
+
+    try {
+      const track = await downloadAndSaveTrack(job);
+      await addTrack(track);
+      setDownloadState("done");
+    } catch (err: any) {
+      setDownloadState("error");
+      setDownloadError(err.message || "Download failed");
+      downloadedRef.current = false;
+    }
+  }, [job, addTrack]);
+
+  useEffect(() => {
+    if (job?.status === "ready" && !downloadedRef.current && downloadState !== "downloading") {
+      doDownload();
+    }
+  }, [job?.status, doDownload, downloadState]);
+
+  const retry = useCallback(() => {
+    downloadedRef.current = false;
+    setDownloadState("idle");
+    setDownloadError(null);
+  }, []);
+
+  return { downloadState, downloadError, retry };
 }
 
 export function useLibraryList() {
-  const { serverConfig, hasServerConfig } = useServerConfig();
-
   return useQuery({
-    queryKey: ["library", serverConfig],
-    queryFn: () => fetchLibrary(serverConfig),
-    enabled: hasServerConfig,
-    refetchInterval: 5000,
+    queryKey: ["library"],
+    queryFn: () => fetchLibrary(),
   });
 }
 
 export function useHideLibraryItem() {
-  const { serverConfig } = useServerConfig();
   const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: (jobId: string) => hideLibraryItem(serverConfig, jobId),
-    onSuccess: async (_, jobId) => {
-      await queryClient.invalidateQueries({ queryKey: ["library", serverConfig] });
-      queryClient.removeQueries({ queryKey: ["job", serverConfig, jobId] });
-    },
-  });
-}
-
-export function useMarkLibraryItemPlayed() {
-  const { serverConfig } = useServerConfig();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (jobId: string) => markLibraryItemPlayed(serverConfig, jobId),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["library", serverConfig] });
+    mutationFn: (jobId: string) => hideLibraryItem(jobId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["library"] });
     },
   });
 }

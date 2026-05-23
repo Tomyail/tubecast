@@ -4,6 +4,7 @@ import { useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SettingsProvider } from "../../features/settings/context";
+import { PlaylistProvider } from "../../features/playlist/context";
 import { PlayerProvider } from "../../features/player/context";
 
 export default function AppProviders({ children }: { children: ReactNode }) {
@@ -14,7 +15,9 @@ export default function AppProviders({ children }: { children: ReactNode }) {
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
           <SettingsProvider>
-            <PlayerProvider>{children}</PlayerProvider>
+            <PlaylistProvider>
+              <PlayerProvider>{children}</PlayerProvider>
+            </PlaylistProvider>
           </SettingsProvider>
         </QueryClientProvider>
       </SafeAreaProvider>
