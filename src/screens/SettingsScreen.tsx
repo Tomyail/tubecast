@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Alert, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, Linking, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import Screen from "../components/Screen";
 import { useSettings } from "../features/settings/context";
 import { getAllTracks } from "../features/playlist/storage";
@@ -54,6 +54,23 @@ export default function SettingsScreen() {
         autoCapitalize="none"
         autoCorrect={false}
       />
+      <Text style={styles.hint}>
+        Get a key by enabling{" "}
+        <Text
+          style={styles.link}
+          onPress={() => Linking.openURL("https://console.cloud.google.com/apis/library/youtube.googleapis.com")}
+        >
+          YouTube Data API v3
+        </Text>
+        {" "}in Google Cloud Console, then create credentials under{" "}
+        <Text
+          style={styles.link}
+          onPress={() => Linking.openURL("https://console.cloud.google.com/apis/credentials")}
+        >
+          APIs &amp; Services → Credentials
+        </Text>
+        .
+      </Text>
       <Pressable style={styles.saveButton} onPress={handleSave}>
         <Text style={styles.saveText}>Save</Text>
       </Pressable>
@@ -79,4 +96,6 @@ const styles = StyleSheet.create({
   storageButton: { backgroundColor: "#eee", paddingVertical: 12, borderRadius: 8, alignItems: "center" },
   storageText: { fontSize: 14, color: "#555" },
   storageInfo: { textAlign: "center", marginTop: 12, fontSize: 16, color: "#333" },
+  hint: { fontSize: 12, color: "#888", marginBottom: 16, lineHeight: 18 },
+  link: { color: "#FF6B35", textDecorationLine: "underline" },
 });
