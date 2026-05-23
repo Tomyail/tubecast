@@ -103,14 +103,22 @@ function SwipeableTrackItem({
         onPress={() => onPlay(track)}
       >
         <View style={styles.trackInfo}>
-          <Text style={[styles.trackTitle, isActive && styles.activeText]} numberOfLines={1}>
+          <Text
+            style={[styles.trackTitle, isActive && styles.activeText, track.playCount > 0 && !isActive && styles.playedTitle]}
+            numberOfLines={1}
+          >
             {track.title || "Untitled"}
           </Text>
           <Text style={styles.trackMeta}>
             {formatDuration(track.durationSeconds)} | {formatFileSize(track.fileSize)}
+            {track.playCount > 0 && !isActive && "  · listened"}
           </Text>
         </View>
-        {isActive && isPlaying && <Text style={styles.playingIcon}>| |</Text>}
+        {isActive && isPlaying ? (
+          <Text style={styles.playingIcon}>| |</Text>
+        ) : !isActive && track.playCount === 0 ? (
+          <View style={styles.unplayedDot} />
+        ) : null}
       </Pressable>
     </Swipeable>
   );
@@ -139,6 +147,8 @@ const styles = StyleSheet.create({
   trackMeta: { fontSize: 13, color: "#888", marginTop: 2 },
   activeText: { color: "#FF6B35" },
   playingIcon: { fontSize: 14, color: "#FF6B35", fontWeight: "bold" },
+  playedTitle: { color: "#aaa" },
+  unplayedDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: "#FF6B35", marginLeft: 8 },
   separator: { height: StyleSheet.hairlineWidth, backgroundColor: "#eee" },
   deleteAction: { backgroundColor: "#FF3B30", justifyContent: "center", alignItems: "center", width: 80 },
   deleteActionText: { color: "#fff", fontWeight: "600", fontSize: 15 },
