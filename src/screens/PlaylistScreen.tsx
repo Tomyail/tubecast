@@ -132,7 +132,7 @@ function formatFileSize(bytes: number | null): string {
 const styles = StyleSheet.create({
   title: { fontSize: 24, fontWeight: "bold", marginBottom: 16 },
   empty: { color: "#999", fontSize: 16, textAlign: "center", marginTop: 40 },
-  trackItem: { flexDirection: "row", alignItems: "center", paddingVertical: 12, paddingHorizontal: 4, backgroundColor: "#fff" },
+  trackItem: { flexDirection: "row", alignItems: "center", paddingVertical: 12, paddingHorizontal: 4, backgroundColor: "#f4ede2" },
   activeTrack: { backgroundColor: "#FFF3EE", paddingHorizontal: 8 },
   trackInfo: { flex: 1 },
   trackTitle: { fontSize: 16, fontWeight: "500" },
