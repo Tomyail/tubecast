@@ -34,6 +34,7 @@ export default function PlayerScreen() {
     <Screen>
       <View style={styles.container}>
         <Pressable onPress={() => {
+          if (isPlaying) togglePlayback();
           const t = Math.floor(currentTime);
           const url = `${activeTrack.sourceUrl}${activeTrack.sourceUrl.includes("?") ? "&" : "?"}t=${t}`;
           Linking.openURL(url);
