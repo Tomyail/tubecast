@@ -1,21 +1,38 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Clipboard from "expo-clipboard";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import Screen from "../components/Screen";
-import { useSubmitJob, useDownloadReadyJob } from "../features/jobs/hooks";
+import { useSubmitJob, useDownloadReadyJob, useJobStatus } from "../features/jobs/hooks";
 import { useSettings } from "../features/settings/context";
+
+const PENDING_JOB_KEY = "pending_job_id";
 
 export default function HomeScreen() {
   const [url, setUrl] = useState("");
   const [jobId, setJobId] = useState<string | null>(null);
   const submit = useSubmitJob();
+  const { data: job } = useJobStatus(jobId);
   const { downloadState, downloadError, retry } = useDownloadReadyJob(jobId);
   const { settings } = useSettings();
+
+  useEffect(() => {
+    AsyncStorage.getItem(PENDING_JOB_KEY).then((id) => {
+      if (id) setJobId(id);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (downloadState === "done" || job?.status === "failed" || job?.status === "expired") {
+      AsyncStorage.removeItem(PENDING_JOB_KEY);
+    }
+  }, [downloadState, job?.status]);
 
   const handleSubmit = async () => {
     if (!url.trim()) return;
     try {
       const result = await submit.mutateAsync(url.trim());
+      await AsyncStorage.setItem(PENDING_JOB_KEY, result.id);
       setJobId(result.id);
     } catch (err: any) {
       Alert.alert("Error", err.message);
@@ -82,6 +99,18 @@ export default function HomeScreen() {
           <Pressable style={styles.retryButton} onPress={retry}>
             <Text style={styles.retryText}>Retry</Text>
           </Pressable>
+        </View>
+      )}
+
+      {job?.status === "failed" && downloadState === "idle" && (
+        <View style={styles.statusBox}>
+          <Text style={styles.errorText}>Conversion failed: {job.errorMessage ?? "Unknown error"}</Text>
+        </View>
+      )}
+
+      {job?.status === "expired" && downloadState === "idle" && (
+        <View style={styles.statusBox}>
+          <Text style={styles.errorText}>Audio has expired. Please submit the URL again.</Text>
         </View>
       )}
     </Screen>
