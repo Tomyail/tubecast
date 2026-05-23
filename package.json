@@ -21,13 +21,14 @@
     "expo-audio": "~55.0.8",
     "expo-clipboard": "~55.0.8",
     "expo-file-system": "^55.0.21",
+    "expo-modules-core": "55.0.14",
     "expo-secure-store": "^55.0.14",
     "expo-status-bar": "~55.0.4",
     "react": "19.2.0",
     "react-native": "0.83.2",
     "react-native-draggable-flatlist": "^4.0.3",
     "react-native-gesture-handler": "~2.30.0",
-    "react-native-reanimated": "^4.3.1",
+    "react-native-reanimated": "^3.16.7",
     "react-native-safe-area-context": "~5.6.2",
     "react-native-screens": "~4.23.0",
     "streamdown-rn": "^0.2.1"
@@ -37,5 +38,10 @@
     "typescript": "~5.9.2",
     "vitest": "^3.2.4"
   },
-  "private": true
+  "private": true,
+  "pnpm": {
+    "patchedDependencies": {
+      "expo-modules-core@55.0.14": "patches/expo-modules-core@55.0.14.patch"
+    }
+  }
 }

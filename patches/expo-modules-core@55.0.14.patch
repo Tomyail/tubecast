@@ -1,0 +1,11 @@
+diff --git a/ios/Worklets/EXJavaScriptSerializable.mm b/ios/Worklets/EXJavaScriptSerializable.mm
+index 1234567..abcdef0 100644
+--- a/ios/Worklets/EXJavaScriptSerializable.mm
++++ b/ios/Worklets/EXJavaScriptSerializable.mm
+@@ -48,6 +48,8 @@ EXSerializableValueType toObjCValueType(worklets::Serializable::ValueType type)
+     case worklets::Serializable::ValueType::CustomType:
+       return EXSerializableValueTypeCustom;
++    default:
++      return EXSerializableValueTypeUndefined;
+   }
+ }
