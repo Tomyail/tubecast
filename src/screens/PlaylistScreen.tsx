@@ -1,5 +1,6 @@
 import { useRef } from "react";
-import { Alert, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import DraggableFlatList, { ScaleDecorator, RenderItemParams } from "react-native-draggable-flatlist";
 import { Swipeable } from "react-native-gesture-handler";
 import { Directory, File, Paths } from "expo-file-system";
 import Screen from "../components/Screen";
@@ -8,7 +9,7 @@ import { usePlayer } from "../features/player/context";
 import type { Track } from "../features/playlist/storage";
 
 export default function PlaylistScreen() {
-  const { tracks, deleteTrack } = usePlaylist();
+  const { tracks, deleteTrack, reorderTracks } = usePlaylist();
   const { playTrack, activeTrack, isPlaying } = usePlayer();
 
   const handlePlay = (track: Track) => {
@@ -39,16 +40,20 @@ export default function PlaylistScreen() {
     );
   };
 
-  const renderItem = ({ item }: { item: Track }) => {
-    const isActive = activeTrack?.id === item.id;
+  const renderItem = ({ item, drag, isActive }: RenderItemParams<Track>) => {
+    const isCurrentTrack = activeTrack?.id === item.id;
     return (
-      <SwipeableTrackItem
-        track={item}
-        isActive={isActive}
-        isPlaying={isPlaying}
-        onPlay={handlePlay}
-        onDelete={handleDelete}
-      />
+      <ScaleDecorator>
+        <SwipeableTrackItem
+          track={item}
+          isActive={isCurrentTrack}
+          isPlaying={isPlaying}
+          isDragging={isActive}
+          onPlay={handlePlay}
+          onDelete={handleDelete}
+          onDrag={drag}
+        />
+      </ScaleDecorator>
     );
   };
 
@@ -58,11 +63,13 @@ export default function PlaylistScreen() {
       {tracks.length === 0 ? (
         <Text style={styles.empty}>No tracks yet. Convert a YouTube URL to get started.</Text>
       ) : (
-        <FlatList
+        <DraggableFlatList
           data={tracks}
           keyExtractor={(t) => t.id}
           renderItem={renderItem}
+          onDragEnd={({ data }) => reorderTracks(data)}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
+          containerStyle={{ flex: 1 }}
         />
       )}
     </Screen>
@@ -73,14 +80,18 @@ function SwipeableTrackItem({
   track,
   isActive,
   isPlaying,
+  isDragging,
   onPlay,
   onDelete,
+  onDrag,
 }: {
   track: Track;
   isActive: boolean;
   isPlaying: boolean;
+  isDragging: boolean;
   onPlay: (t: Track) => void;
   onDelete: (t: Track) => void;
+  onDrag: () => void;
 }) {
   const swipeRef = useRef<Swipeable>(null);
 
@@ -98,11 +109,13 @@ function SwipeableTrackItem({
 
   return (
     <Swipeable ref={swipeRef} renderRightActions={renderRightActions} overshootRight={false}>
-      <Pressable
-        style={[styles.trackItem, isActive && styles.activeTrack]}
-        onPress={() => onPlay(track)}
-      >
-        <View style={styles.trackInfo}>
+      <View style={[styles.trackItem, isActive && styles.activeTrack, isDragging && styles.draggingItem]}>
+        {/* Drag handle */}
+        <Pressable onLongPress={onDrag} style={styles.dragHandle}>
+          <Text style={styles.dragHandleIcon}>&#8801;</Text>
+        </Pressable>
+
+        <Pressable style={styles.trackContent} onPress={() => onPlay(track)}>
           <Text
             style={[styles.trackTitle, isActive && styles.activeText, track.playCount > 0 && !isActive && styles.playedTitle]}
             numberOfLines={1}
@@ -113,13 +126,14 @@ function SwipeableTrackItem({
             {formatDuration(track.durationSeconds)} | {formatFileSize(track.fileSize)}
             {track.playCount > 0 && !isActive && "  · listened"}
           </Text>
-        </View>
+        </Pressable>
+
         {isActive && isPlaying ? (
           <Text style={styles.playingIcon}>| |</Text>
         ) : !isActive && track.playCount === 0 ? (
           <View style={styles.unplayedDot} />
         ) : null}
-      </Pressable>
+      </View>
     </Swipeable>
   );
 }
@@ -142,12 +156,15 @@ const styles = StyleSheet.create({
   empty: { color: "#999", fontSize: 16, textAlign: "center", marginTop: 40 },
   trackItem: { flexDirection: "row", alignItems: "center", paddingVertical: 12, paddingHorizontal: 4, backgroundColor: "#f4ede2" },
   activeTrack: { backgroundColor: "#FFF3EE", paddingHorizontal: 8 },
-  trackInfo: { flex: 1 },
+  draggingItem: { backgroundColor: "#f0e6d8", elevation: 8, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.15, shadowRadius: 4 },
+  dragHandle: { paddingHorizontal: 8, paddingVertical: 4, marginRight: 4 },
+  dragHandleIcon: { fontSize: 18, color: "#bbb" },
+  trackContent: { flex: 1 },
   trackTitle: { fontSize: 16, fontWeight: "500" },
   trackMeta: { fontSize: 13, color: "#888", marginTop: 2 },
   activeText: { color: "#FF6B35" },
-  playingIcon: { fontSize: 14, color: "#FF6B35", fontWeight: "bold" },
   playedTitle: { color: "#aaa" },
+  playingIcon: { fontSize: 14, color: "#FF6B35", fontWeight: "bold" },
   unplayedDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: "#FF6B35", marginLeft: 8 },
   separator: { height: StyleSheet.hairlineWidth, backgroundColor: "#eee" },
   deleteAction: { backgroundColor: "#FF3B30", justifyContent: "center", alignItems: "center", width: 80 },

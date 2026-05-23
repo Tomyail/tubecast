@@ -4,6 +4,7 @@ import type { Track, Playlist } from "./storage";
 import {
   getAllTracks, saveTrack, removeTrack, updateTrackPlayCount,
   getDefaultPlaylist, addTrackToPlaylist, removeTrackFromPlaylist,
+  savePlaylistOrder,
 } from "./storage";
 
 type PlaylistContextValue = {
@@ -12,6 +13,7 @@ type PlaylistContextValue = {
   addTrack: (track: Track) => Promise<void>;
   deleteTrack: (trackId: string) => Promise<void>;
   incrementPlayCount: (trackId: string) => Promise<void>;
+  reorderTracks: (newTracks: Track[]) => Promise<void>;
 };
 
 const PlaylistContext = createContext<PlaylistContextValue | null>(null);
@@ -23,9 +25,13 @@ export function PlaylistProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let mounted = true;
     (async () => {
-      const [t, p] = await Promise.all([getAllTracks(), getDefaultPlaylist()]);
+      const [trackMap, p] = await Promise.all([getAllTracks(), getDefaultPlaylist()]);
       if (mounted) {
-        setTracks(t);
+        // Order tracks by playlist.trackIds so stored order is respected
+        const ordered = p.trackIds
+          .map((id) => trackMap.find((t) => t.id === id))
+          .filter((t): t is Track => t !== undefined);
+        setTracks(ordered);
         setPlaylist(p);
       }
     })();
@@ -57,9 +63,16 @@ export function PlaylistProvider({ children }: { children: ReactNode }) {
     ));
   }, []);
 
+  const reorderTracks = useCallback(async (newTracks: Track[]) => {
+    const newIds = newTracks.map((t) => t.id);
+    await savePlaylistOrder(newIds);
+    setTracks(newTracks);
+    setPlaylist((prev) => prev ? { ...prev, trackIds: newIds } : null);
+  }, []);
+
   const value = useMemo<PlaylistContextValue>(() => ({
-    tracks, playlist, addTrack, deleteTrack, incrementPlayCount,
-  }), [tracks, playlist, addTrack, deleteTrack, incrementPlayCount]);
+    tracks, playlist, addTrack, deleteTrack, incrementPlayCount, reorderTracks,
+  }), [tracks, playlist, addTrack, deleteTrack, incrementPlayCount, reorderTracks]);
 
   return <PlaylistContext.Provider value={value}>{children}</PlaylistContext.Provider>;
 }

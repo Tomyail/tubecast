@@ -113,3 +113,11 @@ export async function removeTrackFromPlaylist(trackId: string, playlistId = "def
   playlist.trackIds = playlist.trackIds.filter((id) => id !== trackId);
   await saveAllPlaylists(playlists);
 }
+
+export async function savePlaylistOrder(trackIds: string[], playlistId = "default"): Promise<void> {
+  const playlists = await loadAllPlaylists();
+  const playlist = playlists[playlistId];
+  if (!playlist) return;
+  playlist.trackIds = trackIds;
+  await saveAllPlaylists(playlists);
+}
