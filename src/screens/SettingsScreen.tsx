@@ -3,16 +3,15 @@ import { Alert, Linking, Pressable, StyleSheet, Text, TextInput, View } from "re
 import Screen from "../components/Screen";
 import { useSettings } from "../features/settings/context";
 import { getAllTracks } from "../features/playlist/storage";
+import { SERVER_URL } from "../features/settings/storage";
 
 export default function SettingsScreen() {
   const { settings, updateSettings } = useSettings();
-  const [serverUrl, setServerUrl] = useState(settings.serverUrl);
-  const [authToken, setAuthToken] = useState(settings.authToken);
   const [youtubeApiKey, setYoutubeApiKey] = useState(settings.youtubeApiKey);
   const [storageInfo, setStorageInfo] = useState<string>("");
 
   const handleSave = async () => {
-    await updateSettings({ serverUrl, authToken, youtubeApiKey });
+    await updateSettings({ youtubeApiKey });
     Alert.alert("Saved", "Settings updated");
   };
 
@@ -25,26 +24,7 @@ export default function SettingsScreen() {
   return (
     <Screen>
       <Text style={styles.title}>Settings</Text>
-      <Text style={styles.label}>Server URL</Text>
-      <TextInput
-        style={styles.input}
-        value={serverUrl}
-        onChangeText={setServerUrl}
-        placeholder="https://your-worker.workers.dev"
-        autoCapitalize="none"
-        autoCorrect={false}
-        keyboardType="url"
-      />
-      <Text style={styles.label}>Auth Token</Text>
-      <TextInput
-        style={styles.input}
-        value={authToken}
-        onChangeText={setAuthToken}
-        placeholder="Your auth token"
-        autoCapitalize="none"
-        autoCorrect={false}
-        secureTextEntry
-      />
+
       <Text style={styles.label}>YouTube API Key</Text>
       <TextInput
         style={styles.input}
@@ -71,13 +51,27 @@ export default function SettingsScreen() {
         </Text>
         .
       </Text>
+
       <Pressable style={styles.saveButton} onPress={handleSave}>
         <Text style={styles.saveText}>Save</Text>
       </Pressable>
+
       <Pressable style={styles.storageButton} onPress={checkStorage}>
         <Text style={styles.storageText}>Check Storage</Text>
       </Pressable>
       {storageInfo ? <Text style={styles.storageInfo}>{storageInfo}</Text> : null}
+
+      <View style={styles.about}>
+        <Text style={styles.aboutTitle}>About</Text>
+        <Text style={styles.aboutText}>yt-audio — YouTube to audio converter</Text>
+        <Text style={styles.aboutText}>API: {SERVER_URL}</Text>
+        <Text
+          style={[styles.aboutText, styles.link]}
+          onPress={() => Linking.openURL("https://gitea.tomyail.com/tomyail/yt-audio")}
+        >
+          Source code
+        </Text>
+      </View>
     </Screen>
   );
 }
@@ -98,4 +92,7 @@ const styles = StyleSheet.create({
   storageInfo: { textAlign: "center", marginTop: 12, fontSize: 16, color: "#333" },
   hint: { fontSize: 12, color: "#888", marginBottom: 16, lineHeight: 18 },
   link: { color: "#FF6B35", textDecorationLine: "underline" },
+  about: { marginTop: 32, paddingTop: 16, borderTopWidth: 1, borderTopColor: "#eee" },
+  aboutTitle: { fontSize: 14, fontWeight: "600", marginBottom: 8, color: "#555" },
+  aboutText: { fontSize: 13, color: "#888", marginBottom: 4 },
 });

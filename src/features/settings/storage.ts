@@ -1,38 +1,11 @@
-import * as SecureStore from "expo-secure-store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-declare const __DEV__: boolean;
+export const SERVER_URL = "https://yt-audio.tomyail.com";
 
 const KEYS = {
-  serverUrl: "settings_serverUrl",
-  authToken: "settings_authToken",
   deviceId: "settings_deviceId",
   youtubeApiKey: "settings_youtubeApiKey",
 };
-
-export async function getServerUrl(): Promise<string> {
-  const stored = await AsyncStorage.getItem(KEYS.serverUrl);
-  if (stored) return stored;
-  return __DEV__ ? process.env.EXPO_PUBLIC_DEV_SERVER_URL || "" : "";
-}
-
-export async function setServerUrl(url: string): Promise<void> {
-  await AsyncStorage.setItem(KEYS.serverUrl, url);
-}
-
-export async function getAuthToken(): Promise<string> {
-  const stored = await SecureStore.getItemAsync(KEYS.authToken);
-  if (stored) return stored;
-  return __DEV__ ? process.env.EXPO_PUBLIC_DEV_AUTH_TOKEN || "" : "";
-}
-
-export async function setAuthToken(token: string): Promise<void> {
-  if (token) {
-    await SecureStore.setItemAsync(KEYS.authToken, token);
-  } else {
-    await SecureStore.deleteItemAsync(KEYS.authToken);
-  }
-}
 
 export async function getYouTubeApiKey(): Promise<string> {
   return (await AsyncStorage.getItem(KEYS.youtubeApiKey)) || "";

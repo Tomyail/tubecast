@@ -1,4 +1,4 @@
-import { getServerUrl, getAuthToken } from "../settings/storage";
+import { SERVER_URL } from "../settings/storage";
 
 export interface JobResponse {
   id: string;
@@ -20,13 +20,10 @@ export interface JobResponse {
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const baseUrl = (await getServerUrl()).replace(/\/+$/, "");
-  const token = await getAuthToken();
-  const res = await fetch(`${baseUrl}${path}`, {
+  const res = await fetch(`${SERVER_URL}${path}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
       ...options.headers,
     },
   });
