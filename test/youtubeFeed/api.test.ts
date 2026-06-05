@@ -1,152 +1,104 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { parseChannelInput, resolveChannel, fetchRecentVideos, type YouTubeApiConfig } from "../../src/features/youtubeFeed/api";
+import { fetchFeedItems, resolveFeedSource } from "../../src/features/youtubeFeed/api";
 
-// Helper to mock global fetch
-function mockFetch(response: any) {
-  vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
-    ok: true,
-    json: () => Promise.resolve(response),
-  }));
+function mockFetch(response: unknown) {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(response),
+    })
+  );
 }
 
-function mockFetchError(status: number, message: string) {
-  vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
-    ok: false,
-    status,
-    json: () => Promise.resolve({ error: { message } }),
-  }));
+function mockFetchError(status: number, response: unknown) {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue({
+      ok: false,
+      status,
+      json: () => Promise.resolve(response),
+    })
+  );
 }
 
-describe("parseChannelInput", () => {
-  it("extracts channel ID from /channel/ URL", () => {
-    const result = parseChannelInput("https://www.youtube.com/channel/UCxxxxxxxxxxxxxxxxxxxxxx");
-    expect(result).toEqual({ type: "id", value: "UCxxxxxxxxxxxxxxxxxxxxxx" });
+describe("youtubeFeed backend API client", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
   });
 
-  it("extracts handle from /@handle URL", () => {
-    const result = parseChannelInput("https://www.youtube.com/@MrBeast");
-    expect(result).toEqual({ type: "handle", value: "@MrBeast" });
-  });
-
-  it("treats raw UC... as channel ID", () => {
-    const result = parseChannelInput("UCxxxxxxxxxxxxxxxxxxxxxx");
-    expect(result).toEqual({ type: "id", value: "UCxxxxxxxxxxxxxxxxxxxxxx" });
-  });
-
-  it("treats @handle as handle", () => {
-    const result = parseChannelInput("@MrBeast");
-    expect(result).toEqual({ type: "handle", value: "@MrBeast" });
-  });
-
-  it("returns null for unrecognized input", () => {
-    const result = parseChannelInput("not a valid input");
-    expect(result).toBeNull();
-  });
-});
-
-describe("resolveChannel", () => {
-  const config: YouTubeApiConfig = { apiKey: "test-key" };
-
-  beforeEach(() => { vi.restoreAllMocks(); });
-
-  it("resolves a channel by ID", async () => {
+  it("resolves a YouTube input through the backend feed API", async () => {
     mockFetch({
-      items: [{
-        id: "UC_xxxxxxxxxxxxxxxxxxxx",
-        snippet: { title: "Test Channel", thumbnails: { default: { url: "https://example.com/thumb.jpg" } } },
-        contentDetails: { relatedPlaylists: { uploads: "UU_xxxxxxxxxxxxxxxxxxxx" } },
-      }],
+      source: {
+        platform: "youtube",
+        platformSourceId: "UCxxxxxxxxxxxxxxxxxxxxxx",
+        title: "Test Channel",
+        thumbnailUrl: "https://example.com/thumb.jpg",
+        sourceUrl: "https://www.youtube.com/channel/UCxxxxxxxxxxxxxxxxxxxxxx",
+      },
     });
 
-    const channel = await resolveChannel(config, { type: "id", value: "UC_xxxxxxxxxxxxxxxxxxxx" });
-    expect(channel).toEqual({
-      id: "UC_xxxxxxxxxxxxxxxxxxxx",
+    const source = await resolveFeedSource("@TestChannel");
+
+    expect(source).toEqual({
+      platform: "youtube",
+      platformSourceId: "UCxxxxxxxxxxxxxxxxxxxxxx",
       title: "Test Channel",
       thumbnailUrl: "https://example.com/thumb.jpg",
-      uploadsPlaylistId: "UU_xxxxxxxxxxxxxxxxxxxx",
+      sourceUrl: "https://www.youtube.com/channel/UCxxxxxxxxxxxxxxxxxxxxxx",
     });
+    expect(fetch).toHaveBeenCalledWith(
+      "https://yt-audio.tomyail.com/api/feed/resolve-source",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ platform: "youtube", input: "@TestChannel" }),
+      })
+    );
   });
 
-  it("resolves a channel by handle", async () => {
-    mockFetch({
-      items: [{
-        id: "UC_xxxxxxxxxxxxxxxxxxxx",
-        snippet: { title: "Handle Channel", thumbnails: { default: { url: "https://example.com/thumb.jpg" } } },
-        contentDetails: { relatedPlaylists: { uploads: "UU_xxxxxxxxxxxxxxxxxxxx" } },
-      }],
-    });
-
-    const channel = await resolveChannel(config, { type: "handle", value: "@TestChannel" });
-    expect(channel).toBeDefined();
-    expect(channel!.title).toBe("Handle Channel");
-  });
-
-  it("returns null when no items found", async () => {
-    mockFetch({ items: [] });
-    const channel = await resolveChannel(config, { type: "id", value: "UC_nonexistent0000000000000" });
-    expect(channel).toBeNull();
-  });
-
-  it("throws on API error", async () => {
-    mockFetchError(403, "forbidden");
-    await expect(resolveChannel(config, { type: "id", value: "UC_xxxxxxxxxxxxxxxxxxxx" })).rejects.toThrow();
-  });
-});
-
-describe("fetchRecentVideos", () => {
-  const config: YouTubeApiConfig = { apiKey: "test-key" };
-
-  beforeEach(() => { vi.restoreAllMocks(); });
-
-  it("fetches recent videos from a playlist", async () => {
+  it("fetches recent feed items through the backend feed API", async () => {
     mockFetch({
       items: [
         {
-          contentDetails: { videoId: "vid1" },
-          snippet: {
-            title: "Video One",
-            channelTitle: "Channel A",
-            channelId: "UC_xxxxxxxxxxxxxxxxxxxx",
-            thumbnails: { medium: { url: "https://example.com/v1.jpg" } },
-            publishedAt: "2026-05-23T10:00:00Z",
-          },
-        },
-        {
-          contentDetails: { videoId: "vid2" },
-          snippet: {
-            title: "Video Two",
-            channelTitle: "Channel A",
-            channelId: "UC_xxxxxxxxxxxxxxxxxxxx",
-            thumbnails: { medium: { url: "https://example.com/v2.jpg" } },
-            publishedAt: "2026-05-22T10:00:00Z",
-          },
+          platform: "youtube",
+          platformItemId: "vid1",
+          platformSourceId: "UCxxxxxxxxxxxxxxxxxxxxxx",
+          title: "Video One",
+          sourceTitle: "Test Channel",
+          thumbnailUrl: "https://example.com/v1.jpg",
+          publishedAt: "2026-05-23T10:00:00Z",
+          sourceUrl: "https://www.youtube.com/watch?v=vid1",
         },
       ],
+      errors: [],
     });
 
-    const videos = await fetchRecentVideos(config, "UU_xxxxxxxxxxxxxxxxxxxx", 5);
-    expect(videos).toHaveLength(2);
-    expect(videos[0]).toEqual({
-      videoId: "vid1",
-      title: "Video One",
-      channelTitle: "Channel A",
-      channelId: "UC_xxxxxxxxxxxxxxxxxxxx",
-      thumbnailUrl: "https://example.com/v1.jpg",
-      publishedAt: "2026-05-23T10:00:00Z",
-      watchUrl: "https://www.youtube.com/watch?v=vid1",
-    });
+    const items = await fetchFeedItems([
+      {
+        platform: "youtube",
+        platformSourceId: "UCxxxxxxxxxxxxxxxxxxxxxx",
+        title: "Test Channel",
+        thumbnailUrl: "https://example.com/thumb.jpg",
+        sourceUrl: "https://www.youtube.com/channel/UCxxxxxxxxxxxxxxxxxxxxxx",
+      },
+    ]);
+
+    expect(items).toHaveLength(1);
+    expect(items[0].platformItemId).toBe("vid1");
+    expect(fetch).toHaveBeenCalledWith(
+      "https://yt-audio.tomyail.com/api/feed/recent-items",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({
+          sources: [{ platform: "youtube", platformSourceId: "UCxxxxxxxxxxxxxxxxxxxxxx" }],
+        }),
+      })
+    );
   });
 
-  it("skips items without videoId", async () => {
-    mockFetch({
-      items: [
-        { contentDetails: {}, snippet: { title: "Deleted", channelTitle: "C", channelId: "UC_x", thumbnails: {}, publishedAt: "2026-05-23T10:00:00Z" } },
-        { contentDetails: { videoId: "vid1" }, snippet: { title: "Valid", channelTitle: "C", channelId: "UC_x", thumbnails: { medium: { url: "http://t.jpg" } }, publishedAt: "2026-05-23T10:00:00Z" } },
-      ],
-    });
+  it("throws stable backend error messages", async () => {
+    mockFetchError(404, { error: { code: "source_not_found", message: "Feed source not found" } });
 
-    const videos = await fetchRecentVideos(config, "UU_xxxxxxxxxxxxxxxxxxxx", 5);
-    expect(videos).toHaveLength(1);
-    expect(videos[0].videoId).toBe("vid1");
+    await expect(resolveFeedSource("@missing")).rejects.toThrow("Feed source not found");
   });
 });

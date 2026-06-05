@@ -1,11 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getSubscribedChannels, addChannel, removeChannel } from "./storage";
-import { fetchRecentVideos, resolveChannel, parseChannelInput } from "./api";
-import { mergeAndSortVideos } from "./feed";
-import type { SubscribedChannel, FeedVideoWithStatus } from "./types";
-import type { YouTubeApiConfig } from "./api";
+import { fetchFeedItems, resolveFeedSource } from "./api";
+import type { FeedItemWithStatus } from "./types";
 
-const VIDEOS_PER_CHANNEL = 5;
 const MAX_FEED_ITEMS = 100;
 
 export function useSubscribedChannels() {
@@ -15,35 +12,21 @@ export function useSubscribedChannels() {
   });
 }
 
-export function useFeedVideos(apiKey: string | null) {
+export function useFeedVideos() {
   return useQuery({
-    queryKey: ["youtubeFeed", apiKey],
-    queryFn: async (): Promise<FeedVideoWithStatus[]> => {
-      if (!apiKey) return [];
-      const config: YouTubeApiConfig = { apiKey };
+    queryKey: ["youtubeFeed"],
+    queryFn: async (): Promise<FeedItemWithStatus[]> => {
       const channels = await getSubscribedChannels();
       if (channels.length === 0) return [];
 
-      const channelVideos = await Promise.all(
-        channels.map(async (ch) => {
-          if (!ch.uploadsPlaylistId) return [];
-          try {
-            return await fetchRecentVideos(config, ch.uploadsPlaylistId, VIDEOS_PER_CHANNEL);
-          } catch {
-            return [];
-          }
-        }),
-      );
-
-      const merged = mergeAndSortVideos(channelVideos, MAX_FEED_ITEMS);
+      const items = await fetchFeedItems(channels);
 
       // For v1, all videos start as "new". Job matching can be enhanced later.
-      return merged.map((v) => ({
+      return items.slice(0, MAX_FEED_ITEMS).map((v) => ({
         ...v,
         status: "new" as const,
       }));
     },
-    enabled: !!apiKey,
     staleTime: 0,
   });
 }
@@ -51,17 +34,9 @@ export function useFeedVideos(apiKey: string | null) {
 export function useAddChannel() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ input, apiKey }: { input: string; apiKey: string }) => {
-      const parsed = parseChannelInput(input);
-      if (!parsed) throw new Error("Unable to recognize this channel");
-
-      const config: YouTubeApiConfig = { apiKey };
-      const resolved = await resolveChannel(config, parsed);
-      if (!resolved) throw new Error("Channel not found");
-      if (!resolved.uploadsPlaylistId) throw new Error("Channel has no public uploads playlist");
-
-      const channel: SubscribedChannel = {
-        ...resolved,
+    mutationFn: async ({ input }: { input: string }) => {
+      const channel = {
+        ...(await resolveFeedSource(input)),
         addedAt: new Date().toISOString(),
       };
       await addChannel(channel);

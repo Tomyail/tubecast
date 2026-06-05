@@ -1,10 +1,7 @@
 import type { ReactNode } from "react";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { getYouTubeApiKey, setYouTubeApiKey } from "./storage";
 
-type Settings = {
-  youtubeApiKey: string;
-};
+type Settings = Record<string, never>;
 
 type SettingsContextValue = {
   isLoaded: boolean;
@@ -16,14 +13,13 @@ const SettingsContext = createContext<SettingsContextValue | null>(null);
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false);
-  const [settings, setSettings] = useState<Settings>({ youtubeApiKey: "" });
+  const [settings, setSettings] = useState<Settings>({});
 
   useEffect(() => {
     let mounted = true;
     (async () => {
-      const ytKey = await getYouTubeApiKey();
       if (mounted) {
-        setSettings({ youtubeApiKey: ytKey });
+        setSettings({});
         setIsLoaded(true);
       }
     })();
@@ -33,10 +29,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const value = useMemo<SettingsContextValue>(() => ({
     isLoaded,
     settings,
-    updateSettings: async (partial) => {
-      const next = { ...settings, ...partial };
-      setSettings(next);
-      if (partial.youtubeApiKey !== undefined) await setYouTubeApiKey(next.youtubeApiKey);
+    updateSettings: async () => {
+      setSettings({});
     },
   }), [settings, isLoaded]);
 

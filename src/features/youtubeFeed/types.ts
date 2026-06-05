@@ -1,24 +1,28 @@
-export type SubscribedChannel = {
-  id: string;
+export type FeedPlatform = "youtube";
+
+export type FeedSource = {
+  platform: FeedPlatform;
+  platformSourceId: string;
   title: string;
-  thumbnailUrl: string;
-  uploadsPlaylistId: string;
-  addedAt: string;
+  thumbnailUrl: string | null;
+  sourceUrl: string | null;
+  addedAt?: string;
 };
 
-export type FeedVideo = {
-  videoId: string;
+export type FeedItem = {
+  platform: FeedPlatform;
+  platformItemId: string;
+  platformSourceId: string;
   title: string;
-  channelTitle: string;
-  channelId: string;
-  thumbnailUrl: string;
+  sourceTitle: string;
+  thumbnailUrl: string | null;
   publishedAt: string;
-  watchUrl: string;
+  sourceUrl: string;
 };
 
-export type FeedVideoStatus = "new" | "converting" | "ready" | "failed";
+export type FeedItemStatus = "new" | "converting" | "ready" | "failed";
 
-export type FeedVideoWithStatus = FeedVideo & {
-  status: FeedVideoStatus;
+export type FeedItemWithStatus = FeedItem & {
+  status: FeedItemStatus;
   jobId?: string;
 };

@@ -2,17 +2,16 @@ import { useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import Screen from "../components/Screen";
 import { useAddChannel } from "../features/youtubeFeed/hooks";
-import type { SubscribedChannel } from "../features/youtubeFeed/types";
+import type { FeedSource } from "../features/youtubeFeed/types";
 
 type Props = {
-  apiKey: string;
   onAdded: () => void;
   onClose: () => void;
 };
 
-export default function AddChannelScreen({ apiKey, onAdded, onClose }: Props) {
+export default function AddChannelScreen({ onAdded, onClose }: Props) {
   const [input, setInput] = useState("");
-  const [preview, setPreview] = useState<SubscribedChannel | null>(null);
+  const [preview, setPreview] = useState<FeedSource | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
   const addChannel = useAddChannel();
 
@@ -21,7 +20,7 @@ export default function AddChannelScreen({ apiKey, onAdded, onClose }: Props) {
     setPreview(null);
 
     try {
-      const result = await addChannel.mutateAsync({ input: input.trim(), apiKey });
+      const result = await addChannel.mutateAsync({ input: input.trim() });
       setPreview(result);
     } catch (err: any) {
       setParseError(err.message);

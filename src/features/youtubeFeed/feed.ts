@@ -1,16 +1,17 @@
-import type { FeedVideo, FeedVideoWithStatus } from "./types";
+import type { FeedItem, FeedItemWithStatus } from "./types";
 
 export type JobLookup = Record<string, { status: string; jobId: string }>;
 
-export function mergeAndSortVideos(
-  channelVideos: FeedVideo[][],
+export function mergeAndSortItems(
+  sourceItems: FeedItem[][],
   maxItems = 100,
-): FeedVideo[] {
-  const all = channelVideos.flat();
+): FeedItem[] {
+  const all = sourceItems.flat();
   const seen = new Set<string>();
   const unique = all.filter((v) => {
-    if (seen.has(v.videoId)) return false;
-    seen.add(v.videoId);
+    const key = `${v.platform}:${v.platformItemId}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
     return true;
   });
   unique.sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
@@ -18,11 +19,11 @@ export function mergeAndSortVideos(
 }
 
 export function matchJobStatus(
-  videos: FeedVideo[],
+  videos: FeedItem[],
   jobLookup: JobLookup,
-): FeedVideoWithStatus[] {
+): FeedItemWithStatus[] {
   return videos.map((video) => {
-    const job = jobLookup[video.videoId];
+    const job = jobLookup[video.platformItemId];
     if (!job) {
       return { ...video, status: "new" as const };
     }

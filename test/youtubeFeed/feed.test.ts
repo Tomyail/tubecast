@@ -1,41 +1,42 @@
 import { describe, it, expect } from "vitest";
-import { mergeAndSortVideos, matchJobStatus, type JobLookup } from "../../src/features/youtubeFeed/feed";
-import type { FeedVideo } from "../../src/features/youtubeFeed/types";
+import { mergeAndSortItems, matchJobStatus, type JobLookup } from "../../src/features/youtubeFeed/feed";
+import type { FeedItem } from "../../src/features/youtubeFeed/types";
 
-const makeVideo = (overrides: Partial<FeedVideo> = {}): FeedVideo => ({
-  videoId: "vid1",
+const makeItem = (overrides: Partial<FeedItem> = {}): FeedItem => ({
+  platform: "youtube",
+  platformItemId: "vid1",
+  platformSourceId: "UC_a",
   title: "Test Video",
-  channelTitle: "Channel A",
-  channelId: "UC_a",
+  sourceTitle: "Channel A",
   thumbnailUrl: "https://example.com/v1.jpg",
   publishedAt: "2026-05-23T10:00:00Z",
-  watchUrl: "https://www.youtube.com/watch?v=vid1",
+  sourceUrl: "https://www.youtube.com/watch?v=vid1",
   ...overrides,
 });
 
-describe("mergeAndSortVideos", () => {
-  it("merges videos from multiple channels and sorts by date descending", () => {
-    const videos = [
-      [makeVideo({ videoId: "v1", publishedAt: "2026-05-23T10:00:00Z" })],
-      [makeVideo({ videoId: "v2", publishedAt: "2026-05-23T12:00:00Z" })],
+describe("mergeAndSortItems", () => {
+  it("merges items from multiple sources and sorts by date descending", () => {
+    const items = [
+      [makeItem({ platformItemId: "v1", publishedAt: "2026-05-23T10:00:00Z" })],
+      [makeItem({ platformItemId: "v2", publishedAt: "2026-05-23T12:00:00Z" })],
     ];
-    const result = mergeAndSortVideos(videos);
-    expect(result[0].videoId).toBe("v2");
-    expect(result[1].videoId).toBe("v1");
+    const result = mergeAndSortItems(items);
+    expect(result[0].platformItemId).toBe("v2");
+    expect(result[1].platformItemId).toBe("v1");
   });
 
-  it("deduplicates by videoId", () => {
-    const videos = [
-      [makeVideo({ videoId: "v1" })],
-      [makeVideo({ videoId: "v1", title: "Duplicate" })],
+  it("deduplicates by platform item id", () => {
+    const items = [
+      [makeItem({ platformItemId: "v1" })],
+      [makeItem({ platformItemId: "v1", title: "Duplicate" })],
     ];
-    const result = mergeAndSortVideos(videos);
+    const result = mergeAndSortItems(items);
     expect(result).toHaveLength(1);
   });
 
   it("caps results to maxItems", () => {
-    const videos = [Array.from({ length: 20 }, (_, i) => makeVideo({ videoId: `v${i}` }))];
-    const result = mergeAndSortVideos(videos, 5);
+    const items = [Array.from({ length: 20 }, (_, i) => makeItem({ platformItemId: `v${i}` }))];
+    const result = mergeAndSortItems(items, 5);
     expect(result).toHaveLength(5);
   });
 });
@@ -48,34 +49,34 @@ describe("matchJobStatus", () => {
     v_queued: { status: "queued", jobId: "job4" },
   };
 
-  it("marks video as ready when job exists and is ready", () => {
-    const video = makeVideo({ videoId: "v_ready" });
-    const result = matchJobStatus([video], lookup);
+  it("marks item as ready when job exists and is ready", () => {
+    const item = makeItem({ platformItemId: "v_ready" });
+    const result = matchJobStatus([item], lookup);
     expect(result[0].status).toBe("ready");
     expect(result[0].jobId).toBe("job1");
   });
 
-  it("marks video as converting when job is processing", () => {
-    const video = makeVideo({ videoId: "v_processing" });
-    const result = matchJobStatus([video], lookup);
+  it("marks item as converting when job is processing", () => {
+    const item = makeItem({ platformItemId: "v_processing" });
+    const result = matchJobStatus([item], lookup);
     expect(result[0].status).toBe("converting");
   });
 
-  it("marks video as converting when job is queued", () => {
-    const video = makeVideo({ videoId: "v_queued" });
-    const result = matchJobStatus([video], lookup);
+  it("marks item as converting when job is queued", () => {
+    const item = makeItem({ platformItemId: "v_queued" });
+    const result = matchJobStatus([item], lookup);
     expect(result[0].status).toBe("converting");
   });
 
-  it("marks video as new when no job exists", () => {
-    const video = makeVideo({ videoId: "v_unknown" });
-    const result = matchJobStatus([video], lookup);
+  it("marks item as new when no job exists", () => {
+    const item = makeItem({ platformItemId: "v_unknown" });
+    const result = matchJobStatus([item], lookup);
     expect(result[0].status).toBe("new");
   });
 
-  it("marks video as new when job failed (allows retry)", () => {
-    const video = makeVideo({ videoId: "v_failed" });
-    const result = matchJobStatus([video], lookup);
+  it("marks item as new when job failed, allowing retry", () => {
+    const item = makeItem({ platformItemId: "v_failed" });
+    const result = matchJobStatus([item], lookup);
     expect(result[0].status).toBe("new");
   });
 });

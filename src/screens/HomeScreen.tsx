@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import Screen from "../components/Screen";
 import { useSubmitJob, useDownloadReadyJob, useJobStatus } from "../features/jobs/hooks";
-import { useSettings } from "../features/settings/context";
 
 const PENDING_JOB_KEY = "pending_job_id";
 
@@ -14,7 +13,6 @@ export default function HomeScreen() {
   const submit = useSubmitJob();
   const { data: job } = useJobStatus(jobId);
   const { downloadState, downloadError, retry } = useDownloadReadyJob(jobId);
-  const { settings } = useSettings();
 
   useEffect(() => {
     AsyncStorage.getItem(PENDING_JOB_KEY).then((id) => {

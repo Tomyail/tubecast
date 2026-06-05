@@ -2,22 +2,20 @@ import { Alert, ActivityIndicator, FlatList, Pressable, ScrollView, StyleSheet, 
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import Screen from "../components/Screen";
-import { useSettings } from "../features/settings/context";
 import { useFeedVideos, useSubscribedChannels, useRemoveChannel } from "../features/youtubeFeed/hooks";
 import { useSubmitJob, useDownloadReadyJob } from "../features/jobs/hooks";
 import { usePlaylist } from "../features/playlist/context";
 import { usePlayer } from "../features/player/context";
 import type { Track } from "../features/playlist/storage";
-import type { FeedVideoWithStatus } from "../features/youtubeFeed/types";
+import type { FeedItemWithStatus } from "../features/youtubeFeed/types";
 import type { RootStackParamList } from "../app/navigation/types";
 import { useState } from "react";
 import AddChannelScreen from "./AddChannelScreen";
 
 export default function FeedScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { settings } = useSettings();
   const { data: channels = [] } = useSubscribedChannels();
-  const { data: videos = [], isLoading, error, refetch } = useFeedVideos(settings.youtubeApiKey || null);
+  const { data: videos = [], isLoading, error, refetch } = useFeedVideos();
   const [selectedChannel, setSelectedChannel] = useState<string | null>(null);
   const [showAddChannel, setShowAddChannel] = useState(false);
   const [submittedJobs, setSubmittedJobs] = useState<Record<string, string>>({});
@@ -27,13 +25,13 @@ export default function FeedScreen() {
   const { playTrack } = usePlayer();
 
   const filteredVideos = selectedChannel
-    ? videos.filter((v) => v.channelId === selectedChannel)
+    ? videos.filter((v) => v.platformSourceId === selectedChannel)
     : videos;
 
-  const handleConvert = async (video: FeedVideoWithStatus) => {
+  const handleConvert = async (video: FeedItemWithStatus) => {
     try {
-      const result = await submitJob.mutateAsync(video.watchUrl);
-      setSubmittedJobs((prev) => ({ ...prev, [video.videoId]: result.id }));
+      const result = await submitJob.mutateAsync(video.sourceUrl);
+      setSubmittedJobs((prev) => ({ ...prev, [video.platformItemId]: result.id }));
     } catch (err: any) {
       Alert.alert("Error", err.message);
     }
@@ -49,21 +47,9 @@ export default function FeedScreen() {
   if (showAddChannel) {
     return (
       <AddChannelScreen
-        apiKey={settings.youtubeApiKey}
         onAdded={() => setShowAddChannel(false)}
         onClose={() => setShowAddChannel(false)}
       />
-    );
-  }
-
-  if (!settings.youtubeApiKey) {
-    return (
-      <Screen>
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyTitle}>YouTube API Key Required</Text>
-          <Text style={styles.emptyText}>Add your YouTube Data API key in Settings to browse subscriptions.</Text>
-        </View>
-      </Screen>
     );
   }
 
@@ -94,12 +80,12 @@ export default function FeedScreen() {
             </Pressable>
             {channels.map((ch) => (
               <Pressable
-                key={ch.id}
-                style={[styles.pill, selectedChannel === ch.id && styles.pillActive]}
-                onPress={() => setSelectedChannel(selectedChannel === ch.id ? null : ch.id)}
-                onLongPress={() => handleRemoveChannel(ch.id)}
+                key={ch.platformSourceId}
+                style={[styles.pill, selectedChannel === ch.platformSourceId && styles.pillActive]}
+                onPress={() => setSelectedChannel(selectedChannel === ch.platformSourceId ? null : ch.platformSourceId)}
+                onLongPress={() => handleRemoveChannel(ch.platformSourceId)}
               >
-                <Text style={[styles.pillText, selectedChannel === ch.id && styles.pillTextActive]} numberOfLines={1}>
+                <Text style={[styles.pillText, selectedChannel === ch.platformSourceId && styles.pillTextActive]} numberOfLines={1}>
                   {ch.title}
                 </Text>
               </Pressable>
@@ -127,11 +113,11 @@ export default function FeedScreen() {
       {!isLoading && !error && (
         <FlatList
           data={filteredVideos}
-          keyExtractor={(v) => v.videoId}
+          keyExtractor={(v) => v.platformItemId}
           renderItem={({ item }) => (
             <VideoCard
               video={item}
-              jobId={submittedJobs[item.videoId] ?? null}
+              jobId={submittedJobs[item.platformItemId] ?? null}
               allTracks={tracks}
               onConvert={handleConvert}
               onPlay={(track) => {
@@ -159,10 +145,10 @@ function VideoCard({
   onPlay,
   isSubmitting,
 }: {
-  video: FeedVideoWithStatus;
+  video: FeedItemWithStatus;
   jobId: string | null;
   allTracks: Track[];
-  onConvert: (v: FeedVideoWithStatus) => void;
+  onConvert: (v: FeedItemWithStatus) => void;
   onPlay: (track: Track) => void;
   isSubmitting: boolean;
 }) {
@@ -179,7 +165,7 @@ function VideoCard({
     <View style={styles.card}>
       <View style={styles.cardContent}>
         <Text style={styles.cardTitle} numberOfLines={2}>{video.title}</Text>
-        <Text style={styles.cardMeta}>{video.channelTitle} · {formatRelativeTime(video.publishedAt)}</Text>
+        <Text style={styles.cardMeta}>{video.sourceTitle} · {formatRelativeTime(video.publishedAt)}</Text>
       </View>
       {status === "new" && (
         <Pressable

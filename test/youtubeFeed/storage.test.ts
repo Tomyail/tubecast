@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import type { SubscribedChannel } from "../../src/features/youtubeFeed/types";
+import type { FeedSource } from "../../src/features/youtubeFeed/types";
 
 // Mock AsyncStorage before importing the module under test
 const store: Record<string, string> = {};
@@ -23,11 +23,12 @@ const { getSubscribedChannels, addChannel, removeChannel, isChannelSubscribed } 
   "../../src/features/youtubeFeed/storage"
 );
 
-const makeChannel = (overrides: Partial<SubscribedChannel> = {}): SubscribedChannel => ({
-  id: "UC_test123",
+const makeChannel = (overrides: Partial<FeedSource> = {}): FeedSource => ({
+  platform: "youtube",
+  platformSourceId: "UC_test123",
   title: "Test Channel",
   thumbnailUrl: "https://example.com/thumb.jpg",
-  uploadsPlaylistId: "UU_test123",
+  sourceUrl: "https://www.youtube.com/channel/UC_test123",
   addedAt: "2026-05-23T00:00:00Z",
   ...overrides,
 });
@@ -56,8 +57,8 @@ describe("youtubeFeed storage", () => {
   });
 
   it("removes a channel by id", async () => {
-    const ch1 = makeChannel({ id: "UC_a" });
-    const ch2 = makeChannel({ id: "UC_b", title: "Channel B" });
+    const ch1 = makeChannel({ platformSourceId: "UC_a" });
+    const ch2 = makeChannel({ platformSourceId: "UC_b", title: "Channel B" });
     await addChannel(ch1);
     await addChannel(ch2);
     await removeChannel("UC_a");
