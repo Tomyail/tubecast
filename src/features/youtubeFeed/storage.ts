@@ -3,9 +3,26 @@ import type { FeedSource } from "./types";
 
 const STORAGE_KEY = "youtube_subscriptions";
 
+type LegacyChannel = { id: string; title: string; thumbnailUrl: string; addedAt: string };
+
+function migrateChannel(item: LegacyChannel | FeedSource): FeedSource {
+  if ("platformSourceId" in item) return item;
+  return {
+    platform: "youtube",
+    platformSourceId: item.id,
+    title: item.title,
+    thumbnailUrl: item.thumbnailUrl ?? null,
+    sourceUrl: `https://www.youtube.com/channel/${item.id}`,
+    addedAt: item.addedAt,
+  };
+}
+
 export async function getSubscribedChannels(): Promise<FeedSource[]> {
   const raw = await AsyncStorage.getItem(STORAGE_KEY);
-  return raw ? JSON.parse(raw) : [];
+  if (!raw) return [];
+  return (JSON.parse(raw) as Array<LegacyChannel | FeedSource>)
+    .map(migrateChannel)
+    .filter((ch) => !!ch.platformSourceId);
 }
 
 async function saveChannels(channels: FeedSource[]): Promise<void> {
