@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export const SERVER_URL = "https://yt-audio.tomyail.com";
+export const SERVER_URL =
+  process.env.EXPO_PUBLIC_SERVER_URL ?? "https://yt-audio.tomyail.com";
 
 const KEYS = {
   deviceId: "settings_deviceId",
