@@ -128,7 +128,9 @@ export async function removeTracksFromPlaylist(
 ): Promise<Playlist> {
   const playlists = await loadAllPlaylists();
   const playlist = playlists[playlistId];
-  if (!playlist) throw new Error(`Playlist ${playlistId} not found`);
+  if (!playlist) {
+    return { id: playlistId, name: "", trackIds: [], createdAt: "" };
+  }
   const idSet = new Set(trackIds);
   playlist.trackIds = playlist.trackIds.filter((id) => !idSet.has(id));
   await saveAllPlaylists(playlists);
