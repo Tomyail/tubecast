@@ -59,6 +59,14 @@ export async function removeTrack(id: string): Promise<void> {
   await saveAllTracks(tracks);
 }
 
+export async function removeTracks(ids: string[]): Promise<void> {
+  const tracks = await loadAllTracks();
+  for (const id of ids) {
+    delete tracks[id];
+  }
+  await saveAllTracks(tracks);
+}
+
 export async function updateTrackPlayCount(id: string): Promise<void> {
   const tracks = await loadAllTracks();
   if (tracks[id]) {
@@ -112,6 +120,19 @@ export async function removeTrackFromPlaylist(trackId: string, playlistId = "def
   if (!playlist) return;
   playlist.trackIds = playlist.trackIds.filter((id) => id !== trackId);
   await saveAllPlaylists(playlists);
+}
+
+export async function removeTracksFromPlaylist(
+  trackIds: string[],
+  playlistId = "default"
+): Promise<Playlist> {
+  const playlists = await loadAllPlaylists();
+  const playlist = playlists[playlistId];
+  if (!playlist) throw new Error(`Playlist ${playlistId} not found`);
+  const idSet = new Set(trackIds);
+  playlist.trackIds = playlist.trackIds.filter((id) => !idSet.has(id));
+  await saveAllPlaylists(playlists);
+  return playlist;
 }
 
 export async function savePlaylistOrder(trackIds: string[], playlistId = "default"): Promise<void> {
