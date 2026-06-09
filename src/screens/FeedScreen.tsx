@@ -12,6 +12,9 @@ import type { RootStackParamList } from "../app/navigation/types";
 import { useState } from "react";
 import AddChannelScreen from "./AddChannelScreen";
 
+const BOTTOM_WITH_PLAYER = 120;
+const BOTTOM_BASE = 24;
+
 export default function FeedScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { data: channels = [] } = useSubscribedChannels();
@@ -23,7 +26,7 @@ export default function FeedScreen() {
   const removeChannel = useRemoveChannel();
   const submitJob = useSubmitJob();
   const { tracks } = usePlaylist();
-  const { playTrack } = usePlayer();
+  const { playTrack, activeTrack } = usePlayer();
 
   const filteredVideos = selectedChannel
     ? videos.filter((v) => v.platformSourceId === selectedChannel)
@@ -138,7 +141,7 @@ export default function FeedScreen() {
           refreshing={isLoading}
           onRefresh={refetch}
           ListEmptyComponent={<Text style={styles.emptyFeed}>No videos found</Text>}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[styles.listContent, { paddingBottom: activeTrack ? BOTTOM_WITH_PLAYER : BOTTOM_BASE }]}
         />
       )}
     </Screen>
@@ -238,7 +241,7 @@ const styles = StyleSheet.create({
   loadingText: { marginTop: 8, fontSize: 15, color: "#777" },
   errorText: { fontSize: 15, color: "red" },
   emptyFeed: { textAlign: "center", color: "#999", marginTop: 40 },
-  listContent: { paddingHorizontal: 18, paddingTop: 8, paddingBottom: 120 },
+  listContent: { paddingHorizontal: 18, paddingTop: 8 },
   card: { flexDirection: "row", alignItems: "center", paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: "#eee" },
   cardContent: { flex: 1, marginRight: 12 },
   cardTitle: { fontSize: 15, fontWeight: "500", lineHeight: 20 },
