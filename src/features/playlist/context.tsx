@@ -4,7 +4,7 @@ import type { Track, Playlist } from "./storage";
 import {
   getAllTracks, saveTrack, removeTrack, updateTrackPlayCount,
   getDefaultPlaylist, addTrackToPlaylist, removeTrackFromPlaylist,
-  savePlaylistOrder,
+  savePlaylistOrder, removeTracks, removeTracksFromPlaylist,
 } from "./storage";
 
 type PlaylistContextValue = {
@@ -12,6 +12,7 @@ type PlaylistContextValue = {
   playlist: Playlist | null;
   addTrack: (track: Track) => Promise<void>;
   deleteTrack: (trackId: string) => Promise<void>;
+  deleteTracks: (trackIds: string[]) => Promise<void>;
   incrementPlayCount: (trackId: string) => Promise<void>;
   reorderTracks: (newTracks: Track[]) => Promise<void>;
 };
@@ -56,6 +57,16 @@ export function PlaylistProvider({ children }: { children: ReactNode }) {
     setPlaylist((prev) => prev ? { ...prev, trackIds: prev.trackIds.filter((id) => id !== trackId) } : null);
   }, []);
 
+  const deleteTracks = useCallback(async (trackIds: string[]) => {
+    await removeTracks(trackIds);
+    await removeTracksFromPlaylist(trackIds);
+    const idSet = new Set(trackIds);
+    setTracks((prev) => prev.filter((t) => !idSet.has(t.id)));
+    setPlaylist((prev) =>
+      prev ? { ...prev, trackIds: prev.trackIds.filter((id) => !idSet.has(id)) } : null
+    );
+  }, []);
+
   const incrementPlayCount = useCallback(async (trackId: string) => {
     await updateTrackPlayCount(trackId);
     setTracks((prev) => prev.map((t) =>
@@ -71,8 +82,8 @@ export function PlaylistProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<PlaylistContextValue>(() => ({
-    tracks, playlist, addTrack, deleteTrack, incrementPlayCount, reorderTracks,
-  }), [tracks, playlist, addTrack, deleteTrack, incrementPlayCount, reorderTracks]);
+    tracks, playlist, addTrack, deleteTrack, deleteTracks, incrementPlayCount, reorderTracks,
+  }), [tracks, playlist, addTrack, deleteTrack, deleteTracks, incrementPlayCount, reorderTracks]);
 
   return <PlaylistContext.Provider value={value}>{children}</PlaylistContext.Provider>;
 }
