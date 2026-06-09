@@ -42,6 +42,7 @@ export default function PlaylistScreen() {
   const handleBulkDelete = () => {
     if (selectedIds.size === 0) return;
     const count = selectedIds.size;
+    const ids = Array.from(selectedIds);
     Alert.alert(
       `删除 ${count} 首？`,
       `将删除 ${count} 个音频文件，无法恢复。`,
@@ -51,7 +52,6 @@ export default function PlaylistScreen() {
           text: "删除",
           style: "destructive",
           onPress: async () => {
-            const ids = Array.from(selectedIds);
             if (activeTrack && selectedIds.has(activeTrack.id)) {
               stopPlayback();
             }
