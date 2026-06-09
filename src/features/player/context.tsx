@@ -18,6 +18,7 @@ type PlayerContextValue = {
   seekTo: (seconds: number) => void;
   playNext: () => void;
   playPrevious: () => void;
+  stopPlayback: () => void;
 };
 
 const PlayerContext = createContext<PlayerContextValue | null>(null);
@@ -112,6 +113,12 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     player.seekTo(seconds);
   }, [player]);
 
+  const stopPlayback = useCallback(() => {
+    try { player.pause(); } catch {}
+    setActiveTrack(null);
+    setQueue([]);
+  }, [player]);
+
   const currentIndex = useMemo(() => {
     if (!activeTrack) return -1;
     return queue.findIndex((t) => t.id === activeTrack.id);
@@ -133,8 +140,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<PlayerContextValue>(() => ({
     activeTrack, queue, isPlaying, isBuffering, currentTime, duration,
-    playTrack, togglePlayback, seekTo, playNext, playPrevious,
-  }), [activeTrack, queue, isPlaying, isBuffering, currentTime, duration, playTrack, togglePlayback, seekTo, playNext, playPrevious]);
+    playTrack, togglePlayback, seekTo, playNext, playPrevious, stopPlayback,
+  }), [activeTrack, queue, isPlaying, isBuffering, currentTime, duration, playTrack, togglePlayback, seekTo, playNext, playPrevious, stopPlayback]);
 
   return <PlayerContext.Provider value={value}>{children}</PlayerContext.Provider>;
 }
