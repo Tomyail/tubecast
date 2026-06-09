@@ -19,6 +19,7 @@ export default function FeedScreen() {
   const [selectedChannel, setSelectedChannel] = useState<string | null>(null);
   const [showAddChannel, setShowAddChannel] = useState(false);
   const [submittedJobs, setSubmittedJobs] = useState<Record<string, string>>({});
+  const [submittingIds, setSubmittingIds] = useState<Set<string>>(new Set());
   const removeChannel = useRemoveChannel();
   const submitJob = useSubmitJob();
   const { tracks } = usePlaylist();
@@ -29,11 +30,18 @@ export default function FeedScreen() {
     : videos;
 
   const handleConvert = async (video: FeedItemWithStatus) => {
+    setSubmittingIds((prev) => new Set(prev).add(video.platformItemId));
     try {
       const result = await submitJob.mutateAsync(video.sourceUrl);
       setSubmittedJobs((prev) => ({ ...prev, [video.platformItemId]: result.id }));
     } catch (err: any) {
       Alert.alert("Error", err.message);
+    } finally {
+      setSubmittingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(video.platformItemId);
+        return next;
+      });
     }
   };
 
@@ -124,7 +132,7 @@ export default function FeedScreen() {
                 playTrack(track, tracks);
                 navigation.navigate("Player", { jobId: track.jobId });
               }}
-              isSubmitting={submitJob.isPending}
+              isSubmitting={submittingIds.has(item.platformItemId)}
             />
           )}
           refreshing={isLoading}
@@ -153,12 +161,16 @@ function VideoCard({
   isSubmitting: boolean;
 }) {
   const { downloadState, job } = useDownloadReadyJob(jobId);
-  const track = jobId ? allTracks.find((t) => t.jobId === jobId) ?? null : null;
+  const track =
+    (jobId ? allTracks.find((t) => t.jobId === jobId) : null) ??
+    allTracks.find((t) => t.sourceUrl === video.sourceUrl) ??
+    null;
 
   const status = jobId
     ? track !== null ? "ready"
     : job?.status === "failed" || downloadState === "error" ? "failed"
     : "converting"
+    : track !== null ? "ready"
     : video.status;
 
   return (
