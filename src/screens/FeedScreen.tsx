@@ -9,7 +9,14 @@ import { usePlayer } from "../features/player/context";
 import type { Track } from "../features/playlist/storage";
 import type { FeedItemWithStatus } from "../features/youtubeFeed/types";
 import type { RootStackParamList } from "../app/navigation/types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import {
+  getSubmittedFeedJobs,
+  saveSubmittedFeedJob,
+  removeSubmittedFeedJob,
+  type SubmittedFeedJob,
+} from "../features/youtubeFeed/submittedJobsStorage";
+import { getFeedProgressLabel } from "../features/jobs/progress";
 import AddChannelScreen from "./AddChannelScreen";
 
 const BOTTOM_WITH_PLAYER = 120;
@@ -21,8 +28,14 @@ export default function FeedScreen() {
   const { data: videos = [], isLoading, error, refetch } = useFeedVideos();
   const [selectedChannel, setSelectedChannel] = useState<string | null>(null);
   const [showAddChannel, setShowAddChannel] = useState(false);
-  const [submittedJobs, setSubmittedJobs] = useState<Record<string, string>>({});
+  const [submittedJobs, setSubmittedJobs] = useState<Record<string, SubmittedFeedJob>>({});
   const [submittingIds, setSubmittingIds] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    getSubmittedFeedJobs().then((jobs) => {
+      setSubmittedJobs(jobs);
+    });
+  }, []);
+
   const removeChannel = useRemoveChannel();
   const submitJob = useSubmitJob();
   const { tracks } = usePlaylist();
@@ -36,7 +49,13 @@ export default function FeedScreen() {
     setSubmittingIds((prev) => new Set(prev).add(video.platformItemId));
     try {
       const result = await submitJob.mutateAsync(video.sourceUrl);
-      setSubmittedJobs((prev) => ({ ...prev, [video.platformItemId]: result.id }));
+      const jobEntry: SubmittedFeedJob = {
+        jobId: result.id,
+        sourceUrl: video.sourceUrl,
+        submittedAt: new Date().toISOString(),
+      };
+      await saveSubmittedFeedJob(video.platformItemId, jobEntry);
+      setSubmittedJobs((prev) => ({ ...prev, [video.platformItemId]: jobEntry }));
     } catch (err: any) {
       Alert.alert("Error", err.message);
     } finally {
@@ -128,7 +147,7 @@ export default function FeedScreen() {
           renderItem={({ item }) => (
             <VideoCard
               video={item}
-              jobId={submittedJobs[item.platformItemId] ?? null}
+              jobId={submittedJobs[item.platformItemId]?.jobId ?? null}
               allTracks={tracks}
               onConvert={handleConvert}
               onPlay={(track) => {
@@ -136,6 +155,14 @@ export default function FeedScreen() {
                 navigation.navigate("Player", { jobId: track.jobId });
               }}
               isSubmitting={submittingIds.has(item.platformItemId)}
+              onTerminal={(platformItemId: string) => {
+                removeSubmittedFeedJob(platformItemId);
+                setSubmittedJobs((prev) => {
+                  const next = { ...prev };
+                  delete next[platformItemId];
+                  return next;
+                });
+              }}
             />
           )}
           refreshing={isLoading}
@@ -155,6 +182,7 @@ function VideoCard({
   onConvert,
   onPlay,
   isSubmitting,
+  onTerminal,
 }: {
   video: FeedItemWithStatus;
   jobId: string | null;
@@ -162,6 +190,7 @@ function VideoCard({
   onConvert: (v: FeedItemWithStatus) => void;
   onPlay: (track: Track) => void;
   isSubmitting: boolean;
+  onTerminal: (platformItemId: string) => void;
 }) {
   const { downloadState, job } = useDownloadReadyJob(jobId);
   const track =
@@ -175,6 +204,18 @@ function VideoCard({
     : "converting"
     : track !== null ? "ready"
     : video.status;
+
+  useEffect(() => {
+    if (!jobId) return;
+    const isTerminal =
+      track !== null ||
+      downloadState === "done" ||
+      job?.status === "failed" ||
+      job?.status === "expired";
+    if (isTerminal) {
+      onTerminal(video.platformItemId);
+    }
+  }, [jobId, track, downloadState, job?.status]);
 
   return (
     <View style={styles.card}>
@@ -193,7 +234,11 @@ function VideoCard({
       )}
       {status === "converting" && (
         <View style={styles.actionButton}>
-          <ActivityIndicator size="small" />
+          <Text style={styles.phaseLabel}>
+            {getFeedProgressLabel(
+              job ?? { status: "queued", progressPhase: null, attemptCount: 0, lastErrorMessage: null }
+            ).label}
+          </Text>
         </View>
       )}
       {status === "ready" && track && (
@@ -251,6 +296,7 @@ const styles = StyleSheet.create({
   playButton: { backgroundColor: "#4CAF50" },
   actionText: { color: "#fff", fontSize: 13, fontWeight: "600" },
   disabled: { opacity: 0.5 },
+  phaseLabel: { fontSize: 11, color: "#FF6B35", fontWeight: "600", textAlign: "center" },
   addChannelButton: { marginTop: 20, backgroundColor: "#FF6B35", paddingHorizontal: 28, paddingVertical: 12, borderRadius: 8 },
   addChannelButtonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
 });

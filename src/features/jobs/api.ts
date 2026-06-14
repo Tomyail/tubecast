@@ -1,5 +1,13 @@
 import { SERVER_URL } from "../settings/storage";
 
+export type JobProgressPhase =
+  | "queued"
+  | "starting"
+  | "downloading"
+  | "transcoding"
+  | "uploading"
+  | "ready";
+
 export interface JobResponse {
   id: string;
   status: "queued" | "processing" | "ready" | "failed" | "expired";
@@ -17,6 +25,8 @@ export interface JobResponse {
   createdAt: string;
   startedAt: string | null;
   finishedAt: string | null;
+  progressPhase?: JobProgressPhase | string | null;
+  progressUpdatedAt?: string | null;
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {

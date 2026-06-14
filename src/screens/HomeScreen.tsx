@@ -4,8 +4,17 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import Screen from "../components/Screen";
 import { useSubmitJob, useDownloadReadyJob, useJobStatus } from "../features/jobs/hooks";
+import { getHomeProgressInfo, PROGRESS_STEPS } from "../features/jobs/progress";
 
 const PENDING_JOB_KEY = "pending_job_id";
+
+const PHASE_LABELS: Record<string, string> = {
+  downloading: "下载",
+  transcoding: "转码",
+  uploading: "保存",
+  starting: "准备",
+  queued: "排队",
+};
 
 export default function HomeScreen() {
   const [url, setUrl] = useState("");
@@ -71,26 +80,6 @@ export default function HomeScreen() {
         )}
       </Pressable>
 
-      {downloadState === "idle" && jobId && (
-        <View style={styles.statusBox}>
-          <ActivityIndicator size="large" />
-          <Text style={styles.statusText}>Converting...</Text>
-        </View>
-      )}
-
-      {downloadState === "downloading" && (
-        <View style={styles.statusBox}>
-          <ActivityIndicator size="large" />
-          <Text style={styles.statusText}>Downloading audio...</Text>
-        </View>
-      )}
-
-      {downloadState === "done" && (
-        <View style={styles.statusBox}>
-          <Text style={styles.readyText}>Done! Added to your playlist.</Text>
-        </View>
-      )}
-
       {downloadState === "error" && (
         <View style={styles.statusBox}>
           <Text style={styles.errorText}>Download failed: {downloadError}</Text>
@@ -102,7 +91,10 @@ export default function HomeScreen() {
 
       {job?.status === "failed" && downloadState === "idle" && (
         <View style={styles.statusBox}>
-          <Text style={styles.errorText}>Conversion failed: {job.errorMessage ?? "Unknown error"}</Text>
+          <Text style={styles.errorText}>转换失败</Text>
+          {job.progressPhase != null && job.progressPhase !== "" && PHASE_LABELS[job.progressPhase] && (
+            <Text style={styles.statusText}>{`失败发生在${PHASE_LABELS[job.progressPhase]}阶段`}</Text>
+          )}
         </View>
       )}
 
@@ -111,6 +103,26 @@ export default function HomeScreen() {
           <Text style={styles.errorText}>Audio has expired. Please submit the URL again.</Text>
         </View>
       )}
+
+      {((jobId && job != null) || downloadState === "downloading" || downloadState === "done") && downloadState !== "error" && job?.status !== "failed" && job?.status !== "expired" && (() => {
+        const { title, detail, activeStep } = getHomeProgressInfo(
+          job ?? { status: "queued", progressPhase: null, attemptCount: 0, lastErrorMessage: null },
+          downloadState,
+        );
+        return (
+          <View style={styles.statusBox}>
+            <Text style={styles.progressTitle}>{title}</Text>
+            <Text style={styles.progressDetail}>{detail}</Text>
+            <View style={styles.stepsRow}>
+              {PROGRESS_STEPS.map((step, i) => (
+                <View key={step} style={[styles.stepItem, i <= activeStep && styles.stepActive]}>
+                  <Text style={[styles.stepText, i <= activeStep && styles.stepTextActive]}>{step}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        );
+      })()}
     </Screen>
   );
 }
@@ -126,8 +138,14 @@ const styles = StyleSheet.create({
   disabled: { opacity: 0.5 },
   statusBox: { marginTop: 24, alignItems: "center", gap: 12 },
   statusText: { fontSize: 16, color: "#666" },
-  readyText: { fontSize: 16, color: "green", fontWeight: "600", textAlign: "center" },
   errorText: { fontSize: 16, color: "red", textAlign: "center" },
   retryButton: { backgroundColor: "#FF6B35", paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8 },
   retryText: { color: "#fff", fontWeight: "600" },
+  progressTitle: { fontSize: 18, fontWeight: "bold" },
+  progressDetail: { fontSize: 14, color: "#888" },
+  stepsRow: { flexDirection: "row", gap: 4, marginTop: 12 },
+  stepItem: { flex: 1, paddingVertical: 6, backgroundColor: "#eee", borderRadius: 4, alignItems: "center" },
+  stepActive: { backgroundColor: "#FF6B35" },
+  stepText: { fontSize: 11, color: "#999" },
+  stepTextActive: { color: "#fff", fontWeight: "600" },
 });
