@@ -8,6 +8,7 @@ export default function PlayerScreen() {
   const {
     activeTrack,
     isPlaying,
+    playbackLoading,
     currentTime,
     duration,
     playbackSource,
@@ -61,7 +62,7 @@ export default function PlayerScreen() {
           <Text style={styles.title} numberOfLines={2}>{activeTrack.title}</Text>
         </Pressable>
         <Text style={styles.time}>
-          {formatTime(currentTime)} / {formatTime(duration)}
+          {playbackLoading ? "正在加载音频..." : `${formatTime(currentTime)} / ${formatTime(duration)}`}
         </Text>
         <Text style={styles.sourceStatus}>{sourceLabel}</Text>
         {playbackError && <Text style={styles.errorText}>{playbackError}</Text>}

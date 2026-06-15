@@ -16,6 +16,7 @@ type PlayerContextValue = {
   queue: Track[];
   isPlaying: boolean;
   isBuffering: boolean;
+  playbackLoading: boolean;
   currentTime: number;
   duration: number;
   playbackSource: PlaybackSource | null;
@@ -54,12 +55,17 @@ export function playbackErrorMessage(err: unknown): string {
   return "播放失败，请重试";
 }
 
+export function isAudioMetadataReady(duration: number, currentTime: number): boolean {
+  return duration > 0 || currentTime > 0;
+}
+
 export function PlayerProvider({ children }: { children: ReactNode }) {
   const { tracks, addTrack, incrementPlayCount } = usePlaylist();
   const [activeTrack, setActiveTrack] = useState<Track | null>(null);
   const [queue, setQueue] = useState<Track[]>([]);
   const [playbackSource, setPlaybackSource] = useState<PlaybackSource | null>(null);
   const [playbackError, setPlaybackError] = useState<string | null>(null);
+  const [playbackLoading, setPlaybackLoading] = useState(false);
   const player = useAudioPlayer("");
   const status = useAudioPlayerStatus(player);
   const lastSaveRef = useRef(0);
@@ -96,6 +102,16 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     }
   }, [status?.didJustFinish]);
 
+  useEffect(() => {
+    if (!activeTrack || playbackError) {
+      setPlaybackLoading(false);
+      return;
+    }
+    if (playbackLoading && isAudioMetadataReady(duration, currentTime)) {
+      setPlaybackLoading(false);
+    }
+  }, [activeTrack, currentTime, duration, playbackError, playbackLoading]);
+
   const ensureCacheForTrack = useCallback((track: Track) => {
     void getJob(track.jobId).then(async (job) => {
       if (job.status !== "ready") return;
@@ -115,6 +131,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     setActiveTrack(track);
     setPlaybackSource(null);
     setPlaybackError(null);
+    setPlaybackLoading(true);
     ensureCacheForTrack(track);
 
     // Resume from saved position
@@ -141,6 +158,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       if (requestId === playRequestRef.current) {
         setPlaybackError(playbackErrorMessage(err));
         setPlaybackSource(null);
+        setPlaybackLoading(false);
       }
       return;
     }
@@ -154,6 +172,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       if (requestId === playRequestRef.current) {
         setPlaybackError(playbackErrorMessage(err));
         setPlaybackSource(null);
+        setPlaybackLoading(false);
       }
       return;
     }
@@ -186,6 +205,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         try {
           player.replace(localUri);
           setPlaybackSource("local");
+          setPlaybackLoading(true);
           if (position > 0) player.seekTo(position);
           player.play();
           return;
@@ -213,6 +233,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     setQueue([]);
     setPlaybackSource(null);
     setPlaybackError(null);
+    setPlaybackLoading(false);
   }, [player]);
 
   const currentIndex = useMemo(() => {
@@ -235,9 +256,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, [currentIndex, queue, playTrack, currentTime, player]);
 
   const value = useMemo<PlayerContextValue>(() => ({
-    activeTrack, queue, isPlaying, isBuffering, currentTime, duration, playbackSource, playbackError,
+    activeTrack, queue, isPlaying, isBuffering, playbackLoading, currentTime, duration, playbackSource, playbackError,
     playTrack, togglePlayback, seekTo, playNext, playPrevious, stopPlayback,
-  }), [activeTrack, queue, isPlaying, isBuffering, currentTime, duration, playbackSource, playbackError, playTrack, togglePlayback, seekTo, playNext, playPrevious, stopPlayback]);
+  }), [activeTrack, queue, isPlaying, isBuffering, playbackLoading, currentTime, duration, playbackSource, playbackError, playTrack, togglePlayback, seekTo, playNext, playPrevious, stopPlayback]);
 
   return <PlayerContext.Provider value={value}>{children}</PlayerContext.Provider>;
 }

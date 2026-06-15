@@ -46,7 +46,7 @@ vi.mock("expo-file-system", () => ({
   },
 }));
 
-const { playbackErrorMessage, resolveCachedLocalUri, resolveTrackSource } = await import(
+const { isAudioMetadataReady, playbackErrorMessage, resolveCachedLocalUri, resolveTrackSource } = await import(
   "../../src/features/player/context"
 );
 
@@ -103,5 +103,11 @@ describe("player source resolution", () => {
 
   it("maps expired remote playback without local cache to a reconvert message", () => {
     expect(playbackErrorMessage(new AudioExpiredError("expired"))).toBe("音频已过期，请重新转换");
+  });
+
+  it("treats 0:00 / 0:00 as not ready while audio metadata is still loading", () => {
+    expect(isAudioMetadataReady(0, 0)).toBe(false);
+    expect(isAudioMetadataReady(120, 0)).toBe(true);
+    expect(isAudioMetadataReady(0, 1)).toBe(true);
   });
 });
