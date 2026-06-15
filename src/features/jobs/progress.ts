@@ -1,6 +1,7 @@
 import type { JobProgressPhase, JobResponse } from "./api";
 
 export type DownloadState = "idle" | "downloading" | "done" | "error";
+export type CacheProgressState = "idle" | "caching" | "cached" | "error";
 
 export interface HomeProgressInfo {
   title: string;
@@ -12,7 +13,7 @@ export interface FeedProgressLabel {
   label: string;
 }
 
-export const PROGRESS_STEPS = ["排队", "下载", "转码", "保存", "到手机"] as const;
+export const PROGRESS_STEPS = ["排队", "下载", "转码", "保存", "可播放"] as const;
 
 const KNOWN_PHASES: JobProgressPhase[] = [
   "queued",
@@ -52,14 +53,16 @@ export function getHomeProgressInfo(
     JobResponse,
     "status" | "progressPhase" | "attemptCount" | "lastErrorMessage"
   >,
-  downloadState: DownloadState,
+  cacheState: CacheProgressState,
 ): HomeProgressInfo {
-  // downloadState takes priority for the final two steps
-  if (downloadState === "downloading") {
-    return { title: "下载到手机", detail: "正在保存到本机播放列表", activeStep: 4 };
+  if (cacheState === "caching") {
+    return { title: "可播放", detail: "正在后台缓存到手机", activeStep: 4 };
   }
-  if (downloadState === "done") {
-    return { title: "已完成", detail: "已加入播放列表", activeStep: 4 };
+  if (cacheState === "cached") {
+    return { title: "已缓存", detail: "可离线播放", activeStep: 4 };
+  }
+  if (cacheState === "error") {
+    return { title: "可播放", detail: "缓存失败，仍可在线播放", activeStep: 4 };
   }
 
   const phase = normalizeProgressPhase(job);
@@ -79,7 +82,7 @@ export function getHomeProgressInfo(
     case "uploading":
       return { title: "保存中", detail: "正在保存音频文件", activeStep: 3 };
     case "ready":
-      return { title: "已完成", detail: "已加入播放列表", activeStep: 4 };
+      return { title: "可播放", detail: "可在线播放，正在准备本机缓存", activeStep: 4 };
     default: {
       const _exhaustive: never = phase;
       void _exhaustive;

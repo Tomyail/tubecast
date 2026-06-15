@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { Track, Playlist } from "./storage";
 import {
-  getAllTracks, saveTrack, removeTrack, updateTrackPlayCount,
+  getAllTracks, getTrack, saveTrack, removeTrack, updateTrackPlayCount,
   getDefaultPlaylist, addTrackToPlaylist, removeTrackFromPlaylist,
   savePlaylistOrder, removeTracks, removeTracksFromPlaylist,
 } from "./storage";
@@ -18,6 +18,25 @@ type PlaylistContextValue = {
 };
 
 const PlaylistContext = createContext<PlaylistContextValue | null>(null);
+
+function mergeTrack(existing: Track | undefined, incoming: Track): Track {
+  if (!existing) return incoming;
+  const incomingHasLocalCache = incoming.cacheStatus === "cached" && incoming.localPath != null;
+  const keepExistingLocalCache = existing.cacheStatus === "cached" && !incomingHasLocalCache;
+
+  return {
+    ...existing,
+    ...incoming,
+    playCount: Math.max(existing.playCount, incoming.playCount),
+    lastPlayedAt: incoming.lastPlayedAt ?? existing.lastPlayedAt,
+    localPath: keepExistingLocalCache ? existing.localPath : incoming.localPath,
+    localFilename: keepExistingLocalCache ? existing.localFilename : incoming.localFilename,
+    fileSize: incoming.fileSize ?? existing.fileSize,
+    downloadedAt: keepExistingLocalCache ? existing.downloadedAt : incoming.downloadedAt,
+    cacheStatus: keepExistingLocalCache ? existing.cacheStatus : incoming.cacheStatus,
+    cacheError: keepExistingLocalCache ? existing.cacheError : incoming.cacheError,
+  };
+}
 
 export function PlaylistProvider({ children }: { children: ReactNode }) {
   const [tracks, setTracks] = useState<Track[]>([]);
@@ -40,15 +59,20 @@ export function PlaylistProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const addTrack = useCallback(async (track: Track) => {
-    await saveTrack(track);
+    const existingTrack = tracks.find((t) => t.id === track.id);
+    const persistedTrack = await getTrack(track.id);
+    const savedTrack = mergeTrack(persistedTrack ?? existingTrack, track);
+    await saveTrack(savedTrack);
     const updated = await addTrackToPlaylist(track.id);
-    setTracks((prev) =>
-      prev.some((t) => t.id === track.id)
-        ? prev.map((t) => (t.id === track.id ? track : t))
-        : [...prev, track]
-    );
+    setTracks((prev) => {
+      const existing = prev.find((t) => t.id === track.id);
+      const merged = mergeTrack(existing, savedTrack);
+      return existing
+        ? prev.map((t) => (t.id === track.id ? merged : t))
+        : [...prev, savedTrack];
+    });
     setPlaylist(updated);
-  }, []);
+  }, [tracks]);
 
   const deleteTrack = useCallback(async (trackId: string) => {
     await removeTrack(trackId);

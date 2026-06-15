@@ -1,4 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Directory, File, Paths } from "expo-file-system";
+
+export type TrackCacheStatus = "none" | "caching" | "cached" | "failed";
 
 export interface Track {
   id: string;
@@ -6,12 +9,14 @@ export interface Track {
   title: string;
   durationSeconds: number;
   thumbnailUrl: string;
-  localPath: string;
-  localFilename?: string;
+  localPath: string | null;
+  localFilename?: string | null;
   sourceUrl: string;
-  fileSize: number;
+  fileSize: number | null;
   contentType: string;
-  downloadedAt: string;
+  downloadedAt: string | null;
+  cacheStatus: TrackCacheStatus;
+  cacheError?: string | null;
   playCount: number;
   lastPlayedAt: string | null;
 }
@@ -28,9 +33,66 @@ const PLAYLISTS_KEY = "playlists";
 
 // --- Tracks ---
 
+function localFileExists(track: Pick<Track, "localPath" | "localFilename">): boolean {
+  const filename =
+    track.localFilename ||
+    (track.localPath ? decodeURIComponent(track.localPath.split("/").pop() || "") : "");
+  if (!filename) return false;
+  try {
+    return new File(new Directory(Paths.document, "audio"), filename).exists;
+  } catch {
+    return false;
+  }
+}
+
+function normalizeTrack(rawTrack: Partial<Track> & { id: string; jobId: string }): Track {
+  const hadCacheStatus = rawTrack.cacheStatus != null;
+  const cacheStatus =
+    rawTrack.cacheStatus ??
+    (rawTrack.localPath ? "cached" : "none");
+
+  const track: Track = {
+    id: rawTrack.id,
+    jobId: rawTrack.jobId,
+    title: rawTrack.title || "Unknown",
+    durationSeconds: rawTrack.durationSeconds || 0,
+    thumbnailUrl: rawTrack.thumbnailUrl || "",
+    localPath: rawTrack.localPath ?? null,
+    localFilename: rawTrack.localFilename ?? null,
+    sourceUrl: rawTrack.sourceUrl || "",
+    fileSize: rawTrack.fileSize ?? null,
+    contentType: rawTrack.contentType || "audio/mp4",
+    downloadedAt: rawTrack.downloadedAt ?? null,
+    cacheStatus: cacheStatus === "caching" ? "none" : cacheStatus,
+    cacheError: rawTrack.cacheError ?? null,
+    playCount: rawTrack.playCount || 0,
+    lastPlayedAt: rawTrack.lastPlayedAt ?? null,
+  };
+
+  if (track.cacheStatus === "cached") {
+    const shouldVerify = hadCacheStatus || track.localFilename != null;
+    if (!track.localPath || (shouldVerify && !localFileExists(track))) {
+      return {
+        ...track,
+        localPath: null,
+        localFilename: null,
+        downloadedAt: null,
+        cacheStatus: "none",
+        cacheError: null,
+      };
+    }
+  }
+
+  return track;
+}
+
 async function loadAllTracks(): Promise<Record<string, Track>> {
   const raw = await AsyncStorage.getItem(TRACKS_KEY);
-  return raw ? JSON.parse(raw) : {};
+  if (!raw) return {};
+  const parsed = JSON.parse(raw) as Record<string, Partial<Track> & { id: string; jobId: string }>;
+  return Object.fromEntries(
+    Object.entries(parsed).map(([id, track]) => [id, normalizeTrack(track)])
+  );
 }
 
 async function saveAllTracks(tracks: Record<string, Track>): Promise<void> {

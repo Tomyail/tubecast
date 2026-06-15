@@ -113,18 +113,18 @@ describe("getHomeProgressInfo — retry", () => {
   });
 });
 
-describe("getHomeProgressInfo — downloadState overrides", () => {
-  it("downloadState=downloading overrides any phase → 下载到手机, activeStep 4", () => {
+describe("getHomeProgressInfo — cacheState overrides", () => {
+  it("cacheState=caching overrides any phase → 可播放, activeStep 4", () => {
     const job = makeJob({ progressPhase: "uploading" });
-    const info = getHomeProgressInfo(job, "downloading");
-    expect(info.title).toBe("下载到手机");
+    const info = getHomeProgressInfo(job, "caching");
+    expect(info.title).toBe("可播放");
     expect(info.activeStep).toBe(4);
   });
 
-  it("downloadState=done → 已完成, activeStep 4", () => {
+  it("cacheState=cached → 已缓存, activeStep 4", () => {
     const job = makeJob({ progressPhase: "uploading" });
-    const info = getHomeProgressInfo(job, "done");
-    expect(info.title).toBe("已完成");
+    const info = getHomeProgressInfo(job, "cached");
+    expect(info.title).toBe("已缓存");
     expect(info.activeStep).toBe(4);
   });
 });

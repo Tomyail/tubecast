@@ -39,6 +39,15 @@ export default function PlaylistScreen() {
     setSelectedIds(allSelected ? new Set() : new Set(tracks.map((t) => t.id)));
   };
 
+  const deleteCachedFile = (track: Track) => {
+    const filename =
+      track.localFilename ||
+      (track.localPath ? decodeURIComponent(track.localPath.split("/").pop() || "") : "");
+    if (!filename) return;
+    const file = new File(new Directory(Paths.document, "audio"), filename);
+    if (file.exists) file.delete();
+  };
+
   const handleBulkDelete = () => {
     if (selectedIds.size === 0) return;
     const count = selectedIds.size;
@@ -59,13 +68,7 @@ export default function PlaylistScreen() {
               const track = tracks.find((t) => t.id === id);
               if (track) {
                 try {
-                  const filename =
-                    track.localFilename ||
-                    decodeURIComponent(track.localPath.split("/").pop() || "");
-                  if (filename) {
-                    const file = new File(new Directory(Paths.document, "audio"), filename);
-                    if (file.exists) file.delete();
-                  }
+                  deleteCachedFile(track);
                 } catch {}
               }
             }
@@ -92,13 +95,7 @@ export default function PlaylistScreen() {
           style: "destructive",
           onPress: async () => {
             try {
-              const filename =
-                track.localFilename ||
-                decodeURIComponent(track.localPath.split("/").pop() || "");
-              if (filename) {
-                const file = new File(new Directory(Paths.document, "audio"), filename);
-                if (file.exists) file.delete();
-              }
+              deleteCachedFile(track);
             } catch {}
             await deleteTrack(track.id);
           },

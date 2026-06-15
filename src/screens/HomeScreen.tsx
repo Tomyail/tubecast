@@ -1,10 +1,16 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import * as Clipboard from "expo-clipboard";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import type { RootStackParamList } from "../app/navigation/types";
 import Screen from "../components/Screen";
-import { useSubmitJob, useDownloadReadyJob, useJobStatus } from "../features/jobs/hooks";
+import { useSubmitJob, useCacheReadyJob, useJobStatus } from "../features/jobs/hooks";
 import { getHomeProgressInfo, PROGRESS_STEPS } from "../features/jobs/progress";
+import { trackFromReadyJob } from "../features/jobs/track";
+import { usePlayer } from "../features/player/context";
+import { usePlaylist } from "../features/playlist/context";
 
 const PENDING_JOB_KEY = "pending_job_id";
 
@@ -17,11 +23,17 @@ const PHASE_LABELS: Record<string, string> = {
 };
 
 export default function HomeScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [url, setUrl] = useState("");
   const [jobId, setJobId] = useState<string | null>(null);
   const submit = useSubmitJob();
   const { data: job } = useJobStatus(jobId);
-  const { downloadState, downloadError, retry } = useDownloadReadyJob(jobId);
+  const { cacheState, cacheError, retryCache } = useCacheReadyJob(jobId);
+  const { tracks } = usePlaylist();
+  const { playTrack } = usePlayer();
+  const playableTrack =
+    (jobId ? tracks.find((track) => track.jobId === jobId) : null) ??
+    (job?.status === "ready" ? trackFromReadyJob(job) : null);
 
   useEffect(() => {
     AsyncStorage.getItem(PENDING_JOB_KEY).then((id) => {
@@ -30,10 +42,10 @@ export default function HomeScreen() {
   }, []);
 
   useEffect(() => {
-    if (downloadState === "done" || job?.status === "failed" || job?.status === "expired") {
+    if (job?.status === "ready" || job?.status === "failed" || job?.status === "expired") {
       AsyncStorage.removeItem(PENDING_JOB_KEY);
     }
-  }, [downloadState, job?.status]);
+  }, [job?.status]);
 
   const handleSubmit = async () => {
     if (!url.trim()) return;
@@ -80,16 +92,16 @@ export default function HomeScreen() {
         )}
       </Pressable>
 
-      {downloadState === "error" && (
+      {cacheState === "error" && job?.status === "ready" && (
         <View style={styles.statusBox}>
-          <Text style={styles.errorText}>Download failed: {downloadError}</Text>
-          <Pressable style={styles.retryButton} onPress={retry}>
-            <Text style={styles.retryText}>Retry</Text>
+          <Text style={styles.errorText}>缓存失败：{cacheError}</Text>
+          <Pressable style={styles.retryButton} onPress={retryCache}>
+            <Text style={styles.retryText}>重试缓存</Text>
           </Pressable>
         </View>
       )}
 
-      {job?.status === "failed" && downloadState === "idle" && (
+      {job?.status === "failed" && (
         <View style={styles.statusBox}>
           <Text style={styles.errorText}>转换失败</Text>
           {job.progressPhase != null && job.progressPhase !== "" && PHASE_LABELS[job.progressPhase] && (
@@ -98,21 +110,32 @@ export default function HomeScreen() {
         </View>
       )}
 
-      {job?.status === "expired" && downloadState === "idle" && (
+      {job?.status === "expired" && (
         <View style={styles.statusBox}>
           <Text style={styles.errorText}>Audio has expired. Please submit the URL again.</Text>
         </View>
       )}
 
-      {((jobId && job != null) || downloadState === "downloading" || downloadState === "done") && downloadState !== "error" && job?.status !== "failed" && job?.status !== "expired" && (() => {
+      {((jobId && job != null) || cacheState === "caching" || cacheState === "cached") && job?.status !== "failed" && job?.status !== "expired" && (() => {
         const { title, detail, activeStep } = getHomeProgressInfo(
           job ?? { status: "queued", progressPhase: null, attemptCount: 0, lastErrorMessage: null },
-          downloadState,
+          cacheState,
         );
         return (
           <View style={styles.statusBox}>
             <Text style={styles.progressTitle}>{title}</Text>
             <Text style={styles.progressDetail}>{detail}</Text>
+            {playableTrack && (
+              <Pressable
+                style={styles.playButton}
+                onPress={() => {
+                  void playTrack(playableTrack, tracks);
+                  navigation.navigate("Player", { jobId: playableTrack.jobId });
+                }}
+              >
+                <Text style={styles.playText}>Play</Text>
+              </Pressable>
+            )}
             <View style={styles.stepsRow}>
               {PROGRESS_STEPS.map((step, i) => (
                 <View key={step} style={[styles.stepItem, i <= activeStep && styles.stepActive]}>
@@ -141,6 +164,8 @@ const styles = StyleSheet.create({
   errorText: { fontSize: 16, color: "red", textAlign: "center" },
   retryButton: { backgroundColor: "#FF6B35", paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8 },
   retryText: { color: "#fff", fontWeight: "600" },
+  playButton: { backgroundColor: "#4CAF50", paddingHorizontal: 28, paddingVertical: 12, borderRadius: 8 },
+  playText: { color: "#fff", fontWeight: "600", fontSize: 16 },
   progressTitle: { fontSize: 18, fontWeight: "bold" },
   progressDetail: { fontSize: 14, color: "#888" },
   stepsRow: { flexDirection: "row", gap: 4, marginTop: 12 },

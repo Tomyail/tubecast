@@ -3,7 +3,8 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import Screen from "../components/Screen";
 import { useFeedVideos, useSubscribedChannels, useRemoveChannel } from "../features/youtubeFeed/hooks";
-import { useSubmitJob, useDownloadReadyJob } from "../features/jobs/hooks";
+import { useSubmitJob, useCacheReadyJob } from "../features/jobs/hooks";
+import { trackFromReadyJob } from "../features/jobs/track";
 import { usePlaylist } from "../features/playlist/context";
 import { usePlayer } from "../features/player/context";
 import type { Track } from "../features/playlist/storage";
@@ -192,15 +193,16 @@ function VideoCard({
   isSubmitting: boolean;
   onTerminal: (platformItemId: string) => void;
 }) {
-  const { downloadState, job } = useDownloadReadyJob(jobId);
+  const { cacheState, job } = useCacheReadyJob(jobId);
   const track =
     (jobId ? allTracks.find((t) => t.jobId === jobId) : null) ??
     allTracks.find((t) => t.sourceUrl === video.sourceUrl) ??
     null;
+  const playableTrack = track ?? (job?.status === "ready" ? trackFromReadyJob(job) : null);
 
   const status = jobId
-    ? track !== null ? "ready"
-    : job?.status === "failed" || downloadState === "error" ? "failed"
+    ? track !== null || job?.status === "ready" ? "ready"
+    : job?.status === "failed" || job?.status === "expired" ? "failed"
     : "converting"
     : track !== null ? "ready"
     : video.status;
@@ -209,13 +211,12 @@ function VideoCard({
     if (!jobId) return;
     const isTerminal =
       track !== null ||
-      downloadState === "done" ||
       job?.status === "failed" ||
       job?.status === "expired";
     if (isTerminal) {
       onTerminal(video.platformItemId);
     }
-  }, [jobId, track, downloadState, job?.status]);
+  }, [jobId, track, job?.status]);
 
   return (
     <View style={styles.card}>
@@ -241,13 +242,17 @@ function VideoCard({
           </Text>
         </View>
       )}
-      {status === "ready" && track && (
-        <Pressable
-          style={[styles.actionButton, styles.playButton]}
-          onPress={() => onPlay(track)}
-        >
-          <Text style={styles.actionText}>Play</Text>
-        </Pressable>
+      {status === "ready" && playableTrack && (
+        <View style={styles.readyActions}>
+          {cacheState === "caching" && <Text style={styles.cacheLabel}>缓存中</Text>}
+          {cacheState === "error" && <Text style={styles.cacheLabel}>缓存失败</Text>}
+          <Pressable
+            style={[styles.actionButton, styles.playButton]}
+            onPress={() => onPlay(playableTrack)}
+          >
+            <Text style={styles.actionText}>Play</Text>
+          </Pressable>
+        </View>
       )}
       {status === "failed" && (
         <Pressable
@@ -297,6 +302,8 @@ const styles = StyleSheet.create({
   actionText: { color: "#fff", fontSize: 13, fontWeight: "600" },
   disabled: { opacity: 0.5 },
   phaseLabel: { fontSize: 11, color: "#FF6B35", fontWeight: "600", textAlign: "center" },
+  readyActions: { alignItems: "center", gap: 4 },
+  cacheLabel: { fontSize: 11, color: "#888", fontWeight: "600" },
   addChannelButton: { marginTop: 20, backgroundColor: "#FF6B35", paddingHorizontal: 28, paddingVertical: 12, borderRadius: 8 },
   addChannelButtonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
 });
