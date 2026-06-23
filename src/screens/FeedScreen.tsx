@@ -19,11 +19,13 @@ import {
 } from "../features/youtubeFeed/submittedJobsStorage";
 import { getFeedProgressLabel } from "../features/jobs/progress";
 import AddChannelScreen from "./AddChannelScreen";
+import { useTranslation } from "../i18n";
 
 const BOTTOM_WITH_PLAYER = 120;
 const BOTTOM_BASE = 24;
 
 export default function FeedScreen() {
+  const { t } = useTranslation();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { data: channels = [] } = useSubscribedChannels();
   const { data: videos = [], isLoading, error, refetch } = useFeedVideos();
@@ -58,7 +60,7 @@ export default function FeedScreen() {
       await saveSubmittedFeedJob(video.platformItemId, jobEntry);
       setSubmittedJobs((prev) => ({ ...prev, [video.platformItemId]: jobEntry }));
     } catch (err: any) {
-      Alert.alert("Error", err.message);
+      Alert.alert(t("common.error"), t("errors.generic"));
     } finally {
       setSubmittingIds((prev) => {
         const next = new Set(prev);
@@ -69,9 +71,9 @@ export default function FeedScreen() {
   };
 
   const handleRemoveChannel = (channelId: string) => {
-    Alert.alert("Remove Channel", "Remove this channel from your subscriptions?", [
-      { text: "Cancel", style: "cancel" },
-      { text: "Remove", style: "destructive", onPress: () => removeChannel.mutate(channelId) },
+    Alert.alert(t("feed.removeTitle"), t("feed.removeMessage"), [
+      { text: t("common.cancel"), style: "cancel" },
+      { text: t("common.remove"), style: "destructive", onPress: () => removeChannel.mutate(channelId) },
     ]);
   };
 
@@ -88,10 +90,10 @@ export default function FeedScreen() {
     return (
       <Screen>
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyTitle}>No Subscriptions</Text>
-          <Text style={styles.emptyText}>Add a YouTube channel to start browsing.</Text>
+          <Text style={styles.emptyTitle}>{t("feed.noSubscriptions")}</Text>
+          <Text style={styles.emptyText}>{t("feed.addToBrowse")}</Text>
           <Pressable style={styles.addChannelButton} onPress={() => setShowAddChannel(true)}>
-            <Text style={styles.addChannelButtonText}>+ Add Channel</Text>
+            <Text style={styles.addChannelButtonText}>+ {t("feed.addChannel")}</Text>
           </Pressable>
         </View>
       </Screen>
@@ -107,7 +109,7 @@ export default function FeedScreen() {
               style={[styles.pill, !selectedChannel && styles.pillActive]}
               onPress={() => setSelectedChannel(null)}
             >
-              <Text style={[styles.pillText, !selectedChannel && styles.pillTextActive]}>All</Text>
+              <Text style={[styles.pillText, !selectedChannel && styles.pillTextActive]}>{t("feed.all")}</Text>
             </Pressable>
             {channels.map((ch) => (
               <Pressable
@@ -131,13 +133,13 @@ export default function FeedScreen() {
       {isLoading && (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" />
-          <Text style={styles.loadingText}>Loading feed...</Text>
+          <Text style={styles.loadingText}>{t("feed.loading")}</Text>
         </View>
       )}
 
       {error && (
         <View style={styles.loadingContainer}>
-          <Text style={styles.errorText}>Failed to load feed. Pull down to retry.</Text>
+          <Text style={styles.errorText}>{t("feed.loadFailed")}</Text>
         </View>
       )}
 
@@ -168,7 +170,7 @@ export default function FeedScreen() {
           )}
           refreshing={isLoading}
           onRefresh={refetch}
-          ListEmptyComponent={<Text style={styles.emptyFeed}>No videos found</Text>}
+          ListEmptyComponent={<Text style={styles.emptyFeed}>{t("feed.noVideos")}</Text>}
           contentContainerStyle={[styles.listContent, { paddingBottom: activeTrack ? BOTTOM_WITH_PLAYER : BOTTOM_BASE }]}
         />
       )}
@@ -193,6 +195,7 @@ function VideoCard({
   isSubmitting: boolean;
   onTerminal: (platformItemId: string) => void;
 }) {
+  const { t } = useTranslation();
   const { cacheState, job } = useCacheReadyJob(jobId);
   const track =
     (jobId ? allTracks.find((t) => t.jobId === jobId) : null) ??
@@ -222,7 +225,7 @@ function VideoCard({
     <View style={styles.card}>
       <View style={styles.cardContent}>
         <Text style={styles.cardTitle} numberOfLines={2}>{video.title}</Text>
-        <Text style={styles.cardMeta}>{video.sourceTitle} · {formatRelativeTime(video.publishedAt)}</Text>
+        <Text style={styles.cardMeta}>{video.sourceTitle} · {formatRelativeTime(video.publishedAt, t)}</Text>
       </View>
       {status === "new" && (
         <Pressable
@@ -230,7 +233,7 @@ function VideoCard({
           onPress={() => onConvert(video)}
           disabled={isSubmitting}
         >
-          <Text style={styles.actionText}>Convert</Text>
+          <Text style={styles.actionText}>{t("feed.convert")}</Text>
         </Pressable>
       )}
       {status === "converting" && (
@@ -238,19 +241,19 @@ function VideoCard({
           <Text style={styles.phaseLabel}>
             {getFeedProgressLabel(
               job ?? { status: "queued", progressPhase: null, attemptCount: 0, lastErrorMessage: null }
-            ).label}
+            , t).label}
           </Text>
         </View>
       )}
       {status === "ready" && playableTrack && (
         <View style={styles.readyActions}>
-          {cacheState === "caching" && <Text style={styles.cacheLabel}>缓存中</Text>}
-          {cacheState === "error" && <Text style={styles.cacheLabel}>缓存失败</Text>}
+          {cacheState === "caching" && <Text style={styles.cacheLabel}>{t("feed.caching")}</Text>}
+          {cacheState === "error" && <Text style={styles.cacheLabel}>{t("feed.cacheFailed")}</Text>}
           <Pressable
             style={[styles.actionButton, styles.playButton]}
             onPress={() => onPlay(playableTrack)}
           >
-            <Text style={styles.actionText}>Play</Text>
+            <Text style={styles.actionText}>{t("common.play")}</Text>
           </Pressable>
         </View>
       )}
@@ -259,21 +262,21 @@ function VideoCard({
           style={[styles.actionButton, styles.convertButton]}
           onPress={() => onConvert(video)}
         >
-          <Text style={styles.actionText}>Retry</Text>
+          <Text style={styles.actionText}>{t("common.retry")}</Text>
         </Pressable>
       )}
     </View>
   );
 }
 
-function formatRelativeTime(isoDate: string): string {
+function formatRelativeTime(isoDate: string, t: (key: string, options?: { count: number }) => string): string {
   const diff = Date.now() - new Date(isoDate).getTime();
   const minutes = Math.floor(diff / 60000);
-  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 60) return t("feed.ago.minute", { count: minutes });
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return t("feed.ago.hour", { count: hours });
   const days = Math.floor(hours / 24);
-  return `${days}d ago`;
+  return t("feed.ago.day", { count: days });
 }
 
 const styles = StyleSheet.create({

@@ -1,14 +1,16 @@
 import { StyleSheet, Text, View } from "react-native";
 import type { JobStatus } from "../types";
+import { useTranslation } from "../i18n";
 
 const LABELS: Record<JobStatus, string> = {
-  queued: "排队中",
-  processing: "转换中",
-  ready: "可播放",
-  failed: "失败",
+  queued: "progress.queued",
+  processing: "progress.transcoding",
+  ready: "progress.playable",
+  failed: "home.conversionFailed",
 };
 
 export default function StatusBadge({ status }: { status: JobStatus }) {
+  const { t } = useTranslation();
   return (
     <View
       style={[
@@ -18,7 +20,7 @@ export default function StatusBadge({ status }: { status: JobStatus }) {
         status === "failed" && styles.failed,
       ]}
     >
-      <Text style={styles.text}>{LABELS[status]}</Text>
+      <Text style={styles.text}>{t(LABELS[status])}</Text>
     </View>
   );
 }

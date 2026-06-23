@@ -8,6 +8,7 @@ import { usePlaylist } from "../playlist/context";
 import { AudioExpiredError, getDownloadUrl, getJob } from "../jobs/api";
 import { ensureTrackCached } from "../jobs/cache";
 import { trackFromReadyJob } from "../jobs/track";
+import { useTranslation } from "../../i18n";
 
 export type PlaybackSource = "local" | "remote";
 
@@ -50,9 +51,10 @@ export async function resolveTrackSource(track: Track): Promise<{ uri: string; s
   return { uri: await getDownloadUrl(track.jobId), source: "remote" };
 }
 
-export function playbackErrorMessage(err: unknown): string {
-  if (err instanceof AudioExpiredError) return "音频已过期，请重新转换";
-  return "播放失败，请重试";
+export function playbackErrorMessage(err: unknown, t?: (key: string) => string): string {
+  if (!t) return err instanceof AudioExpiredError ? "音频已过期，请重新转换" : "播放失败，请重试";
+  if (err instanceof AudioExpiredError) return t("player.expired");
+  return t("player.failed");
 }
 
 export function isAudioMetadataReady(duration: number, currentTime: number): boolean {
@@ -60,6 +62,7 @@ export function isAudioMetadataReady(duration: number, currentTime: number): boo
 }
 
 export function PlayerProvider({ children }: { children: ReactNode }) {
+  const { t } = useTranslation();
   const { tracks, addTrack, incrementPlayCount } = usePlaylist();
   const [activeTrack, setActiveTrack] = useState<Track | null>(null);
   const [queue, setQueue] = useState<Track[]>([]);
@@ -156,7 +159,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       source = await resolveTrackSource(track);
     } catch (err) {
       if (requestId === playRequestRef.current) {
-        setPlaybackError(playbackErrorMessage(err));
+        setPlaybackError(playbackErrorMessage(err, t));
         setPlaybackSource(null);
         setPlaybackLoading(false);
       }
@@ -170,7 +173,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       setPlaybackError(null);
     } catch (err) {
       if (requestId === playRequestRef.current) {
-        setPlaybackError(playbackErrorMessage(err));
+        setPlaybackError(playbackErrorMessage(err, t));
         setPlaybackSource(null);
         setPlaybackLoading(false);
       }
@@ -179,7 +182,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     if (requestId !== playRequestRef.current) return;
 
     player.setActiveForLockScreen(true, {
-      title: track.title || "Untitled",
+      title: track.title || t("common.untitled"),
       artist: "TubeCast",
       artworkUrl: track.thumbnailUrl || undefined,
     }, {
@@ -210,7 +213,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
           player.play();
           return;
         } catch {
-          setPlaybackError("播放失败，请重试");
+          setPlaybackError(t("player.failed"));
         }
       }
     }
@@ -219,7 +222,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       player.play();
       setPlaybackError(null);
     } catch (err) {
-      setPlaybackError(playbackErrorMessage(err));
+        setPlaybackError(playbackErrorMessage(err, t));
     }
   }, [activeTrack, currentTime, isPlaying, playbackSource, player, tracks]);
 

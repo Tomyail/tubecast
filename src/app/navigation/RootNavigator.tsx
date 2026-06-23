@@ -10,11 +10,13 @@ import PlayerScreen from "../../screens/PlayerScreen";
 import SettingsScreen from "../../screens/SettingsScreen";
 import MiniPlayer from "../../components/MiniPlayer";
 import { View } from "react-native";
+import { useTranslation } from "../../i18n";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<RootTabParamList>();
 
 function Tabs() {
+  const { t } = useTranslation();
   return (
     <View style={{ flex: 1, backgroundColor: "#f4ede2" }}>
       <Tab.Navigator
@@ -31,10 +33,10 @@ function Tabs() {
           },
         }}
       >
-        <Tab.Screen name="Home" component={HomeScreen} options={{ title: "Home" }} />
-        <Tab.Screen name="Feed" component={FeedScreen} options={{ title: "Feed" }} />
-        <Tab.Screen name="Playlist" component={PlaylistScreen} options={{ title: "Playlist" }} />
-        <Tab.Screen name="Settings" component={SettingsScreen} options={{ title: "Settings" }} />
+        <Tab.Screen name="Home" component={HomeScreen} options={{ title: t("nav.home") }} />
+        <Tab.Screen name="Feed" component={FeedScreen} options={{ title: t("nav.feed") }} />
+        <Tab.Screen name="Playlist" component={PlaylistScreen} options={{ title: t("nav.playlist") }} />
+        <Tab.Screen name="Settings" component={SettingsScreen} options={{ title: t("nav.settings") }} />
       </Tab.Navigator>
       <MiniPlayer />
     </View>
@@ -42,6 +44,7 @@ function Tabs() {
 }
 
 export default function RootNavigator() {
+  const { t } = useTranslation();
   return (
     <NavigationContainer
       theme={{
@@ -66,7 +69,7 @@ export default function RootNavigator() {
         }}
       >
         <Stack.Screen name="Tabs" component={Tabs} options={{ headerShown: false }} />
-        <Stack.Screen name="Player" component={PlayerScreen} options={{ title: "Now Playing" }} />
+        <Stack.Screen name="Player" component={PlayerScreen} options={{ title: t("nav.player") }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

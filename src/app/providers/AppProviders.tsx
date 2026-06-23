@@ -6,6 +6,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SettingsProvider } from "../../features/settings/context";
 import { PlaylistProvider } from "../../features/playlist/context";
 import { PlayerProvider } from "../../features/player/context";
+import { I18nProvider } from "../../i18n";
 
 export default function AppProviders({ children }: { children: ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
@@ -14,11 +15,13 @@ export default function AppProviders({ children }: { children: ReactNode }) {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
-          <SettingsProvider>
-            <PlaylistProvider>
-              <PlayerProvider>{children}</PlayerProvider>
-            </PlaylistProvider>
-          </SettingsProvider>
+          <I18nProvider>
+            <SettingsProvider>
+              <PlaylistProvider>
+                <PlayerProvider>{children}</PlayerProvider>
+              </PlaylistProvider>
+            </SettingsProvider>
+          </I18nProvider>
         </QueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

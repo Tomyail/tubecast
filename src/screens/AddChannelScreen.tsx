@@ -3,6 +3,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 
 import Screen from "../components/Screen";
 import { useAddChannel } from "../features/youtubeFeed/hooks";
 import type { FeedSource } from "../features/youtubeFeed/types";
+import { useTranslation } from "../i18n";
 
 type Props = {
   onAdded: () => void;
@@ -10,6 +11,7 @@ type Props = {
 };
 
 export default function AddChannelScreen({ onAdded, onClose }: Props) {
+  const { t } = useTranslation();
   const [input, setInput] = useState("");
   const [preview, setPreview] = useState<FeedSource | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
@@ -22,8 +24,8 @@ export default function AddChannelScreen({ onAdded, onClose }: Props) {
     try {
       const result = await addChannel.mutateAsync({ input: input.trim() });
       setPreview(result);
-    } catch (err: any) {
-      setParseError(err.message);
+    } catch {
+      setParseError(t("errors.generic"));
     }
   };
 
@@ -37,16 +39,16 @@ export default function AddChannelScreen({ onAdded, onClose }: Props) {
     <Screen>
       <View style={styles.header}>
         <Pressable onPress={onClose}>
-          <Text style={styles.closeText}>Cancel</Text>
+          <Text style={styles.closeText}>{t("common.cancel")}</Text>
         </Pressable>
-        <Text style={styles.title}>Add Channel</Text>
+        <Text style={styles.title}>{t("channel.title")}</Text>
         <View style={{ width: 50 }} />
       </View>
 
       <View style={styles.inputRow}>
         <TextInput
           style={styles.input}
-          placeholder="YouTube channel URL or @handle"
+          placeholder={t("channel.placeholder")}
           value={input}
           onChangeText={setInput}
           autoCapitalize="none"
@@ -58,7 +60,7 @@ export default function AddChannelScreen({ onAdded, onClose }: Props) {
           onPress={handleResolve}
           disabled={!input.trim() || addChannel.isPending}
         >
-          {addChannel.isPending ? <ActivityIndicator color="#fff" /> : <Text style={styles.resolveText}>Add</Text>}
+          {addChannel.isPending ? <ActivityIndicator color="#fff" /> : <Text style={styles.resolveText}>{t("channel.add")}</Text>}
         </Pressable>
       </View>
 
@@ -66,10 +68,10 @@ export default function AddChannelScreen({ onAdded, onClose }: Props) {
 
       {preview && (
         <View style={styles.preview}>
-          <Text style={styles.previewLabel}>Found channel:</Text>
+          <Text style={styles.previewLabel}>{t("channel.preview")}</Text>
           <Text style={styles.previewTitle}>{preview.title}</Text>
           <Pressable style={styles.confirmButton} onPress={handleConfirm}>
-            <Text style={styles.confirmText}>Done</Text>
+            <Text style={styles.confirmText}>{t("common.done")}</Text>
           </Pressable>
         </View>
       )}

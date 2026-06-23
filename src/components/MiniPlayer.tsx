@@ -4,8 +4,10 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { formatDuration } from "../api";
 import type { RootStackParamList } from "../app/navigation/types";
 import { usePlayer } from "../features/player/context";
+import { useTranslation } from "../i18n";
 
 export default function MiniPlayer() {
+  const { t } = useTranslation();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { activeTrack, currentTime, duration, isPlaying, togglePlayback } = usePlayer();
 
@@ -30,7 +32,7 @@ export default function MiniPlayer() {
         </View>
         </Pressable>
         <Pressable hitSlop={8} style={styles.button} onPress={togglePlayback}>
-          <Text style={styles.buttonText}>{isPlaying ? "暂停" : "播放"}</Text>
+          <Text style={styles.buttonText}>{isPlaying ? t("common.pause") : t("common.play")}</Text>
         </Pressable>
       </View>
     </View>

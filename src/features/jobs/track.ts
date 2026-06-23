@@ -8,7 +8,7 @@ export function trackFromReadyJob(
   return {
     id: job.id,
     jobId: job.id,
-    title: job.title || "Unknown",
+    title: job.title || "",
     durationSeconds: job.durationSeconds || 0,
     thumbnailUrl: job.thumbnailUrl || "",
     localPath: null,

@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { formatDuration } from "../api";
 import type { Job } from "../types";
 import StatusBadge from "./StatusBadge";
+import { useTranslation } from "../i18n";
 
 export default function JobCard({
   job,
@@ -12,6 +13,7 @@ export default function JobCard({
   onPress?: () => void;
   footer?: React.ReactNode;
 }) {
+  const { t } = useTranslation();
   return (
     <Pressable style={styles.card} onPress={onPress} disabled={!onPress}>
       <View style={styles.header}>
@@ -20,7 +22,7 @@ export default function JobCard({
             {job.title || job.sourceUrl}
           </Text>
           <Text style={styles.meta} numberOfLines={1}>
-            {job.channelName || "Unknown channel"} · {formatDuration(job.durationSeconds)}
+            {job.channelName || t("common.unknown")} · {formatDuration(job.durationSeconds)}
           </Text>
         </View>
         <StatusBadge status={job.status} />

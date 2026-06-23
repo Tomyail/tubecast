@@ -11,24 +11,18 @@ import { getHomeProgressInfo, PROGRESS_STEPS } from "../features/jobs/progress";
 import { trackFromReadyJob } from "../features/jobs/track";
 import { usePlayer } from "../features/player/context";
 import { usePlaylist } from "../features/playlist/context";
+import { useTranslation } from "../i18n";
 
 const PENDING_JOB_KEY = "pending_job_id";
 
-const PHASE_LABELS: Record<string, string> = {
-  downloading: "下载",
-  transcoding: "转码",
-  uploading: "保存",
-  starting: "准备",
-  queued: "排队",
-};
-
 export default function HomeScreen() {
+  const { t } = useTranslation();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [url, setUrl] = useState("");
   const [jobId, setJobId] = useState<string | null>(null);
   const submit = useSubmitJob();
   const { data: job } = useJobStatus(jobId);
-  const { cacheState, cacheError, retryCache } = useCacheReadyJob(jobId);
+  const { cacheState, retryCache } = useCacheReadyJob(jobId);
   const { tracks } = usePlaylist();
   const { playTrack } = usePlayer();
   const playableTrack =
@@ -54,7 +48,7 @@ export default function HomeScreen() {
       await AsyncStorage.setItem(PENDING_JOB_KEY, result.id);
       setJobId(result.id);
     } catch (err: any) {
-      Alert.alert("Error", err.message);
+      Alert.alert(t("common.error"), t("errors.generic"));
     }
   };
 
@@ -65,11 +59,11 @@ export default function HomeScreen() {
 
   return (
     <Screen>
-      <Text style={styles.title}>Convert Audio</Text>
+      <Text style={styles.title}>{t("home.title")}</Text>
       <View style={styles.inputRow}>
         <TextInput
           style={styles.input}
-          placeholder="Paste YouTube URL"
+          placeholder={t("home.pasteUrl")}
           value={url}
           onChangeText={setUrl}
           autoCapitalize="none"
@@ -77,7 +71,7 @@ export default function HomeScreen() {
           keyboardType="url"
         />
         <Pressable style={styles.pasteButton} onPress={handlePaste}>
-          <Text style={styles.pasteText}>Paste</Text>
+          <Text style={styles.pasteText}>{t("home.paste")}</Text>
         </Pressable>
       </View>
       <Pressable
@@ -88,31 +82,31 @@ export default function HomeScreen() {
         {submit.isPending ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.submitText}>Convert</Text>
+          <Text style={styles.submitText}>{t("home.convert")}</Text>
         )}
       </Pressable>
 
       {cacheState === "error" && job?.status === "ready" && (
         <View style={styles.statusBox}>
-          <Text style={styles.errorText}>缓存失败：{cacheError}</Text>
+          <Text style={styles.errorText}>{t("home.cacheFailed")}</Text>
           <Pressable style={styles.retryButton} onPress={retryCache}>
-            <Text style={styles.retryText}>重试缓存</Text>
+            <Text style={styles.retryText}>{t("home.retryCache")}</Text>
           </Pressable>
         </View>
       )}
 
       {job?.status === "failed" && (
         <View style={styles.statusBox}>
-          <Text style={styles.errorText}>转换失败</Text>
-          {job.progressPhase != null && job.progressPhase !== "" && PHASE_LABELS[job.progressPhase] && (
-            <Text style={styles.statusText}>{`失败发生在${PHASE_LABELS[job.progressPhase]}阶段`}</Text>
+          <Text style={styles.errorText}>{t("home.conversionFailed")}</Text>
+          {job.progressPhase != null && job.progressPhase !== "" && (
+            <Text style={styles.statusText}>{t("home.failedAt", { phase: t(`progress.${job.progressPhase === "downloading" ? "downloading" : job.progressPhase === "transcoding" ? "transcoding" : job.progressPhase === "uploading" ? "saving" : job.progressPhase === "starting" ? "preparing" : "queued"}`) })}</Text>
           )}
         </View>
       )}
 
       {job?.status === "expired" && (
         <View style={styles.statusBox}>
-          <Text style={styles.errorText}>Audio has expired. Please submit the URL again.</Text>
+          <Text style={styles.errorText}>{t("home.expired")}</Text>
         </View>
       )}
 
@@ -120,6 +114,7 @@ export default function HomeScreen() {
         const { title, detail, activeStep } = getHomeProgressInfo(
           job ?? { status: "queued", progressPhase: null, attemptCount: 0, lastErrorMessage: null },
           cacheState,
+          t,
         );
         return (
           <View style={styles.statusBox}>
@@ -133,13 +128,13 @@ export default function HomeScreen() {
                   navigation.navigate("Player", { jobId: playableTrack.jobId });
                 }}
               >
-                <Text style={styles.playText}>Play</Text>
+                <Text style={styles.playText}>{t("common.play")}</Text>
               </Pressable>
             )}
             <View style={styles.stepsRow}>
               {PROGRESS_STEPS.map((step, i) => (
                 <View key={step} style={[styles.stepItem, i <= activeStep && styles.stepActive]}>
-                  <Text style={[styles.stepText, i <= activeStep && styles.stepTextActive]}>{step}</Text>
+                  <Text style={[styles.stepText, i <= activeStep && styles.stepTextActive]}>{t(`home.progress.${step}`)}</Text>
                 </View>
               ))}
             </View>

@@ -3,8 +3,11 @@ import { Linking, PanResponder, Pressable, StyleSheet, Text, View } from "react-
 import Screen from "../components/Screen";
 import { useCacheReadyJob } from "../features/jobs/hooks";
 import { usePlayer } from "../features/player/context";
+import { useTranslation } from "../i18n";
+import { formatDuration } from "../i18n/formatters";
 
 export default function PlayerScreen() {
+  const { t } = useTranslation();
   const {
     activeTrack,
     isPlaying,
@@ -37,18 +40,17 @@ export default function PlayerScreen() {
   if (!activeTrack) {
     return (
       <Screen>
-        <Text style={styles.empty}>No track playing</Text>
+        <Text style={styles.empty}>{t("player.noTrack")}</Text>
       </Screen>
     );
   }
 
   const progress = duration > 0 ? currentTime / duration : 0;
   const sourceLabel =
-    cacheState === "caching" ? "缓存中" :
-    activeTrack.cacheStatus === "cached" || playbackSource === "local" ? "已缓存" :
-    cacheState === "error" || activeTrack.cacheStatus === "failed" ? "缓存失败" :
-    playbackSource === "remote" ? "在线播放" :
-    "未缓存";
+    cacheState === "caching" ? t("player.caching") :
+    activeTrack.cacheStatus === "cached" || playbackSource === "local" ? t("player.cached") :
+    cacheState === "error" || activeTrack.cacheStatus === "failed" ? t("player.cacheFailed") :
+    playbackSource === "remote" ? t("player.streaming") : t("player.notCached");
 
   return (
     <Screen>
@@ -62,13 +64,13 @@ export default function PlayerScreen() {
           <Text style={styles.title} numberOfLines={2}>{activeTrack.title}</Text>
         </Pressable>
         <Text style={styles.time}>
-          {playbackLoading ? "正在加载音频..." : `${formatTime(currentTime)} / ${formatTime(duration)}`}
+          {playbackLoading ? t("player.loading") : `${formatDuration(currentTime)} / ${formatDuration(duration)}`}
         </Text>
         <Text style={styles.sourceStatus}>{sourceLabel}</Text>
         {playbackError && <Text style={styles.errorText}>{playbackError}</Text>}
         {cacheState === "error" && (
           <Pressable style={styles.retryCacheButton} onPress={retryCache}>
-            <Text style={styles.retryCacheText}>重试缓存</Text>
+            <Text style={styles.retryCacheText}>{t("player.retryCache")}</Text>
           </Pressable>
         )}
 
@@ -98,13 +100,6 @@ export default function PlayerScreen() {
       </View>
     </Screen>
   );
-}
-
-function formatTime(seconds: number): string {
-  if (!seconds || isNaN(seconds)) return "0:00";
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
 const styles = StyleSheet.create({

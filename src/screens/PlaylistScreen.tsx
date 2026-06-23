@@ -7,8 +7,11 @@ import Screen from "../components/Screen";
 import { usePlaylist } from "../features/playlist/context";
 import { usePlayer } from "../features/player/context";
 import type { Track } from "../features/playlist/storage";
+import { useTranslation } from "../i18n";
+import { formatDuration, formatFileSize } from "../i18n/formatters";
 
 export default function PlaylistScreen() {
+  const { t, i18n } = useTranslation();
   const { tracks, deleteTrack, deleteTracks, reorderTracks } = usePlaylist();
   const { playTrack, activeTrack, isPlaying, stopPlayback } = usePlayer();
   const [isEditMode, setIsEditMode] = useState(false);
@@ -53,12 +56,12 @@ export default function PlaylistScreen() {
     const count = selectedIds.size;
     const ids = Array.from(selectedIds);
     Alert.alert(
-      `删除 ${count} 首？`,
-      `将删除 ${count} 个音频文件，无法恢复。`,
+      t("playlist.deleteTracksTitle"),
+      t("playlist.deleteTracksMessage", { count }),
       [
-        { text: "取消", style: "cancel" },
+        { text: t("common.cancel"), style: "cancel" },
         {
-          text: "删除",
+          text: t("common.delete"),
           style: "destructive",
           onPress: async () => {
             if (activeTrack && selectedIds.has(activeTrack.id)) {
@@ -86,12 +89,12 @@ export default function PlaylistScreen() {
 
   const handleDelete = (track: Track) => {
     Alert.alert(
-      "Delete Track",
-      `Remove "${track.title || "this track"}" from your library? The audio file will also be deleted.`,
+      t("playlist.deleteTrackTitle"),
+      t("playlist.deleteTrackMessage", { title: track.title || t("common.untitled") }),
       [
-        { text: "Cancel", style: "cancel" },
+        { text: t("common.cancel"), style: "cancel" },
         {
-          text: "Delete",
+          text: t("common.delete"),
           style: "destructive",
           onPress: async () => {
             try {
@@ -119,6 +122,8 @@ export default function PlaylistScreen() {
           onDelete={handleDelete}
           onDrag={drag}
           onToggleSelect={toggleSelect}
+          t={t}
+          locale={i18n.language}
         />
       </ScaleDecorator>
     );
@@ -130,21 +135,21 @@ export default function PlaylistScreen() {
         {isEditMode ? (
           <>
             <Pressable onPress={toggleSelectAll}>
-              <Text style={styles.headerAction}>{allSelected ? "取消全选" : "全选"}</Text>
+              <Text style={styles.headerAction}>{allSelected ? t("playlist.clearAll") : t("playlist.selectAll")}</Text>
             </Pressable>
             <Text style={styles.title}>
-              {selectedIds.size > 0 ? `已选 ${selectedIds.size} 项` : "选择曲目"}
+              {selectedIds.size > 0 ? t("playlist.selected", { count: selectedIds.size }) : t("playlist.selectTracks")}
             </Text>
             <Pressable onPress={exitEditMode}>
-              <Text style={styles.headerAction}>完成</Text>
+              <Text style={styles.headerAction}>{t("common.done")}</Text>
             </Pressable>
           </>
         ) : (
           <>
-            <Text style={styles.title}>My Music</Text>
+            <Text style={styles.title}>{t("playlist.title")}</Text>
             {tracks.length > 0 && (
               <Pressable onPress={enterEditMode}>
-                <Text style={styles.headerAction}>编辑</Text>
+                <Text style={styles.headerAction}>{t("playlist.edit")}</Text>
               </Pressable>
             )}
           </>
@@ -152,7 +157,7 @@ export default function PlaylistScreen() {
       </View>
 
       {tracks.length === 0 ? (
-        <Text style={styles.empty}>No tracks yet. Convert a YouTube URL to get started.</Text>
+        <Text style={styles.empty}>{t("playlist.empty")}</Text>
       ) : (
         <DraggableFlatList
           data={tracks}
@@ -167,7 +172,7 @@ export default function PlaylistScreen() {
       {isEditMode && (
         <View style={styles.actionBar}>
           <Pressable style={styles.actionBarCancel} onPress={exitEditMode}>
-            <Text style={styles.actionBarCancelText}>取消</Text>
+            <Text style={styles.actionBarCancelText}>{t("common.cancel")}</Text>
           </Pressable>
           <Pressable
             style={[
@@ -178,7 +183,7 @@ export default function PlaylistScreen() {
             disabled={selectedIds.size === 0}
           >
             <Text style={styles.actionBarDeleteText}>
-              {selectedIds.size > 0 ? `删除 (${selectedIds.size} 项)` : "删除"}
+              {selectedIds.size > 0 ? t("playlist.deleteSelected", { count: selectedIds.size }) : t("common.delete")}
             </Text>
           </Pressable>
         </View>
@@ -198,6 +203,8 @@ function SwipeableTrackItem({
   onDelete,
   onDrag,
   onToggleSelect,
+  t,
+  locale,
 }: {
   track: Track;
   isActive: boolean;
@@ -209,6 +216,8 @@ function SwipeableTrackItem({
   onDelete: (t: Track) => void;
   onDrag: () => void;
   onToggleSelect: (id: string) => void;
+  t: (key: string, options?: Record<string, unknown>) => string;
+  locale: string;
 }) {
   const swipeRef = useRef<Swipeable>(null);
 
@@ -241,11 +250,11 @@ function SwipeableTrackItem({
           ]}
           numberOfLines={1}
         >
-          {track.title || "Untitled"}
+          {track.title || t("common.untitled")}
         </Text>
         <Text style={styles.trackMeta}>
-          {formatDuration(track.durationSeconds)} | {formatFileSize(track.fileSize)}
-          {track.playCount > 0 && !isActive && "  · listened"}
+          {formatDuration(track.durationSeconds)} | {formatFileSize(track.fileSize, locale)}
+          {track.playCount > 0 && !isActive && ` · ${t("playlist.listened")}`}
         </Text>
       </View>
 
@@ -274,7 +283,7 @@ function SwipeableTrackItem({
             onDelete(track);
           }}
         >
-          <Text style={styles.deleteActionText}>Delete</Text>
+          <Text style={styles.deleteActionText}>{t("common.delete")}</Text>
         </Pressable>
       )}
       overshootRight={false}
@@ -282,19 +291,6 @@ function SwipeableTrackItem({
       {rowContent}
     </Swipeable>
   );
-}
-
-function formatDuration(seconds: number | null): string {
-  if (!seconds) return "--:--";
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${m}:${s.toString().padStart(2, "0")}`;
-}
-
-function formatFileSize(bytes: number | null): string {
-  if (!bytes) return "";
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 const styles = StyleSheet.create({
