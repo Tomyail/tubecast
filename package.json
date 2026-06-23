@@ -1,0 +1,47 @@
+{
+  "name": "mobile",
+  "version": "1.0.0",
+  "packageManager": "pnpm@10.28.1",
+  "main": "index.ts",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web",
+    "release:ios": "expo run:ios --device --configuration Release",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@react-navigation/bottom-tabs": "^7.15.5",
+    "@react-navigation/native": "^7.1.33",
+    "@react-navigation/native-stack": "^7.14.4",
+    "@tanstack/react-query": "^5.90.21",
+    "expo": "~55.0.5",
+    "expo-audio": "~55.0.8",
+    "expo-clipboard": "~55.0.8",
+    "expo-file-system": "^55.0.21",
+    "expo-modules-core": "55.0.14",
+    "expo-secure-store": "^55.0.14",
+    "expo-status-bar": "~55.0.4",
+    "react": "19.2.0",
+    "react-native": "0.83.2",
+    "react-native-draggable-flatlist": "^4.0.3",
+    "react-native-gesture-handler": "~2.30.0",
+    "react-native-reanimated": "^4.3.1",
+    "react-native-safe-area-context": "~5.6.2",
+    "react-native-screens": "~4.23.0",
+    "streamdown-rn": "^0.2.1"
+  },
+  "devDependencies": {
+    "@types/react": "~19.2.2",
+    "typescript": "~5.9.2",
+    "vitest": "^3.2.4"
+  },
+  "private": false,
+  "pnpm": {
+    "patchedDependencies": {
+      "expo-modules-core@55.0.14": "patches/expo-modules-core@55.0.14.patch"
+    }
+  }
+}

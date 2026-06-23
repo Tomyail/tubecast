@@ -1,0 +1,82 @@
+import { describe, it, expect } from "vitest";
+import { mergeAndSortItems, matchJobStatus, type JobLookup } from "../../src/features/youtubeFeed/feed";
+import type { FeedItem } from "../../src/features/youtubeFeed/types";
+
+const makeItem = (overrides: Partial<FeedItem> = {}): FeedItem => ({
+  platform: "youtube",
+  platformItemId: "vid1",
+  platformSourceId: "UC_a",
+  title: "Test Video",
+  sourceTitle: "Channel A",
+  thumbnailUrl: "https://example.com/v1.jpg",
+  publishedAt: "2026-05-23T10:00:00Z",
+  sourceUrl: "https://www.youtube.com/watch?v=vid1",
+  ...overrides,
+});
+
+describe("mergeAndSortItems", () => {
+  it("merges items from multiple sources and sorts by date descending", () => {
+    const items = [
+      [makeItem({ platformItemId: "v1", publishedAt: "2026-05-23T10:00:00Z" })],
+      [makeItem({ platformItemId: "v2", publishedAt: "2026-05-23T12:00:00Z" })],
+    ];
+    const result = mergeAndSortItems(items);
+    expect(result[0].platformItemId).toBe("v2");
+    expect(result[1].platformItemId).toBe("v1");
+  });
+
+  it("deduplicates by platform item id", () => {
+    const items = [
+      [makeItem({ platformItemId: "v1" })],
+      [makeItem({ platformItemId: "v1", title: "Duplicate" })],
+    ];
+    const result = mergeAndSortItems(items);
+    expect(result).toHaveLength(1);
+  });
+
+  it("caps results to maxItems", () => {
+    const items = [Array.from({ length: 20 }, (_, i) => makeItem({ platformItemId: `v${i}` }))];
+    const result = mergeAndSortItems(items, 5);
+    expect(result).toHaveLength(5);
+  });
+});
+
+describe("matchJobStatus", () => {
+  const lookup: JobLookup = {
+    v_ready: { status: "ready", jobId: "job1" },
+    v_processing: { status: "processing", jobId: "job2" },
+    v_failed: { status: "failed", jobId: "job3" },
+    v_queued: { status: "queued", jobId: "job4" },
+  };
+
+  it("marks item as ready when job exists and is ready", () => {
+    const item = makeItem({ platformItemId: "v_ready" });
+    const result = matchJobStatus([item], lookup);
+    expect(result[0].status).toBe("ready");
+    expect(result[0].jobId).toBe("job1");
+  });
+
+  it("marks item as converting when job is processing", () => {
+    const item = makeItem({ platformItemId: "v_processing" });
+    const result = matchJobStatus([item], lookup);
+    expect(result[0].status).toBe("converting");
+  });
+
+  it("marks item as converting when job is queued", () => {
+    const item = makeItem({ platformItemId: "v_queued" });
+    const result = matchJobStatus([item], lookup);
+    expect(result[0].status).toBe("converting");
+  });
+
+  it("marks item as new when no job exists", () => {
+    const item = makeItem({ platformItemId: "v_unknown" });
+    const result = matchJobStatus([item], lookup);
+    expect(result[0].status).toBe("new");
+  });
+
+  it("marks item as new when job failed, allowing retry", () => {
+    const item = makeItem({ platformItemId: "v_failed" });
+    const result = matchJobStatus([item], lookup);
+    expect(result[0].status).toBe("new");
+  });
+});
