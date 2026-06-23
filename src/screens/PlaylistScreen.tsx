@@ -1,4 +1,7 @@
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useLayoutEffect } from "react";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { Ionicons } from "@expo/vector-icons";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import DraggableFlatList, { ScaleDecorator, RenderItemParams } from "react-native-draggable-flatlist";
 import { Swipeable } from "react-native-gesture-handler";
@@ -10,8 +13,12 @@ import type { Track } from "../features/playlist/storage";
 import { useTranslation } from "../i18n";
 import { formatDuration, formatFileSize } from "../i18n/formatters";
 
+type PlaylistStackParamList = { PlaylistRoot: undefined };
+const MINI_PLAYER_HEIGHT = 64;
+
 export default function PlaylistScreen() {
   const { t, i18n } = useTranslation();
+  const navigation = useNavigation<NativeStackNavigationProp<PlaylistStackParamList>>();
   const { tracks, deleteTrack, deleteTracks, reorderTracks } = usePlaylist();
   const { playTrack, activeTrack, isPlaying, stopPlayback } = usePlayer();
   const [isEditMode, setIsEditMode] = useState(false);
@@ -107,6 +114,37 @@ export default function PlaylistScreen() {
     );
   };
 
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerLargeTitle: false,
+      title: isEditMode
+        ? selectedIds.size > 0
+          ? t("playlist.selected", { count: selectedIds.size })
+          : t("playlist.selectTracks")
+        : t("playlist.title"),
+      headerLeft: isEditMode
+        ? () => (
+            <Pressable onPress={toggleSelectAll} style={styles.navigationAction}>
+              <Text style={styles.headerAction}>{allSelected ? t("playlist.clearAll") : t("playlist.selectAll")}</Text>
+            </Pressable>
+          )
+        : undefined,
+      headerRight: isEditMode
+        ? () => (
+            <Pressable onPress={exitEditMode} style={styles.navigationAction}>
+              <Text style={styles.headerAction}>{t("common.done")}</Text>
+            </Pressable>
+          )
+        : tracks.length > 0
+          ? () => (
+              <Pressable onPress={enterEditMode} style={styles.navigationAction}>
+                <Text style={styles.headerAction}>{t("playlist.edit")}</Text>
+              </Pressable>
+            )
+          : undefined,
+    });
+  }, [allSelected, isEditMode, navigation, selectedIds.size, t, tracks.length]);
+
   const renderItem = ({ item, drag, isActive }: RenderItemParams<Track>) => {
     const isCurrentTrack = activeTrack?.id === item.id;
     return (
@@ -131,31 +169,6 @@ export default function PlaylistScreen() {
 
   return (
     <Screen scroll={false}>
-      <View style={styles.header}>
-        {isEditMode ? (
-          <>
-            <Pressable onPress={toggleSelectAll}>
-              <Text style={styles.headerAction}>{allSelected ? t("playlist.clearAll") : t("playlist.selectAll")}</Text>
-            </Pressable>
-            <Text style={styles.title}>
-              {selectedIds.size > 0 ? t("playlist.selected", { count: selectedIds.size }) : t("playlist.selectTracks")}
-            </Text>
-            <Pressable onPress={exitEditMode}>
-              <Text style={styles.headerAction}>{t("common.done")}</Text>
-            </Pressable>
-          </>
-        ) : (
-          <>
-            <Text style={styles.title}>{t("playlist.title")}</Text>
-            {tracks.length > 0 && (
-              <Pressable onPress={enterEditMode}>
-                <Text style={styles.headerAction}>{t("playlist.edit")}</Text>
-              </Pressable>
-            )}
-          </>
-        )}
-      </View>
-
       {tracks.length === 0 ? (
         <Text style={styles.empty}>{t("playlist.empty")}</Text>
       ) : (
@@ -166,11 +179,12 @@ export default function PlaylistScreen() {
           onDragEnd={isEditMode ? () => {} : ({ data }) => reorderTracks(data)}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           containerStyle={{ flex: 1 }}
+          contentContainerStyle={{ paddingBottom: isEditMode ? 84 + (activeTrack ? MINI_PLAYER_HEIGHT : 0) : activeTrack ? MINI_PLAYER_HEIGHT : 0 }}
         />
       )}
 
       {isEditMode && (
-        <View style={styles.actionBar}>
+        <View style={[styles.actionBar, activeTrack && styles.actionBarWithPlayer]}>
           <Pressable style={styles.actionBarCancel} onPress={exitEditMode}>
             <Text style={styles.actionBarCancelText}>{t("common.cancel")}</Text>
           </Pressable>
@@ -233,11 +247,11 @@ function SwipeableTrackItem({
     >
       {isEditMode ? (
         <View style={[styles.checkbox, isSelected && styles.checkboxSelected]}>
-          {isSelected && <View style={styles.checkboxInner} />}
+          {isSelected && <Ionicons name="checkmark" size={15} color="#fff9f3" />}
         </View>
       ) : (
-        <Pressable onLongPress={onDrag} style={styles.dragHandle}>
-          <Text style={styles.dragHandleIcon}>&#8801;</Text>
+        <Pressable accessibilityLabel="Reorder track" accessibilityRole="button" onLongPress={onDrag} style={styles.dragHandle}>
+          <Ionicons name="reorder-three-outline" size={22} color="#9a8d81" />
         </Pressable>
       )}
 
@@ -260,7 +274,7 @@ function SwipeableTrackItem({
 
       {!isEditMode && (
         isActive && isPlaying ? (
-          <Text style={styles.playingIcon}>| |</Text>
+          <Ionicons name="volume-high" size={19} color="#b65a36" />
         ) : !isActive && track.playCount === 0 ? (
           <View style={styles.unplayedDot} />
         ) : null
@@ -294,24 +308,19 @@ function SwipeableTrackItem({
 }
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 16,
-  },
-  title: { fontSize: 24, fontWeight: "bold" },
   headerAction: { fontSize: 16, color: "#b65a36", fontWeight: "600" },
-  empty: { color: "#999", fontSize: 16, textAlign: "center", marginTop: 40 },
+  navigationAction: { paddingHorizontal: 4, paddingVertical: 8 },
+  empty: { color: "#6f6256", fontSize: 16, textAlign: "center", marginTop: 40 },
   trackItem: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 4,
+    minHeight: 68,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
     backgroundColor: "#f4ede2",
   },
-  activeTrack: { backgroundColor: "#FFF3EE", paddingHorizontal: 8 },
-  selectedTrack: { backgroundColor: "#FEF0E8" },
+  activeTrack: { backgroundColor: "#fff3ee" },
+  selectedTrack: { backgroundColor: "#f8e9df" },
   draggingItem: {
     backgroundColor: "#f0e6d8",
     elevation: 8,
@@ -320,8 +329,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 4,
   },
-  dragHandle: { paddingHorizontal: 8, paddingVertical: 4, marginRight: 4 },
-  dragHandleIcon: { fontSize: 18, color: "#bbb" },
+  dragHandle: { alignItems: "center", height: 44, justifyContent: "center", marginRight: 4, width: 36 },
   checkbox: {
     width: 22,
     height: 22,
@@ -333,24 +341,17 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  checkboxSelected: { backgroundColor: "#fff" },
-  checkboxInner: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: "#b65a36",
-  },
+  checkboxSelected: { backgroundColor: "#b65a36" },
   trackContent: { flex: 1 },
-  trackTitle: { fontSize: 16, fontWeight: "500" },
-  trackMeta: { fontSize: 13, color: "#888", marginTop: 2 },
-  activeText: { color: "#FF6B35" },
-  playedTitle: { color: "#aaa" },
-  playingIcon: { fontSize: 14, color: "#FF6B35", fontWeight: "bold" },
+  trackTitle: { color: "#241a12", fontSize: 16, fontWeight: "600" },
+  trackMeta: { color: "#85776a", fontSize: 13, marginTop: 3 },
+  activeText: { color: "#b65a36" },
+  playedTitle: { color: "#9a8d81" },
   unplayedDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#FF6B35",
+    backgroundColor: "#b65a36",
     marginLeft: 8,
   },
   separator: { height: StyleSheet.hairlineWidth, backgroundColor: "#eee" },
@@ -369,16 +370,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 24,
-    paddingVertical: 14,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
     backgroundColor: "#fff9f3",
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: "#dbcbb9",
   },
+  actionBarWithPlayer: { bottom: MINI_PLAYER_HEIGHT },
   actionBarCancel: { paddingHorizontal: 8, paddingVertical: 8 },
   actionBarCancelText: { fontSize: 16, color: "#6f6256", fontWeight: "600" },
   actionBarDelete: {
-    backgroundColor: "#FF3B30",
+    backgroundColor: "#b42318",
     paddingHorizontal: 24,
     paddingVertical: 10,
     borderRadius: 8,

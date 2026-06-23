@@ -1,12 +1,13 @@
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { Ionicons } from "@expo/vector-icons";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { formatDuration } from "../api";
 import type { RootStackParamList } from "../app/navigation/types";
 import { usePlayer } from "../features/player/context";
 import { useTranslation } from "../i18n";
 
-export default function MiniPlayer() {
+export default function MiniPlayer({ tabBarHeight }: { tabBarHeight: number }) {
   const { t } = useTranslation();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { activeTrack, currentTime, duration, isPlaying, togglePlayback } = usePlayer();
@@ -16,9 +17,11 @@ export default function MiniPlayer() {
   }
 
   return (
-    <View style={styles.shell}>
+    <View pointerEvents="box-none" style={[styles.shell, { bottom: tabBarHeight }]}>
       <View style={styles.card}>
         <Pressable
+          accessibilityLabel={activeTrack.title || activeTrack.sourceUrl}
+          accessibilityRole="button"
           style={styles.tapArea}
           onPress={() => navigation.navigate("Player", { jobId: activeTrack.jobId })}
         >
@@ -31,8 +34,14 @@ export default function MiniPlayer() {
           </Text>
         </View>
         </Pressable>
-        <Pressable hitSlop={8} style={styles.button} onPress={togglePlayback}>
-          <Text style={styles.buttonText}>{isPlaying ? t("common.pause") : t("common.play")}</Text>
+        <Pressable
+          accessibilityLabel={isPlaying ? t("common.pause") : t("common.play")}
+          accessibilityRole="button"
+          hitSlop={8}
+          style={styles.button}
+          onPress={togglePlayback}
+        >
+          <Ionicons name={isPlaying ? "pause" : "play"} size={19} color="#fff7ef" />
         </Pressable>
       </View>
     </View>
@@ -41,19 +50,20 @@ export default function MiniPlayer() {
 
 const styles = StyleSheet.create({
   shell: {
-    bottom: 76,
-    left: 12,
+    left: 0,
     position: "absolute",
-    right: 12,
+    right: 0,
   },
   card: {
     alignItems: "center",
     backgroundColor: "#211c18",
-    borderRadius: 20,
+    borderTopColor: "rgba(255, 255, 255, 0.12)",
+    borderTopWidth: StyleSheet.hairlineWidth,
     flexDirection: "row",
     gap: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+    minHeight: 64,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
   },
   tapArea: {
     flex: 1,
@@ -72,14 +82,10 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: "#b65a36",
-    borderRadius: 14,
-    minHeight: 38,
+    borderRadius: 22,
+    height: 44,
     justifyContent: "center",
-    paddingHorizontal: 14,
-  },
-  buttonText: {
-    color: "#fff7ef",
-    fontSize: 13,
-    fontWeight: "800",
+    alignItems: "center",
+    width: 44,
   },
 });

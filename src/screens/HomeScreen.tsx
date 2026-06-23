@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { Ionicons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
@@ -47,7 +48,7 @@ export default function HomeScreen() {
       const result = await submit.mutateAsync(url.trim());
       await AsyncStorage.setItem(PENDING_JOB_KEY, result.id);
       setJobId(result.id);
-    } catch (err: any) {
+    } catch {
       Alert.alert(t("common.error"), t("errors.generic"));
     }
   };
@@ -57,115 +58,77 @@ export default function HomeScreen() {
     if (text) setUrl(text);
   };
 
+  const showProgress = ((jobId && job != null) || cacheState === "caching" || cacheState === "cached") && job?.status !== "failed" && job?.status !== "expired";
+
   return (
     <Screen>
-      <Text style={styles.title}>{t("home.title")}</Text>
-      <View style={styles.inputRow}>
-        <TextInput
-          style={styles.input}
-          placeholder={t("home.pasteUrl")}
-          value={url}
-          onChangeText={setUrl}
-          autoCapitalize="none"
-          autoCorrect={false}
-          keyboardType="url"
-        />
-        <Pressable style={styles.pasteButton} onPress={handlePaste}>
-          <Text style={styles.pasteText}>{t("home.paste")}</Text>
-        </Pressable>
+      <View style={styles.formGroup}>
+        <View style={styles.fieldHeader}>
+          <Ionicons name="link-outline" size={18} color="#8b5c48" />
+          <Text style={styles.fieldLabel}>{t("home.pasteUrl")}</Text>
+        </View>
+        <View style={styles.inputRow}>
+          <TextInput
+            style={styles.input}
+            placeholder={t("home.pasteUrl")}
+            value={url}
+            onChangeText={setUrl}
+            autoCapitalize="none"
+            autoCorrect={false}
+            keyboardType="url"
+            onSubmitEditing={() => void handleSubmit()}
+            returnKeyType="done"
+          />
+          <Pressable accessibilityLabel={t("home.paste")} accessibilityRole="button" style={styles.pasteButton} onPress={handlePaste}>
+            <Ionicons name="clipboard-outline" size={21} color="#8b5c48" />
+          </Pressable>
+        </View>
       </View>
-      <Pressable
-        style={[styles.submitButton, (!url.trim() || submit.isPending) && styles.disabled]}
-        onPress={handleSubmit}
-        disabled={!url.trim() || submit.isPending}
-      >
-        {submit.isPending ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.submitText}>{t("home.convert")}</Text>
-        )}
+      <Pressable accessibilityRole="button" style={[styles.submitButton, (!url.trim() || submit.isPending) && styles.disabled]} onPress={handleSubmit} disabled={!url.trim() || submit.isPending}>
+        {submit.isPending ? <ActivityIndicator color="#fff9f3" /> : <><Ionicons name="arrow-down" size={20} color="#fff9f3" /><Text style={styles.submitText}>{t("home.convert")}</Text></>}
       </Pressable>
 
       {cacheState === "error" && job?.status === "ready" && (
-        <View style={styles.statusBox}>
-          <Text style={styles.errorText}>{t("home.cacheFailed")}</Text>
-          <Pressable style={styles.retryButton} onPress={retryCache}>
-            <Text style={styles.retryText}>{t("home.retryCache")}</Text>
-          </Pressable>
-        </View>
+        <StatusCard error title={t("home.cacheFailed")} icon="alert-circle-outline">
+          <Pressable accessibilityRole="button" style={styles.retryButton} onPress={retryCache}><Text style={styles.retryText}>{t("home.retryCache")}</Text></Pressable>
+        </StatusCard>
       )}
-
       {job?.status === "failed" && (
-        <View style={styles.statusBox}>
-          <Text style={styles.errorText}>{t("home.conversionFailed")}</Text>
-          {job.progressPhase != null && job.progressPhase !== "" && (
-            <Text style={styles.statusText}>{t("home.failedAt", { phase: t(`progress.${job.progressPhase === "downloading" ? "downloading" : job.progressPhase === "transcoding" ? "transcoding" : job.progressPhase === "uploading" ? "saving" : job.progressPhase === "starting" ? "preparing" : "queued"}`) })}</Text>
-          )}
-        </View>
+        <StatusCard error title={t("home.conversionFailed")} icon="alert-circle-outline">
+          {job.progressPhase ? <Text style={styles.statusText}>{t("home.failedAt", { phase: t(`progress.${job.progressPhase === "downloading" ? "downloading" : job.progressPhase === "transcoding" ? "transcoding" : job.progressPhase === "uploading" ? "saving" : job.progressPhase === "starting" ? "preparing" : "queued"}`) })}</Text> : null}
+        </StatusCard>
       )}
+      {job?.status === "expired" && <StatusCard error title={t("home.expired")} icon="time-outline" />}
 
-      {job?.status === "expired" && (
-        <View style={styles.statusBox}>
-          <Text style={styles.errorText}>{t("home.expired")}</Text>
-        </View>
-      )}
-
-      {((jobId && job != null) || cacheState === "caching" || cacheState === "cached") && job?.status !== "failed" && job?.status !== "expired" && (() => {
-        const { title, detail, activeStep } = getHomeProgressInfo(
-          job ?? { status: "queued", progressPhase: null, attemptCount: 0, lastErrorMessage: null },
-          cacheState,
-          t,
-        );
+      {showProgress && (() => {
+        const { title, detail, activeStep } = getHomeProgressInfo(job ?? { status: "queued", progressPhase: null, attemptCount: 0, lastErrorMessage: null }, cacheState, t);
         return (
-          <View style={styles.statusBox}>
-            <Text style={styles.progressTitle}>{title}</Text>
-            <Text style={styles.progressDetail}>{detail}</Text>
-            {playableTrack && (
-              <Pressable
-                style={styles.playButton}
-                onPress={() => {
-                  void playTrack(playableTrack, tracks);
-                  navigation.navigate("Player", { jobId: playableTrack.jobId });
-                }}
-              >
-                <Text style={styles.playText}>{t("common.play")}</Text>
+          <StatusCard title={title} icon={playableTrack ? "checkmark-circle" : "cloud-download-outline"}>
+            <Text style={styles.statusText}>{detail}</Text>
+            {playableTrack ? (
+              <Pressable accessibilityRole="button" style={styles.playButton} onPress={() => { void playTrack(playableTrack, tracks); navigation.navigate("Player", { jobId: playableTrack.jobId }); }}>
+                <Ionicons name="play" size={19} color="#fff9f3" /><Text style={styles.playText}>{t("common.play")}</Text>
               </Pressable>
-            )}
+            ) : null}
             <View style={styles.stepsRow}>
-              {PROGRESS_STEPS.map((step, i) => (
-                <View key={step} style={[styles.stepItem, i <= activeStep && styles.stepActive]}>
-                  <Text style={[styles.stepText, i <= activeStep && styles.stepTextActive]}>{t(`home.progress.${step}`)}</Text>
+              {PROGRESS_STEPS.map((step, index) => (
+                <View key={step} style={styles.stepItem}>
+                  <View style={[styles.stepDot, index <= activeStep && styles.stepActive]}>{index < activeStep ? <Ionicons name="checkmark" size={11} color="#fff9f3" /> : null}</View>
+                  {index < PROGRESS_STEPS.length - 1 ? <View style={[styles.stepLine, index < activeStep && styles.stepLineActive]} /> : null}
                 </View>
               ))}
             </View>
-          </View>
+          </StatusCard>
         );
       })()}
     </Screen>
   );
 }
 
+function StatusCard({ title, icon, error = false, children }: { title: string; icon: "alert-circle-outline" | "time-outline" | "checkmark-circle" | "cloud-download-outline"; error?: boolean; children?: React.ReactNode }) {
+  return <View style={[styles.statusCard, error && styles.errorCard]}><View style={styles.statusHeading}><Ionicons name={icon} size={20} color={error ? "#b42318" : "#8b5c48"} /><Text style={[styles.statusTitle, error && styles.errorTitle]}>{title}</Text></View>{children}</View>;
+}
+
 const styles = StyleSheet.create({
-  title: { fontSize: 24, fontWeight: "bold", marginBottom: 16 },
-  inputRow: { flexDirection: "row", gap: 8, marginBottom: 12 },
-  input: { flex: 1, borderWidth: 1, borderColor: "#ccc", borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10, fontSize: 16 },
-  pasteButton: { backgroundColor: "#eee", paddingHorizontal: 16, justifyContent: "center", borderRadius: 8 },
-  pasteText: { fontSize: 14, color: "#555" },
-  submitButton: { backgroundColor: "#FF6B35", paddingVertical: 14, borderRadius: 8, alignItems: "center" },
-  submitText: { color: "#fff", fontSize: 16, fontWeight: "600" },
-  disabled: { opacity: 0.5 },
-  statusBox: { marginTop: 24, alignItems: "center", gap: 12 },
-  statusText: { fontSize: 16, color: "#666" },
-  errorText: { fontSize: 16, color: "red", textAlign: "center" },
-  retryButton: { backgroundColor: "#FF6B35", paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8 },
-  retryText: { color: "#fff", fontWeight: "600" },
-  playButton: { backgroundColor: "#4CAF50", paddingHorizontal: 28, paddingVertical: 12, borderRadius: 8 },
-  playText: { color: "#fff", fontWeight: "600", fontSize: 16 },
-  progressTitle: { fontSize: 18, fontWeight: "bold" },
-  progressDetail: { fontSize: 14, color: "#888" },
-  stepsRow: { flexDirection: "row", gap: 4, marginTop: 12 },
-  stepItem: { flex: 1, paddingVertical: 6, backgroundColor: "#eee", borderRadius: 4, alignItems: "center" },
-  stepActive: { backgroundColor: "#FF6B35" },
-  stepText: { fontSize: 11, color: "#999" },
-  stepTextActive: { color: "#fff", fontWeight: "600" },
+  formGroup: { gap: 8 }, fieldHeader: { alignItems: "center", flexDirection: "row", gap: 6 }, fieldLabel: { color: "#6f6256", fontSize: 13, fontWeight: "600" }, inputRow: { flexDirection: "row", gap: 8 }, input: { backgroundColor: "#fff9f3", borderColor: "#d8c9b8", borderRadius: 12, borderWidth: 1, flex: 1, fontSize: 16, minHeight: 48, paddingHorizontal: 14 }, pasteButton: { alignItems: "center", backgroundColor: "#eee6dc", borderRadius: 12, height: 48, justifyContent: "center", width: 48 }, submitButton: { alignItems: "center", backgroundColor: "#b65a36", borderRadius: 12, flexDirection: "row", gap: 8, justifyContent: "center", minHeight: 48 }, submitText: { color: "#fff9f3", fontSize: 16, fontWeight: "600" }, disabled: { opacity: 0.5 }, statusCard: { backgroundColor: "#fff9f3", borderColor: "#d8c9b8", borderRadius: 16, borderWidth: 1, gap: 10, marginTop: 24, padding: 16 }, errorCard: { backgroundColor: "#fff5f3", borderColor: "#f0c3c1" }, statusHeading: { alignItems: "center", flexDirection: "row", gap: 8 }, statusTitle: { color: "#241a12", flex: 1, fontSize: 17, fontWeight: "700" }, errorTitle: { color: "#b42318" }, statusText: { color: "#6f6256", fontSize: 14, lineHeight: 20 }, retryButton: { alignSelf: "flex-start", paddingVertical: 6 }, retryText: { color: "#8b5c48", fontSize: 15, fontWeight: "600" }, playButton: { alignItems: "center", backgroundColor: "#b65a36", borderRadius: 10, flexDirection: "row", gap: 8, justifyContent: "center", minHeight: 44 }, playText: { color: "#fff9f3", fontSize: 16, fontWeight: "600" }, stepsRow: { alignItems: "center", flexDirection: "row", marginTop: 4 }, stepItem: { alignItems: "center", flex: 1, flexDirection: "row" }, stepDot: { alignItems: "center", backgroundColor: "#ded0c1", borderRadius: 8, height: 16, justifyContent: "center", width: 16 }, stepActive: { backgroundColor: "#b65a36" }, stepLine: { backgroundColor: "#ded0c1", flex: 1, height: 2 }, stepLineActive: { backgroundColor: "#b65a36" },
 });

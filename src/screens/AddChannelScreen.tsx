@@ -1,17 +1,17 @@
 import { useState } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { Ionicons } from "@expo/vector-icons";
+import { ActivityIndicator, Image, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import type { RootStackParamList } from "../app/navigation/types";
 import Screen from "../components/Screen";
 import { useAddChannel } from "../features/youtubeFeed/hooks";
 import type { FeedSource } from "../features/youtubeFeed/types";
 import { useTranslation } from "../i18n";
 
-type Props = {
-  onAdded: () => void;
-  onClose: () => void;
-};
-
-export default function AddChannelScreen({ onAdded, onClose }: Props) {
+export default function AddChannelScreen() {
   const { t } = useTranslation();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [input, setInput] = useState("");
   const [preview, setPreview] = useState<FeedSource | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
@@ -32,45 +32,74 @@ export default function AddChannelScreen({ onAdded, onClose }: Props) {
   const handleConfirm = () => {
     setPreview(null);
     setInput("");
-    onAdded();
+    navigation.goBack();
   };
 
   return (
     <Screen>
-      <View style={styles.header}>
-        <Pressable onPress={onClose}>
-          <Text style={styles.closeText}>{t("common.cancel")}</Text>
-        </Pressable>
-        <Text style={styles.title}>{t("channel.title")}</Text>
-        <View style={{ width: 50 }} />
+      <View style={styles.intro}>
+        <View style={styles.introIcon}>
+          <Ionicons name="link-outline" size={22} color="#b65a36" />
+        </View>
+        <Text style={styles.introText}>{t("channel.helper")}</Text>
       </View>
 
-      <View style={styles.inputRow}>
+      <View style={styles.formGroup}>
+        <Text style={styles.fieldLabel}>{t("channel.placeholder")}</Text>
         <TextInput
           style={styles.input}
+          autoFocus
           placeholder={t("channel.placeholder")}
           value={input}
           onChangeText={setInput}
           autoCapitalize="none"
           autoCorrect={false}
           keyboardType="url"
+          onSubmitEditing={() => void handleResolve()}
+          returnKeyType="done"
         />
-        <Pressable
-          style={[styles.resolveButton, !input.trim() && styles.disabled]}
-          onPress={handleResolve}
-          disabled={!input.trim() || addChannel.isPending}
-        >
-          {addChannel.isPending ? <ActivityIndicator color="#fff" /> : <Text style={styles.resolveText}>{t("channel.add")}</Text>}
-        </Pressable>
       </View>
 
-      {parseError && <Text style={styles.errorText}>{parseError}</Text>}
+      <Pressable
+        accessibilityRole="button"
+        style={[styles.resolveButton, (!input.trim() || addChannel.isPending) && styles.disabled]}
+        onPress={handleResolve}
+        disabled={!input.trim() || addChannel.isPending}
+      >
+        {addChannel.isPending ? (
+          <ActivityIndicator color="#fff9f3" />
+        ) : (
+          <>
+            <Ionicons name="add" size={20} color="#fff9f3" />
+            <Text style={styles.resolveText}>{t("channel.add")}</Text>
+          </>
+        )}
+      </Pressable>
+
+      {parseError && (
+        <View style={styles.errorState}>
+          <Ionicons name="alert-circle-outline" size={18} color="#b42318" />
+          <Text style={styles.errorText}>{parseError}</Text>
+        </View>
+      )}
 
       {preview && (
         <View style={styles.preview}>
-          <Text style={styles.previewLabel}>{t("channel.preview")}</Text>
-          <Text style={styles.previewTitle}>{preview.title}</Text>
-          <Pressable style={styles.confirmButton} onPress={handleConfirm}>
+          <View style={styles.previewHeader}>
+            <View style={styles.thumbnail}>
+              {preview.thumbnailUrl ? (
+                <Image resizeMode="cover" source={{ uri: preview.thumbnailUrl }} style={styles.thumbnailImage} />
+              ) : (
+                <Ionicons name="play" size={22} color="#b65a36" />
+              )}
+            </View>
+            <View style={styles.previewContent}>
+              <Text style={styles.previewLabel}>{t("channel.added")}</Text>
+              <Text numberOfLines={2} style={styles.previewTitle}>{preview.title}</Text>
+            </View>
+            <Ionicons name="checkmark-circle" size={24} color="#4f8a61" />
+          </View>
+          <Pressable accessibilityRole="button" style={styles.confirmButton} onPress={handleConfirm}>
             <Text style={styles.confirmText}>{t("common.done")}</Text>
           </Pressable>
         </View>
@@ -80,18 +109,24 @@ export default function AddChannelScreen({ onAdded, onClose }: Props) {
 }
 
 const styles = StyleSheet.create({
-  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 16 },
-  closeText: { fontSize: 16, color: "#b65a36" },
-  title: { fontSize: 20, fontWeight: "bold" },
-  inputRow: { flexDirection: "row", gap: 8, marginBottom: 8 },
-  input: { flex: 1, borderWidth: 1, borderColor: "#ccc", borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10, fontSize: 16 },
-  resolveButton: { backgroundColor: "#FF6B35", paddingHorizontal: 20, justifyContent: "center", borderRadius: 8 },
-  resolveText: { color: "#fff", fontSize: 14, fontWeight: "600" },
+  intro: { alignItems: "center", flexDirection: "row", gap: 12, marginBottom: 24 },
+  introIcon: { alignItems: "center", backgroundColor: "#f1dfc7", borderRadius: 22, height: 44, justifyContent: "center", width: 44 },
+  introText: { color: "#6f6256", flex: 1, fontSize: 15, lineHeight: 21 },
+  formGroup: { gap: 8 },
+  fieldLabel: { color: "#6f6256", fontSize: 13, fontWeight: "600" },
+  input: { backgroundColor: "#fff9f3", borderColor: "#d8c9b8", borderRadius: 12, borderWidth: 1, fontSize: 16, minHeight: 48, paddingHorizontal: 14 },
+  resolveButton: { alignItems: "center", backgroundColor: "#b65a36", borderRadius: 12, flexDirection: "row", gap: 8, justifyContent: "center", marginTop: 16, minHeight: 48, paddingHorizontal: 20 },
+  resolveText: { color: "#fff9f3", fontSize: 16, fontWeight: "600" },
   disabled: { opacity: 0.5 },
-  errorText: { color: "red", fontSize: 14, marginBottom: 8 },
-  preview: { marginTop: 16, padding: 16, backgroundColor: "#fff", borderRadius: 8, borderWidth: 1, borderColor: "#dbcbb9" },
-  previewLabel: { fontSize: 13, color: "#888" },
-  previewTitle: { fontSize: 18, fontWeight: "600", marginTop: 4, marginBottom: 12 },
-  confirmButton: { backgroundColor: "#4CAF50", paddingVertical: 12, borderRadius: 8, alignItems: "center" },
-  confirmText: { color: "#fff", fontSize: 16, fontWeight: "600" },
+  errorState: { alignItems: "center", flexDirection: "row", gap: 6, marginTop: 12 },
+  errorText: { color: "#b42318", flex: 1, fontSize: 14 },
+  preview: { backgroundColor: "#fff9f3", borderColor: "#d8c9b8", borderRadius: 16, borderWidth: 1, gap: 18, marginTop: 24, padding: 16 },
+  previewHeader: { alignItems: "center", flexDirection: "row", gap: 12 },
+  thumbnail: { alignItems: "center", backgroundColor: "#f1dfc7", borderRadius: 12, height: 56, justifyContent: "center", overflow: "hidden", width: 56 },
+  thumbnailImage: { height: "100%", width: "100%" },
+  previewContent: { flex: 1, gap: 3 },
+  previewLabel: { color: "#6f6256", fontSize: 13, fontWeight: "600" },
+  previewTitle: { color: "#241a12", fontSize: 17, fontWeight: "700", lineHeight: 22 },
+  confirmButton: { alignItems: "center", borderColor: "#b65a36", borderRadius: 10, borderWidth: 1, justifyContent: "center", minHeight: 44 },
+  confirmText: { color: "#8b5c48", fontSize: 16, fontWeight: "600" },
 });

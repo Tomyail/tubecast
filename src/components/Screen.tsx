@@ -22,7 +22,7 @@ export default function Screen({
     <View style={[styles.staticContent, { paddingBottom }]}>{children}</View>
   );
 
-  return <SafeAreaView edges={["top", "left", "right"]} style={styles.safeArea}>{content}</SafeAreaView>;
+  return <SafeAreaView edges={["left", "right"]} style={styles.safeArea}>{content}</SafeAreaView>;
 }
 
 const styles = StyleSheet.create({

@@ -1,6 +1,8 @@
 export type RootStackParamList = {
   Tabs: undefined;
   Player: { jobId: string };
+  AddChannel: undefined;
+  ManageChannels: undefined;
 };
 
 export type RootTabParamList = {

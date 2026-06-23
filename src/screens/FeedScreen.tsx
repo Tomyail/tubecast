@@ -1,8 +1,10 @@
-import { Alert, ActivityIndicator, FlatList, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import type { ComponentProps } from "react";
+import { Alert, ActivityIndicator, FlatList, Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import Screen from "../components/Screen";
-import { useFeedVideos, useSubscribedChannels, useRemoveChannel } from "../features/youtubeFeed/hooks";
+import { useFeedVideos, useSubscribedChannels } from "../features/youtubeFeed/hooks";
 import { useSubmitJob, useCacheReadyJob } from "../features/jobs/hooks";
 import { trackFromReadyJob } from "../features/jobs/track";
 import { usePlaylist } from "../features/playlist/context";
@@ -18,11 +20,11 @@ import {
   type SubmittedFeedJob,
 } from "../features/youtubeFeed/submittedJobsStorage";
 import { getFeedProgressLabel } from "../features/jobs/progress";
-import AddChannelScreen from "./AddChannelScreen";
 import { useTranslation } from "../i18n";
 
 const BOTTOM_WITH_PLAYER = 120;
 const BOTTOM_BASE = 24;
+type IoniconName = NonNullable<ComponentProps<typeof Ionicons>["name"]>;
 
 export default function FeedScreen() {
   const { t } = useTranslation();
@@ -30,7 +32,6 @@ export default function FeedScreen() {
   const { data: channels = [] } = useSubscribedChannels();
   const { data: videos = [], isLoading, error, refetch } = useFeedVideos();
   const [selectedChannel, setSelectedChannel] = useState<string | null>(null);
-  const [showAddChannel, setShowAddChannel] = useState(false);
   const [submittedJobs, setSubmittedJobs] = useState<Record<string, SubmittedFeedJob>>({});
   const [submittingIds, setSubmittingIds] = useState<Set<string>>(new Set());
   useEffect(() => {
@@ -39,7 +40,6 @@ export default function FeedScreen() {
     });
   }, []);
 
-  const removeChannel = useRemoveChannel();
   const submitJob = useSubmitJob();
   const { tracks } = usePlaylist();
   const { playTrack, activeTrack } = usePlayer();
@@ -70,30 +70,15 @@ export default function FeedScreen() {
     }
   };
 
-  const handleRemoveChannel = (channelId: string) => {
-    Alert.alert(t("feed.removeTitle"), t("feed.removeMessage"), [
-      { text: t("common.cancel"), style: "cancel" },
-      { text: t("common.remove"), style: "destructive", onPress: () => removeChannel.mutate(channelId) },
-    ]);
-  };
-
-  if (showAddChannel) {
-    return (
-      <AddChannelScreen
-        onAdded={() => setShowAddChannel(false)}
-        onClose={() => setShowAddChannel(false)}
-      />
-    );
-  }
-
   if (channels.length === 0 && !isLoading) {
     return (
       <Screen>
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyTitle}>{t("feed.noSubscriptions")}</Text>
           <Text style={styles.emptyText}>{t("feed.addToBrowse")}</Text>
-          <Pressable style={styles.addChannelButton} onPress={() => setShowAddChannel(true)}>
-            <Text style={styles.addChannelButtonText}>+ {t("feed.addChannel")}</Text>
+          <Pressable accessibilityRole="button" style={styles.addChannelButton} onPress={() => navigation.navigate("AddChannel")}>
+            <Ionicons name="add" size={20} color="#fff9f3" />
+            <Text style={styles.addChannelButtonText}>{t("feed.addChannel")}</Text>
           </Pressable>
         </View>
       </Screen>
@@ -104,7 +89,7 @@ export default function FeedScreen() {
     <Screen scroll={false}>
       {channels.length > 0 && (
         <View style={styles.pillsRow}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.channelScroll}>
             <Pressable
               style={[styles.pill, !selectedChannel && styles.pillActive]}
               onPress={() => setSelectedChannel(null)}
@@ -113,10 +98,10 @@ export default function FeedScreen() {
             </Pressable>
             {channels.map((ch) => (
               <Pressable
+                accessibilityRole="button"
                 key={ch.platformSourceId}
                 style={[styles.pill, selectedChannel === ch.platformSourceId && styles.pillActive]}
                 onPress={() => setSelectedChannel(selectedChannel === ch.platformSourceId ? null : ch.platformSourceId)}
-                onLongPress={() => handleRemoveChannel(ch.platformSourceId)}
               >
                 <Text style={[styles.pillText, selectedChannel === ch.platformSourceId && styles.pillTextActive]} numberOfLines={1}>
                   {ch.title}
@@ -124,9 +109,24 @@ export default function FeedScreen() {
               </Pressable>
             ))}
           </ScrollView>
-          <Pressable style={styles.addButton} onPress={() => setShowAddChannel(true)}>
-            <Text style={styles.addButtonText}>+</Text>
-          </Pressable>
+          <View style={styles.channelActions}>
+            <Pressable
+              accessibilityLabel={t("feed.manageChannels")}
+              accessibilityRole="button"
+              style={styles.manageButton}
+              onPress={() => navigation.navigate("ManageChannels")}
+            >
+              <Ionicons name="ellipsis-horizontal" size={20} color="#6f6256" />
+            </Pressable>
+            <Pressable
+              accessibilityLabel={t("feed.addChannel")}
+              accessibilityRole="button"
+              style={styles.addButton}
+              onPress={() => navigation.navigate("AddChannel")}
+            >
+              <Ionicons name="add" size={24} color="#fff9f3" />
+            </Pressable>
+          </View>
         </View>
       )}
 
@@ -223,49 +223,77 @@ function VideoCard({
 
   return (
     <View style={styles.card}>
+      <VideoThumbnail thumbnailUrl={video.thumbnailUrl} />
       <View style={styles.cardContent}>
         <Text style={styles.cardTitle} numberOfLines={2}>{video.title}</Text>
         <Text style={styles.cardMeta}>{video.sourceTitle} · {formatRelativeTime(video.publishedAt, t)}</Text>
-      </View>
-      {status === "new" && (
-        <Pressable
-          style={[styles.actionButton, styles.convertButton, isSubmitting && styles.disabled]}
-          onPress={() => onConvert(video)}
-          disabled={isSubmitting}
-        >
-          <Text style={styles.actionText}>{t("feed.convert")}</Text>
-        </Pressable>
-      )}
-      {status === "converting" && (
-        <View style={styles.actionButton}>
-          <Text style={styles.phaseLabel}>
+        {status === "converting" && (
+          <View style={styles.inlineStatus}>
+            <ActivityIndicator size="small" color="#b65a36" />
+            <Text style={styles.phaseLabel} numberOfLines={1}>
             {getFeedProgressLabel(
               job ?? { status: "queued", progressPhase: null, attemptCount: 0, lastErrorMessage: null }
             , t).label}
-          </Text>
-        </View>
-      )}
-      {status === "ready" && playableTrack && (
-        <View style={styles.readyActions}>
-          {cacheState === "caching" && <Text style={styles.cacheLabel}>{t("feed.caching")}</Text>}
-          {cacheState === "error" && <Text style={styles.cacheLabel}>{t("feed.cacheFailed")}</Text>}
-          <Pressable
-            style={[styles.actionButton, styles.playButton]}
-            onPress={() => onPlay(playableTrack)}
-          >
-            <Text style={styles.actionText}>{t("common.play")}</Text>
-          </Pressable>
-        </View>
-      )}
-      {status === "failed" && (
-        <Pressable
-          style={[styles.actionButton, styles.convertButton]}
-          onPress={() => onConvert(video)}
-        >
-          <Text style={styles.actionText}>{t("common.retry")}</Text>
-        </Pressable>
+            </Text>
+          </View>
+        )}
+        {status === "ready" && cacheState === "caching" && <Text style={styles.cacheLabel}>{t("feed.caching")}</Text>}
+        {status === "ready" && cacheState === "error" && <Text style={styles.cacheLabel}>{t("feed.cacheFailed")}</Text>}
+      </View>
+      <VideoAction
+        isSubmitting={isSubmitting}
+        onConvert={() => onConvert(video)}
+        onPlay={playableTrack ? () => onPlay(playableTrack) : undefined}
+        status={status}
+        t={t}
+      />
+    </View>
+  );
+}
+
+function VideoThumbnail({ thumbnailUrl }: { thumbnailUrl: string | null }) {
+  return (
+    <View style={styles.thumbnail}>
+      {thumbnailUrl ? (
+        <Image resizeMode="cover" source={{ uri: thumbnailUrl }} style={styles.thumbnailImage} />
+      ) : (
+        <Ionicons name="play" size={22} color="#b65a36" />
       )}
     </View>
+  );
+}
+
+function VideoAction({
+  status,
+  isSubmitting,
+  onConvert,
+  onPlay,
+  t,
+}: {
+  status: "new" | "converting" | "ready" | "failed";
+  isSubmitting: boolean;
+  onConvert: () => void;
+  onPlay?: () => void;
+  t: (key: string) => string;
+}) {
+  if (status === "converting" || isSubmitting) {
+    return <View accessibilityLabel={t("progress.processing")} accessibilityRole="progressbar" style={styles.actionPlaceholder} />;
+  }
+
+  const isReady = status === "ready" && onPlay;
+  const icon: IoniconName = isReady ? "play" : status === "failed" ? "refresh" : "arrow-down";
+  const label = isReady ? t("common.play") : status === "failed" ? t("common.retry") : t("feed.convert");
+
+  return (
+    <Pressable
+      accessibilityLabel={label}
+      accessibilityRole="button"
+      disabled={isReady ? false : false}
+      onPress={isReady ? onPlay : onConvert}
+      style={[styles.actionButton, status === "failed" && styles.retryButton]}
+    >
+      <Ionicons name={icon} size={22} color="#fff9f3" />
+    </Pressable>
   );
 }
 
@@ -280,33 +308,35 @@ function formatRelativeTime(isoDate: string, t: (key: string, options?: { count:
 }
 
 const styles = StyleSheet.create({
-  pillsRow: { flexDirection: "row", alignItems: "center", paddingVertical: 8, paddingHorizontal: 18, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: "#dbcbb9" },
-  pill: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 16, backgroundColor: "#eee", marginRight: 8 },
+  pillsRow: { alignItems: "center", borderBottomColor: "#dbcbb9", borderBottomWidth: StyleSheet.hairlineWidth, flexDirection: "row", paddingHorizontal: 18, paddingVertical: 8 },
+  channelScroll: { flex: 1 },
+  channelActions: { flexDirection: "row", gap: 4, marginLeft: 4 },
+  pill: { alignItems: "center", backgroundColor: "#eee6dc", borderRadius: 18, justifyContent: "center", marginRight: 8, minHeight: 36, paddingHorizontal: 14 },
   pillActive: { backgroundColor: "#b65a36" },
-  pillText: { fontSize: 13, color: "#555" },
+  pillText: { color: "#6f6256", fontSize: 13 },
   pillTextActive: { color: "#fff", fontWeight: "600" },
-  addButton: { width: 32, height: 32, borderRadius: 16, backgroundColor: "#FF6B35", justifyContent: "center", alignItems: "center", marginLeft: 4 },
-  addButtonText: { color: "#fff", fontSize: 18, fontWeight: "bold" },
-  emptyContainer: { flex: 1, justifyContent: "center", alignItems: "center", padding: 32 },
-  emptyTitle: { fontSize: 20, fontWeight: "bold", marginBottom: 8 },
-  emptyText: { fontSize: 15, color: "#777", textAlign: "center" },
-  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
-  loadingText: { marginTop: 8, fontSize: 15, color: "#777" },
-  errorText: { fontSize: 15, color: "red" },
-  emptyFeed: { textAlign: "center", color: "#999", marginTop: 40 },
-  listContent: { paddingHorizontal: 18, paddingTop: 8 },
-  card: { flexDirection: "row", alignItems: "center", paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: "#eee" },
-  cardContent: { flex: 1, marginRight: 12 },
-  cardTitle: { fontSize: 15, fontWeight: "500", lineHeight: 20 },
-  cardMeta: { fontSize: 12, color: "#888", marginTop: 2 },
-  actionButton: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 8, minWidth: 70, alignItems: "center", justifyContent: "center" },
-  convertButton: { backgroundColor: "#FF6B35" },
-  playButton: { backgroundColor: "#4CAF50" },
-  actionText: { color: "#fff", fontSize: 13, fontWeight: "600" },
-  disabled: { opacity: 0.5 },
-  phaseLabel: { fontSize: 11, color: "#FF6B35", fontWeight: "600", textAlign: "center" },
-  readyActions: { alignItems: "center", gap: 4 },
-  cacheLabel: { fontSize: 11, color: "#888", fontWeight: "600" },
-  addChannelButton: { marginTop: 20, backgroundColor: "#FF6B35", paddingHorizontal: 28, paddingVertical: 12, borderRadius: 8 },
-  addChannelButtonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
+  addButton: { alignItems: "center", backgroundColor: "#b65a36", borderRadius: 22, height: 44, justifyContent: "center", marginLeft: 4, width: 44 },
+  manageButton: { alignItems: "center", backgroundColor: "#eee6dc", borderRadius: 22, height: 44, justifyContent: "center", width: 44 },
+  emptyContainer: { alignItems: "center", flex: 1, justifyContent: "center", padding: 32 },
+  emptyTitle: { color: "#241a12", fontSize: 20, fontWeight: "700", marginBottom: 8 },
+  emptyText: { color: "#6f6256", fontSize: 15, textAlign: "center" },
+  loadingContainer: { alignItems: "center", flex: 1, justifyContent: "center" },
+  loadingText: { color: "#6f6256", fontSize: 15, marginTop: 8 },
+  errorText: { color: "#b42318", fontSize: 15 },
+  emptyFeed: { color: "#6f6256", marginTop: 40, textAlign: "center" },
+  listContent: { paddingHorizontal: 18, paddingTop: 4 },
+  card: { alignItems: "center", borderBottomColor: "#e2d7c9", borderBottomWidth: StyleSheet.hairlineWidth, flexDirection: "row", gap: 12, minHeight: 84, paddingVertical: 12 },
+  thumbnail: { alignItems: "center", aspectRatio: 16 / 9, backgroundColor: "#f1dfc7", borderRadius: 10, justifyContent: "center", overflow: "hidden", width: 84 },
+  thumbnailImage: { height: "100%", width: "100%" },
+  cardContent: { flex: 1, gap: 4 },
+  cardTitle: { color: "#241a12", fontSize: 16, fontWeight: "600", lineHeight: 20 },
+  cardMeta: { color: "#85776a", fontSize: 13 },
+  inlineStatus: { alignItems: "center", flexDirection: "row", gap: 5 },
+  phaseLabel: { color: "#8b5c48", flex: 1, fontSize: 12, fontWeight: "600" },
+  cacheLabel: { color: "#85776a", fontSize: 12 },
+  actionButton: { alignItems: "center", backgroundColor: "#b65a36", borderRadius: 22, height: 44, justifyContent: "center", width: 44 },
+  retryButton: { backgroundColor: "#9a5b3d" },
+  actionPlaceholder: { height: 44, width: 44 },
+  addChannelButton: { alignItems: "center", backgroundColor: "#b65a36", borderRadius: 12, flexDirection: "row", gap: 8, marginTop: 20, minHeight: 44, paddingHorizontal: 20 },
+  addChannelButtonText: { color: "#fff9f3", fontSize: 16, fontWeight: "600" },
 });
