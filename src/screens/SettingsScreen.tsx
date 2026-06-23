@@ -24,11 +24,11 @@ export default function SettingsScreen() {
 
       <View style={styles.about}>
         <Text style={styles.aboutTitle}>About</Text>
-        <Text style={styles.aboutText}>yt-audio — YouTube to audio converter</Text>
+        <Text style={styles.aboutText}>TubeCast — your personal YouTube audio library</Text>
         <Text style={styles.aboutText}>API: {SERVER_URL}</Text>
         <Text
           style={[styles.aboutText, styles.link]}
-          onPress={() => Linking.openURL("https://gitea.tomyail.com/tomyail/yt-audio")}
+          onPress={() => Linking.openURL("https://github.com/Tomyail/tubecast")}
         >
           Source code
         </Text>

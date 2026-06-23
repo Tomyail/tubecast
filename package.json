@@ -38,7 +38,7 @@
     "typescript": "~5.9.2",
     "vitest": "^3.2.4"
   },
-  "private": true,
+  "private": false,
   "pnpm": {
     "patchedDependencies": {
       "expo-modules-core@55.0.14": "patches/expo-modules-core@55.0.14.patch"

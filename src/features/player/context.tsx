@@ -180,7 +180,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
     player.setActiveForLockScreen(true, {
       title: track.title || "Untitled",
-      artist: "YT Audio",
+      artist: "TubeCast",
       artworkUrl: track.thumbnailUrl || undefined,
     }, {
       showSeekForward: true,

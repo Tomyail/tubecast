@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "YT Audio",
-    "slug": "yt-audio-mobile",
+    "name": "TubeCast",
+    "slug": "tubecast",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -13,12 +13,13 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.yt-audio-mobile",
+      "bundleIdentifier": "com.tomyail.tubecast",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
+      "package": "com.tomyail.tubecast",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -44,10 +45,6 @@
         }
       ]
     ],
-    "extra": {
-      "eas": {
-        "projectId": "413ae4a4-1602-4e17-924b-d83b00faa54a"
-      }
-    }
+    "extra": {}
   }
 }
