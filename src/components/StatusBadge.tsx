@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
 import type { JobStatus } from "../types";
 import { useTranslation } from "../i18n";
+import { useAppTheme } from "../app/theme";
 
 const LABELS: Record<JobStatus, string> = {
   queued: "progress.queued",
@@ -11,16 +12,16 @@ const LABELS: Record<JobStatus, string> = {
 
 export default function StatusBadge({ status }: { status: JobStatus }) {
   const { t } = useTranslation();
+  const { colors } = useAppTheme();
+  const backgroundColor = status === "failed" ? colors.destructive : status === "ready" ? colors.tint : colors.elevatedSurface;
+  const color = status === "failed" || status === "ready" ? colors.tintText : colors.primaryText;
   return (
     <View
       style={[
-        styles.base,
-        status === "processing" && styles.processing,
-        status === "ready" && styles.ready,
-        status === "failed" && styles.failed,
+        styles.base, { backgroundColor },
       ]}
     >
-      <Text style={styles.text}>{t(LABELS[status])}</Text>
+      <Text style={[styles.text, { color }]}>{t(LABELS[status])}</Text>
     </View>
   );
 }

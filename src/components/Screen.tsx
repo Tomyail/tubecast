@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { usePlayer } from "../features/player/context";
+import { useAppTheme } from "../app/theme";
 
 const BOTTOM_WITH_PLAYER = 120;
 const BOTTOM_BASE = 24;
@@ -14,6 +15,7 @@ export default function Screen({
   scroll?: boolean;
 }) {
   const { activeTrack } = usePlayer();
+  const { colors } = useAppTheme();
   const paddingBottom = activeTrack ? BOTTOM_WITH_PLAYER : BOTTOM_BASE;
 
   const content = scroll ? (
@@ -22,13 +24,12 @@ export default function Screen({
     <View style={[styles.staticContent, { paddingBottom }]}>{children}</View>
   );
 
-  return <SafeAreaView edges={["left", "right"]} style={styles.safeArea}>{content}</SafeAreaView>;
+  return <SafeAreaView edges={["left", "right"]} style={[styles.safeArea, { backgroundColor: colors.background }]}>{content}</SafeAreaView>;
 }
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#f4ede2",
   },
   scrollContent: {
     gap: 16,

@@ -21,6 +21,7 @@ import {
 } from "../features/youtubeFeed/submittedJobsStorage";
 import { getFeedProgressLabel } from "../features/jobs/progress";
 import { useTranslation } from "../i18n";
+import { useAppTheme } from "../app/theme";
 
 const BOTTOM_WITH_PLAYER = 120;
 const BOTTOM_BASE = 24;
@@ -28,6 +29,7 @@ type IoniconName = NonNullable<ComponentProps<typeof Ionicons>["name"]>;
 
 export default function FeedScreen() {
   const { t } = useTranslation();
+  const { colors } = useAppTheme();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { data: channels = [] } = useSubscribedChannels();
   const { data: videos = [], isLoading, error, refetch } = useFeedVideos();
@@ -74,11 +76,11 @@ export default function FeedScreen() {
     return (
       <Screen>
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyTitle}>{t("feed.noSubscriptions")}</Text>
-          <Text style={styles.emptyText}>{t("feed.addToBrowse")}</Text>
-          <Pressable accessibilityRole="button" style={styles.addChannelButton} onPress={() => navigation.navigate("AddChannel")}>
-            <Ionicons name="add" size={20} color="#fff9f3" />
-            <Text style={styles.addChannelButtonText}>{t("feed.addChannel")}</Text>
+          <Text style={[styles.emptyTitle, { color: colors.primaryText }]}>{t("feed.noSubscriptions")}</Text>
+          <Text style={[styles.emptyText, { color: colors.secondaryText }]}>{t("feed.addToBrowse")}</Text>
+          <Pressable accessibilityRole="button" style={[styles.addChannelButton, { backgroundColor: colors.tint }]} onPress={() => navigation.navigate("AddChannel")}>
+            <Ionicons name="add" size={20} color={colors.tintText} />
+            <Text style={[styles.addChannelButtonText, { color: colors.tintText }]}>{t("feed.addChannel")}</Text>
           </Pressable>
         </View>
       </Screen>
@@ -88,22 +90,22 @@ export default function FeedScreen() {
   return (
     <Screen scroll={false}>
       {channels.length > 0 && (
-        <View style={styles.pillsRow}>
+        <View style={[styles.pillsRow, { borderBottomColor: colors.border }]}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.channelScroll}>
             <Pressable
-              style={[styles.pill, !selectedChannel && styles.pillActive]}
+              style={[styles.pill, { backgroundColor: colors.elevatedSurface }, !selectedChannel && { backgroundColor: colors.tint }]}
               onPress={() => setSelectedChannel(null)}
             >
-              <Text style={[styles.pillText, !selectedChannel && styles.pillTextActive]}>{t("feed.all")}</Text>
+              <Text style={[styles.pillText, { color: colors.secondaryText }, !selectedChannel && { color: colors.tintText }]}>{t("feed.all")}</Text>
             </Pressable>
             {channels.map((ch) => (
               <Pressable
                 accessibilityRole="button"
                 key={ch.platformSourceId}
-                style={[styles.pill, selectedChannel === ch.platformSourceId && styles.pillActive]}
+                style={[styles.pill, { backgroundColor: colors.elevatedSurface }, selectedChannel === ch.platformSourceId && { backgroundColor: colors.tint }]}
                 onPress={() => setSelectedChannel(selectedChannel === ch.platformSourceId ? null : ch.platformSourceId)}
               >
-                <Text style={[styles.pillText, selectedChannel === ch.platformSourceId && styles.pillTextActive]} numberOfLines={1}>
+                  <Text style={[styles.pillText, { color: colors.secondaryText }, selectedChannel === ch.platformSourceId && { color: colors.tintText }]} numberOfLines={1}>
                   {ch.title}
                 </Text>
               </Pressable>
@@ -113,18 +115,18 @@ export default function FeedScreen() {
             <Pressable
               accessibilityLabel={t("feed.manageChannels")}
               accessibilityRole="button"
-              style={styles.manageButton}
+              style={[styles.manageButton, { backgroundColor: colors.elevatedSurface }]}
               onPress={() => navigation.navigate("ManageChannels")}
             >
-              <Ionicons name="ellipsis-horizontal" size={20} color="#6f6256" />
+              <Ionicons name="ellipsis-horizontal" size={20} color={colors.secondaryText} />
             </Pressable>
             <Pressable
               accessibilityLabel={t("feed.addChannel")}
               accessibilityRole="button"
-              style={styles.addButton}
+              style={[styles.addButton, { backgroundColor: colors.tint }]}
               onPress={() => navigation.navigate("AddChannel")}
             >
-              <Ionicons name="add" size={24} color="#fff9f3" />
+              <Ionicons name="add" size={24} color={colors.tintText} />
             </Pressable>
           </View>
         </View>
@@ -133,13 +135,13 @@ export default function FeedScreen() {
       {isLoading && (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" />
-          <Text style={styles.loadingText}>{t("feed.loading")}</Text>
+          <Text style={[styles.loadingText, { color: colors.secondaryText }]}>{t("feed.loading")}</Text>
         </View>
       )}
 
       {error && (
         <View style={styles.loadingContainer}>
-          <Text style={styles.errorText}>{t("feed.loadFailed")}</Text>
+          <Text style={[styles.errorText, { color: colors.destructive }]}>{t("feed.loadFailed")}</Text>
         </View>
       )}
 
@@ -170,7 +172,7 @@ export default function FeedScreen() {
           )}
           refreshing={isLoading}
           onRefresh={refetch}
-          ListEmptyComponent={<Text style={styles.emptyFeed}>{t("feed.noVideos")}</Text>}
+          ListEmptyComponent={<Text style={[styles.emptyFeed, { color: colors.secondaryText }]}>{t("feed.noVideos")}</Text>}
           contentContainerStyle={[styles.listContent, { paddingBottom: activeTrack ? BOTTOM_WITH_PLAYER : BOTTOM_BASE }]}
         />
       )}
@@ -196,6 +198,7 @@ function VideoCard({
   onTerminal: (platformItemId: string) => void;
 }) {
   const { t } = useTranslation();
+  const { colors } = useAppTheme();
   const { cacheState, job } = useCacheReadyJob(jobId);
   const track =
     (jobId ? allTracks.find((t) => t.jobId === jobId) : null) ??
@@ -222,23 +225,23 @@ function VideoCard({
   }, [jobId, track, job?.status]);
 
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, { borderBottomColor: colors.border }]}>
       <VideoThumbnail thumbnailUrl={video.thumbnailUrl} />
       <View style={styles.cardContent}>
-        <Text style={styles.cardTitle} numberOfLines={2}>{video.title}</Text>
-        <Text style={styles.cardMeta}>{video.sourceTitle} · {formatRelativeTime(video.publishedAt, t)}</Text>
+        <Text style={[styles.cardTitle, { color: colors.primaryText }]} numberOfLines={2}>{video.title}</Text>
+        <Text style={[styles.cardMeta, { color: colors.secondaryText }]}>{video.sourceTitle} · {formatRelativeTime(video.publishedAt, t)}</Text>
         {status === "converting" && (
           <View style={styles.inlineStatus}>
-            <ActivityIndicator size="small" color="#b65a36" />
-            <Text style={styles.phaseLabel} numberOfLines={1}>
+            <ActivityIndicator size="small" color={colors.tint} />
+            <Text style={[styles.phaseLabel, { color: colors.tint }]} numberOfLines={1}>
             {getFeedProgressLabel(
               job ?? { status: "queued", progressPhase: null, attemptCount: 0, lastErrorMessage: null }
             , t).label}
             </Text>
           </View>
         )}
-        {status === "ready" && cacheState === "caching" && <Text style={styles.cacheLabel}>{t("feed.caching")}</Text>}
-        {status === "ready" && cacheState === "error" && <Text style={styles.cacheLabel}>{t("feed.cacheFailed")}</Text>}
+        {status === "ready" && cacheState === "caching" && <Text style={[styles.cacheLabel, { color: colors.secondaryText }]}>{t("feed.caching")}</Text>}
+        {status === "ready" && cacheState === "error" && <Text style={[styles.cacheLabel, { color: colors.destructive }]}>{t("feed.cacheFailed")}</Text>}
       </View>
       <VideoAction
         isSubmitting={isSubmitting}
@@ -252,12 +255,13 @@ function VideoCard({
 }
 
 function VideoThumbnail({ thumbnailUrl }: { thumbnailUrl: string | null }) {
+  const { colors } = useAppTheme();
   return (
-    <View style={styles.thumbnail}>
+    <View style={[styles.thumbnail, { backgroundColor: colors.elevatedSurface }]}>
       {thumbnailUrl ? (
         <Image resizeMode="cover" source={{ uri: thumbnailUrl }} style={styles.thumbnailImage} />
       ) : (
-        <Ionicons name="play" size={22} color="#b65a36" />
+        <Ionicons name="play" size={22} color={colors.tint} />
       )}
     </View>
   );
@@ -276,6 +280,7 @@ function VideoAction({
   onPlay?: () => void;
   t: (key: string) => string;
 }) {
+  const { colors } = useAppTheme();
   if (status === "converting" || isSubmitting) {
     return <View accessibilityLabel={t("progress.processing")} accessibilityRole="progressbar" style={styles.actionPlaceholder} />;
   }
@@ -290,9 +295,9 @@ function VideoAction({
       accessibilityRole="button"
       disabled={isReady ? false : false}
       onPress={isReady ? onPlay : onConvert}
-      style={[styles.actionButton, status === "failed" && styles.retryButton]}
+      style={[styles.actionButton, { backgroundColor: status === "failed" ? colors.destructive : colors.tint }]}
     >
-      <Ionicons name={icon} size={22} color="#fff9f3" />
+      <Ionicons name={icon} size={22} color={colors.tintText} />
     </Pressable>
   );
 }

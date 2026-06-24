@@ -7,6 +7,7 @@ import Screen from "../components/Screen";
 import { useHideLibraryItem, useLibraryList } from "../features/jobs/hooks";
 import type { JobResponse } from "../features/jobs/api";
 import { formatDuration } from "../api";
+import { useAppTheme } from "../app/theme";
 
 type LibraryFilter = "all" | JobResponse["status"];
 
@@ -20,6 +21,7 @@ const FILTERS: Array<{ key: LibraryFilter; label: string }> = [
 
 export default function LibraryScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { colors } = useAppTheme();
   const jobsQuery = useLibraryList();
   const hideLibraryItemMutation = useHideLibraryItem();
   const [filter, setFilter] = useState<LibraryFilter>("all");
@@ -31,18 +33,18 @@ export default function LibraryScreen() {
   return (
     <Screen>
       <View style={styles.header}>
-        <Text style={styles.title}>媒体库</Text>
-        <Text style={styles.subtitle}>先把列表独立出来，后续再补筛选、重试和下载视图。</Text>
+        <Text style={[styles.title, { color: colors.primaryText }]}>媒体库</Text>
+        <Text style={[styles.subtitle, { color: colors.secondaryText }]}>先把列表独立出来，后续再补筛选、重试和下载视图。</Text>
       </View>
 
       <View style={styles.filters}>
         {FILTERS.map((item) => (
           <Pressable
             key={item.key}
-            style={[styles.filterChip, filter === item.key && styles.filterChipActive]}
+            style={[styles.filterChip, { backgroundColor: filter === item.key ? colors.tint : colors.elevatedSurface }]}
             onPress={() => setFilter(item.key)}
           >
-            <Text style={[styles.filterChipText, filter === item.key && styles.filterChipTextActive]}>
+            <Text style={[styles.filterChipText, { color: filter === item.key ? colors.tintText : colors.primaryText }]}>
               {item.label}
             </Text>
           </Pressable>
@@ -53,20 +55,20 @@ export default function LibraryScreen() {
         {filteredJobs.map((job: JobResponse) => (
           <Pressable
             key={job.id}
-            style={styles.card}
+            style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
             onPress={() => navigation.navigate("Player", { jobId: job.id })}
           >
             <View style={styles.cardHeader}>
               <View style={styles.textWrap}>
-                <Text style={styles.cardTitle} numberOfLines={1}>
+                <Text style={[styles.cardTitle, { color: colors.primaryText }]} numberOfLines={1}>
                   {job.title || job.sourceUrl}
                 </Text>
-                <Text style={styles.cardMeta} numberOfLines={1}>
+                <Text style={[styles.cardMeta, { color: colors.secondaryText }]} numberOfLines={1}>
                   {formatDuration(job.durationSeconds)} · {job.status}
                 </Text>
               </View>
               <View style={styles.footer}>
-                <Text style={styles.footerText}>{job.sourceUrl}</Text>
+                <Text style={[styles.footerText, { color: colors.secondaryText }]}>{job.sourceUrl}</Text>
                 <Pressable
                   disabled={hideLibraryItemMutation.isPending}
                   onPress={() => {
@@ -82,14 +84,14 @@ export default function LibraryScreen() {
                     ]);
                   }}
                 >
-                  <Text style={styles.deleteText}>移出列表</Text>
+                  <Text style={[styles.deleteText, { color: colors.destructive }]}>移出列表</Text>
                 </Pressable>
               </View>
             </View>
           </Pressable>
         ))}
         {!filteredJobs.length ? (
-          <Text style={styles.empty}>
+          <Text style={[styles.empty, { color: colors.secondaryText }]}>
             {jobsQuery.data?.length ? "当前筛选下没有任务。" : "还没有任务。"}
           </Text>
         ) : null}

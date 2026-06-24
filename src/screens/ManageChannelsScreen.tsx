@@ -4,9 +4,11 @@ import Screen from "../components/Screen";
 import { useRemoveChannel, useSubscribedChannels } from "../features/youtubeFeed/hooks";
 import type { FeedSource } from "../features/youtubeFeed/types";
 import { useTranslation } from "../i18n";
+import { useAppTheme } from "../app/theme";
 
 export default function ManageChannelsScreen() {
   const { t } = useTranslation();
+  const { colors } = useAppTheme();
   const { data: channels = [] } = useSubscribedChannels();
   const removeChannel = useRemoveChannel();
 
@@ -28,15 +30,15 @@ export default function ManageChannelsScreen() {
         keyExtractor={(channel) => channel.platformSourceId}
         contentContainerStyle={styles.listContent}
         renderItem={({ item }) => (
-          <View style={styles.row}>
-            <View style={styles.thumbnail}>
+          <View style={[styles.row, { borderBottomColor: colors.border }]}>
+            <View style={[styles.thumbnail, { backgroundColor: colors.elevatedSurface }]}>
               {item.thumbnailUrl ? (
                 <Image resizeMode="cover" source={{ uri: item.thumbnailUrl }} style={styles.thumbnailImage} />
               ) : (
-                <Ionicons name="play" size={20} color="#b65a36" />
+                <Ionicons name="play" size={20} color={colors.tint} />
               )}
             </View>
-            <Text numberOfLines={2} style={styles.title}>{item.title}</Text>
+            <Text numberOfLines={2} style={[styles.title, { color: colors.primaryText }]}>{item.title}</Text>
             <Pressable
               accessibilityLabel={`${t("common.remove")} ${item.title}`}
               accessibilityRole="button"
@@ -44,14 +46,14 @@ export default function ManageChannelsScreen() {
               onPress={() => confirmRemove(item)}
               style={styles.removeButton}
             >
-              <Text style={styles.removeText}>{t("common.remove")}</Text>
+              <Text style={[styles.removeText, { color: colors.destructive }]}>{t("common.remove")}</Text>
             </Pressable>
           </View>
         )}
         ListEmptyComponent={(
           <View style={styles.emptyState}>
-            <Ionicons name="albums-outline" size={32} color="#8b7d70" />
-            <Text style={styles.emptyText}>{t("feed.noSubscriptions")}</Text>
+            <Ionicons name="albums-outline" size={32} color={colors.secondaryText} />
+            <Text style={[styles.emptyText, { color: colors.secondaryText }]}>{t("feed.noSubscriptions")}</Text>
           </View>
         )}
       />

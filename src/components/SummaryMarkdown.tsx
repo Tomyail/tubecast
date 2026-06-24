@@ -1,5 +1,6 @@
 import { StyleSheet, View } from "react-native";
 import StreamdownRN from "streamdown-rn";
+import { useAppTheme } from "../app/theme";
 
 export default function SummaryMarkdown({
   content,
@@ -8,6 +9,7 @@ export default function SummaryMarkdown({
   content: string;
   isComplete: boolean;
 }) {
+  const { isDark } = useAppTheme();
   if (!content.trim()) {
     return null;
   }
@@ -17,7 +19,7 @@ export default function SummaryMarkdown({
       <StreamdownRN
         isComplete={isComplete}
         style={styles.markdown}
-        theme="light"
+        theme={isDark ? "dark" : "light"}
       >
         {content}
       </StreamdownRN>

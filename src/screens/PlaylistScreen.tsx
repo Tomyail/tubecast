@@ -12,12 +12,14 @@ import { usePlayer } from "../features/player/context";
 import type { Track } from "../features/playlist/storage";
 import { useTranslation } from "../i18n";
 import { formatDuration, formatFileSize } from "../i18n/formatters";
+import { useAppTheme } from "../app/theme";
 
 type PlaylistStackParamList = { PlaylistRoot: undefined };
 const MINI_PLAYER_HEIGHT = 64;
 
 export default function PlaylistScreen() {
   const { t, i18n } = useTranslation();
+  const { colors } = useAppTheme();
   const navigation = useNavigation<NativeStackNavigationProp<PlaylistStackParamList>>();
   const { tracks, deleteTrack, deleteTracks, reorderTracks } = usePlaylist();
   const { playTrack, activeTrack, isPlaying, stopPlayback } = usePlayer();
@@ -125,25 +127,25 @@ export default function PlaylistScreen() {
       headerLeft: isEditMode
         ? () => (
             <Pressable onPress={toggleSelectAll} style={styles.navigationAction}>
-              <Text style={styles.headerAction}>{allSelected ? t("playlist.clearAll") : t("playlist.selectAll")}</Text>
+              <Text style={[styles.headerAction, { color: colors.tint }]}>{allSelected ? t("playlist.clearAll") : t("playlist.selectAll")}</Text>
             </Pressable>
           )
         : undefined,
       headerRight: isEditMode
         ? () => (
             <Pressable onPress={exitEditMode} style={styles.navigationAction}>
-              <Text style={styles.headerAction}>{t("common.done")}</Text>
+              <Text style={[styles.headerAction, { color: colors.tint }]}>{t("common.done")}</Text>
             </Pressable>
           )
         : tracks.length > 0
           ? () => (
               <Pressable onPress={enterEditMode} style={styles.navigationAction}>
-                <Text style={styles.headerAction}>{t("playlist.edit")}</Text>
+                <Text style={[styles.headerAction, { color: colors.tint }]}>{t("playlist.edit")}</Text>
               </Pressable>
             )
           : undefined,
     });
-  }, [allSelected, isEditMode, navigation, selectedIds.size, t, tracks.length]);
+  }, [allSelected, colors.tint, isEditMode, navigation, selectedIds.size, t, tracks.length]);
 
   const renderItem = ({ item, drag, isActive }: RenderItemParams<Track>) => {
     const isCurrentTrack = activeTrack?.id === item.id;
@@ -162,6 +164,7 @@ export default function PlaylistScreen() {
           onToggleSelect={toggleSelect}
           t={t}
           locale={i18n.language}
+          colors={colors}
         />
       </ScaleDecorator>
     );
@@ -170,33 +173,34 @@ export default function PlaylistScreen() {
   return (
     <Screen scroll={false}>
       {tracks.length === 0 ? (
-        <Text style={styles.empty}>{t("playlist.empty")}</Text>
+        <Text style={[styles.empty, { color: colors.secondaryText }]}>{t("playlist.empty")}</Text>
       ) : (
         <DraggableFlatList
           data={tracks}
           keyExtractor={(t) => t.id}
           renderItem={renderItem}
           onDragEnd={isEditMode ? () => {} : ({ data }) => reorderTracks(data)}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          ItemSeparatorComponent={() => <View style={[styles.separator, { backgroundColor: colors.border }]} />}
           containerStyle={{ flex: 1 }}
           contentContainerStyle={{ paddingBottom: isEditMode ? 84 + (activeTrack ? MINI_PLAYER_HEIGHT : 0) : activeTrack ? MINI_PLAYER_HEIGHT : 0 }}
         />
       )}
 
       {isEditMode && (
-        <View style={[styles.actionBar, activeTrack && styles.actionBarWithPlayer]}>
+        <View style={[styles.actionBar, { backgroundColor: colors.surface, borderTopColor: colors.border }, activeTrack && styles.actionBarWithPlayer]}>
           <Pressable style={styles.actionBarCancel} onPress={exitEditMode}>
-            <Text style={styles.actionBarCancelText}>{t("common.cancel")}</Text>
+            <Text style={[styles.actionBarCancelText, { color: colors.secondaryText }]}>{t("common.cancel")}</Text>
           </Pressable>
           <Pressable
             style={[
               styles.actionBarDelete,
+              { backgroundColor: colors.destructive },
               selectedIds.size === 0 && styles.actionBarDeleteDisabled,
             ]}
             onPress={handleBulkDelete}
             disabled={selectedIds.size === 0}
           >
-            <Text style={styles.actionBarDeleteText}>
+            <Text style={[styles.actionBarDeleteText, { color: colors.tintText }]}>
               {selectedIds.size > 0 ? t("playlist.deleteSelected", { count: selectedIds.size }) : t("common.delete")}
             </Text>
           </Pressable>
@@ -219,6 +223,7 @@ function SwipeableTrackItem({
   onToggleSelect,
   t,
   locale,
+  colors,
 }: {
   track: Track;
   isActive: boolean;
@@ -232,6 +237,7 @@ function SwipeableTrackItem({
   onToggleSelect: (id: string) => void;
   t: (key: string, options?: Record<string, unknown>) => string;
   locale: string;
+  colors: ReturnType<typeof useAppTheme>["colors"];
 }) {
   const swipeRef = useRef<Swipeable>(null);
 
@@ -239,34 +245,35 @@ function SwipeableTrackItem({
     <Pressable
       style={[
         styles.trackItem,
-        isActive && !isEditMode && styles.activeTrack,
-        isDragging && styles.draggingItem,
-        isSelected && styles.selectedTrack,
+        { backgroundColor: colors.background },
+        isActive && !isEditMode && { backgroundColor: colors.elevatedSurface },
+        isDragging && [styles.draggingItem, { backgroundColor: colors.surface }],
+        isSelected && { backgroundColor: colors.elevatedSurface },
       ]}
       onPress={() => (isEditMode ? onToggleSelect(track.id) : onPlay(track))}
     >
       {isEditMode ? (
-        <View style={[styles.checkbox, isSelected && styles.checkboxSelected]}>
-          {isSelected && <Ionicons name="checkmark" size={15} color="#fff9f3" />}
+        <View style={[styles.checkbox, { borderColor: colors.tint }, isSelected && { backgroundColor: colors.tint }]}>
+          {isSelected && <Ionicons name="checkmark" size={15} color={colors.tintText} />}
         </View>
       ) : (
         <Pressable accessibilityLabel="Reorder track" accessibilityRole="button" onLongPress={onDrag} style={styles.dragHandle}>
-          <Ionicons name="reorder-three-outline" size={22} color="#9a8d81" />
+          <Ionicons name="reorder-three-outline" size={22} color={colors.secondaryText} />
         </Pressable>
       )}
 
       <View style={styles.trackContent}>
         <Text
           style={[
-            styles.trackTitle,
-            isActive && !isEditMode && styles.activeText,
-            track.playCount > 0 && !isActive && styles.playedTitle,
+            styles.trackTitle, { color: colors.primaryText },
+            isActive && !isEditMode && { color: colors.tint },
+            track.playCount > 0 && !isActive && { color: colors.secondaryText },
           ]}
           numberOfLines={1}
         >
           {track.title || t("common.untitled")}
         </Text>
-        <Text style={styles.trackMeta}>
+        <Text style={[styles.trackMeta, { color: colors.secondaryText }]}>
           {formatDuration(track.durationSeconds)} | {formatFileSize(track.fileSize, locale)}
           {track.playCount > 0 && !isActive && ` · ${t("playlist.listened")}`}
         </Text>
@@ -274,9 +281,9 @@ function SwipeableTrackItem({
 
       {!isEditMode && (
         isActive && isPlaying ? (
-          <Ionicons name="volume-high" size={19} color="#b65a36" />
+          <Ionicons name="volume-high" size={19} color={colors.tint} />
         ) : !isActive && track.playCount === 0 ? (
-          <View style={styles.unplayedDot} />
+          <View style={[styles.unplayedDot, { backgroundColor: colors.tint }]} />
         ) : null
       )}
     </Pressable>
@@ -291,13 +298,13 @@ function SwipeableTrackItem({
       ref={swipeRef}
       renderRightActions={() => (
         <Pressable
-          style={styles.deleteAction}
+          style={[styles.deleteAction, { backgroundColor: colors.destructive }]}
           onPress={() => {
             swipeRef.current?.close();
             onDelete(track);
           }}
         >
-          <Text style={styles.deleteActionText}>{t("common.delete")}</Text>
+          <Text style={[styles.deleteActionText, { color: colors.tintText }]}>{t("common.delete")}</Text>
         </Pressable>
       )}
       overshootRight={false}

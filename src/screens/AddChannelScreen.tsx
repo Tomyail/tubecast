@@ -8,9 +8,11 @@ import Screen from "../components/Screen";
 import { useAddChannel } from "../features/youtubeFeed/hooks";
 import type { FeedSource } from "../features/youtubeFeed/types";
 import { useTranslation } from "../i18n";
+import { useAppTheme } from "../app/theme";
 
 export default function AddChannelScreen() {
   const { t } = useTranslation();
+  const { colors } = useAppTheme();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [input, setInput] = useState("");
   const [preview, setPreview] = useState<FeedSource | null>(null);
@@ -38,16 +40,17 @@ export default function AddChannelScreen() {
   return (
     <Screen>
       <View style={styles.intro}>
-        <View style={styles.introIcon}>
-          <Ionicons name="link-outline" size={22} color="#b65a36" />
+        <View style={[styles.introIcon, { backgroundColor: colors.elevatedSurface }]}>
+          <Ionicons name="link-outline" size={22} color={colors.tint} />
         </View>
-        <Text style={styles.introText}>{t("channel.helper")}</Text>
+        <Text style={[styles.introText, { color: colors.secondaryText }]}>{t("channel.helper")}</Text>
       </View>
 
       <View style={styles.formGroup}>
-        <Text style={styles.fieldLabel}>{t("channel.placeholder")}</Text>
+        <Text style={[styles.fieldLabel, { color: colors.secondaryText }]}>{t("channel.placeholder")}</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.primaryText }]}
+          placeholderTextColor={colors.secondaryText}
           autoFocus
           placeholder={t("channel.placeholder")}
           value={input}
@@ -62,45 +65,45 @@ export default function AddChannelScreen() {
 
       <Pressable
         accessibilityRole="button"
-        style={[styles.resolveButton, (!input.trim() || addChannel.isPending) && styles.disabled]}
+        style={[styles.resolveButton, { backgroundColor: colors.tint }, (!input.trim() || addChannel.isPending) && styles.disabled]}
         onPress={handleResolve}
         disabled={!input.trim() || addChannel.isPending}
       >
         {addChannel.isPending ? (
-          <ActivityIndicator color="#fff9f3" />
+          <ActivityIndicator color={colors.tintText} />
         ) : (
           <>
-            <Ionicons name="add" size={20} color="#fff9f3" />
-            <Text style={styles.resolveText}>{t("channel.add")}</Text>
+            <Ionicons name="add" size={20} color={colors.tintText} />
+            <Text style={[styles.resolveText, { color: colors.tintText }]}>{t("channel.add")}</Text>
           </>
         )}
       </Pressable>
 
       {parseError && (
         <View style={styles.errorState}>
-          <Ionicons name="alert-circle-outline" size={18} color="#b42318" />
-          <Text style={styles.errorText}>{parseError}</Text>
+          <Ionicons name="alert-circle-outline" size={18} color={colors.destructive} />
+          <Text style={[styles.errorText, { color: colors.destructive }]}>{parseError}</Text>
         </View>
       )}
 
       {preview && (
-        <View style={styles.preview}>
+        <View style={[styles.preview, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <View style={styles.previewHeader}>
-            <View style={styles.thumbnail}>
+            <View style={[styles.thumbnail, { backgroundColor: colors.elevatedSurface }]}>
               {preview.thumbnailUrl ? (
                 <Image resizeMode="cover" source={{ uri: preview.thumbnailUrl }} style={styles.thumbnailImage} />
               ) : (
-                <Ionicons name="play" size={22} color="#b65a36" />
+                <Ionicons name="play" size={22} color={colors.tint} />
               )}
             </View>
             <View style={styles.previewContent}>
-              <Text style={styles.previewLabel}>{t("channel.added")}</Text>
-              <Text numberOfLines={2} style={styles.previewTitle}>{preview.title}</Text>
+              <Text style={[styles.previewLabel, { color: colors.secondaryText }]}>{t("channel.added")}</Text>
+              <Text numberOfLines={2} style={[styles.previewTitle, { color: colors.primaryText }]}>{preview.title}</Text>
             </View>
-            <Ionicons name="checkmark-circle" size={24} color="#4f8a61" />
+            <Ionicons name="checkmark-circle" size={24} color={colors.success} />
           </View>
-          <Pressable accessibilityRole="button" style={styles.confirmButton} onPress={handleConfirm}>
-            <Text style={styles.confirmText}>{t("common.done")}</Text>
+          <Pressable accessibilityRole="button" style={[styles.confirmButton, { borderColor: colors.tint }]} onPress={handleConfirm}>
+            <Text style={[styles.confirmText, { color: colors.tint }]}>{t("common.done")}</Text>
           </Pressable>
         </View>
       )}

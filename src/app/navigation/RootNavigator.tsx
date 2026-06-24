@@ -16,6 +16,7 @@ import ManageChannelsScreen from "../../screens/ManageChannelsScreen";
 import MiniPlayer from "../../components/MiniPlayer";
 import { Pressable, Text, View } from "react-native";
 import { useTranslation } from "../../i18n";
+import { useAppTheme } from "../theme";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<RootTabParamList>();
@@ -34,15 +35,20 @@ const tabIcons: Record<keyof RootTabParamList, { active: IoniconName; inactive: 
   Settings: { active: "settings", inactive: "settings-outline" },
 };
 
-const screenOptions = {
-  headerLargeTitle: false,
-  headerShadowVisible: false,
-  headerStyle: { backgroundColor: "#fff9f3" },
-  headerTintColor: "#241a12",
-};
+function useTabStackOptions() {
+  const { colors } = useAppTheme();
+  return {
+    headerLargeTitle: false,
+    headerShadowVisible: false,
+    headerStyle: { backgroundColor: colors.surface },
+    headerTintColor: colors.primaryText,
+    contentStyle: { backgroundColor: colors.background },
+  };
+}
 
 function HomeNavigator() {
   const { t } = useTranslation();
+  const screenOptions = useTabStackOptions();
   return (
     <HomeStack.Navigator screenOptions={screenOptions}>
       <HomeStack.Screen name="HomeRoot" component={HomeScreen} options={{ title: t("nav.home") }} />
@@ -52,6 +58,7 @@ function HomeNavigator() {
 
 function FeedNavigator() {
   const { t } = useTranslation();
+  const screenOptions = useTabStackOptions();
   return (
     <FeedStack.Navigator screenOptions={screenOptions}>
       <FeedStack.Screen name="FeedRoot" component={FeedScreen} options={{ title: t("nav.feed") }} />
@@ -61,6 +68,7 @@ function FeedNavigator() {
 
 function PlaylistNavigator() {
   const { t } = useTranslation();
+  const screenOptions = useTabStackOptions();
   return (
     <PlaylistStack.Navigator screenOptions={screenOptions}>
       <PlaylistStack.Screen name="PlaylistRoot" component={PlaylistScreen} options={{ title: t("nav.playlist") }} />
@@ -70,6 +78,7 @@ function PlaylistNavigator() {
 
 function SettingsNavigator() {
   const { t } = useTranslation();
+  const screenOptions = useTabStackOptions();
   return (
     <SettingsStack.Navigator screenOptions={screenOptions}>
       <SettingsStack.Screen name="SettingsRoot" component={SettingsScreen} options={{ title: t("nav.settings") }} />
@@ -79,27 +88,29 @@ function SettingsNavigator() {
 
 function CloseModalButton() {
   const { t } = useTranslation();
+  const { colors } = useAppTheme();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   return (
     <Pressable accessibilityRole="button" onPress={() => navigation.goBack()} style={{ paddingVertical: 8 }}>
-      <Text style={{ color: "#b65a36", fontSize: 17 }}>{t("common.cancel")}</Text>
+      <Text style={{ color: colors.tint, fontSize: 17 }}>{t("common.cancel")}</Text>
     </Pressable>
   );
 }
 
 function Tabs() {
   const { t } = useTranslation();
+  const { colors } = useAppTheme();
   const insets = useSafeAreaInsets();
   const tabBarHeight = TAB_BAR_CONTENT_HEIGHT + insets.bottom;
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#f4ede2" }}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <Tab.Navigator
         screenOptions={({ route }) => ({
           headerShown: false,
-          tabBarActiveTintColor: "#b65a36",
-          tabBarInactiveTintColor: "#6f6256",
+          tabBarActiveTintColor: colors.tint,
+          tabBarInactiveTintColor: colors.secondaryText,
           tabBarHideOnKeyboard: true,
           tabBarLabelStyle: { fontSize: 10, fontWeight: "600" },
           tabBarIcon: ({ color, focused, size }) => {
@@ -108,8 +119,8 @@ function Tabs() {
             return <Ionicons name={iconName} size={size} color={color} />;
           },
           tabBarStyle: {
-            backgroundColor: "#fff9f3",
-            borderTopColor: "#dbcbb9",
+            backgroundColor: colors.surface,
+            borderTopColor: colors.border,
             height: tabBarHeight,
             paddingBottom: insets.bottom,
             paddingTop: 4,
@@ -128,27 +139,28 @@ function Tabs() {
 
 export default function RootNavigator() {
   const { t } = useTranslation();
+  const { colors, isDark } = useAppTheme();
   return (
     <NavigationContainer
       theme={{
-        ...DefaultTheme,
+        ...(isDark ? { ...DefaultTheme, dark: true } : DefaultTheme),
         colors: {
           ...DefaultTheme.colors,
-          background: "#f4ede2",
-          card: "#fff9f3",
-          border: "#dbcbb9",
-          primary: "#b65a36",
-          text: "#241a12",
+          background: colors.background,
+          card: colors.surface,
+          border: colors.border,
+          primary: colors.tint,
+          text: colors.primaryText,
         },
       }}
     >
-      <StatusBar style="dark" />
+      <StatusBar style={isDark ? "light" : "dark"} />
       <Stack.Navigator
         screenOptions={{
           headerShadowVisible: false,
-          headerStyle: { backgroundColor: "#fff9f3" },
-          headerTintColor: "#241a12",
-          contentStyle: { backgroundColor: "#f4ede2" },
+          headerStyle: { backgroundColor: colors.surface },
+          headerTintColor: colors.primaryText,
+          contentStyle: { backgroundColor: colors.background },
         }}
       >
         <Stack.Screen name="Tabs" component={Tabs} options={{ headerShown: false }} />

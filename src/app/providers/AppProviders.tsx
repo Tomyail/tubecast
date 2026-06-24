@@ -7,6 +7,7 @@ import { SettingsProvider } from "../../features/settings/context";
 import { PlaylistProvider } from "../../features/playlist/context";
 import { PlayerProvider } from "../../features/player/context";
 import { I18nProvider } from "../../i18n";
+import { AppThemeProvider } from "../theme";
 
 export default function AppProviders({ children }: { children: ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
@@ -15,13 +16,15 @@ export default function AppProviders({ children }: { children: ReactNode }) {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
-          <I18nProvider>
-            <SettingsProvider>
-              <PlaylistProvider>
-                <PlayerProvider>{children}</PlayerProvider>
-              </PlaylistProvider>
-            </SettingsProvider>
-          </I18nProvider>
+          <AppThemeProvider>
+            <I18nProvider>
+              <SettingsProvider>
+                <PlaylistProvider>
+                  <PlayerProvider>{children}</PlayerProvider>
+                </PlaylistProvider>
+              </SettingsProvider>
+            </I18nProvider>
+          </AppThemeProvider>
         </QueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

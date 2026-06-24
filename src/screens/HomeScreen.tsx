@@ -13,11 +13,13 @@ import { trackFromReadyJob } from "../features/jobs/track";
 import { usePlayer } from "../features/player/context";
 import { usePlaylist } from "../features/playlist/context";
 import { useTranslation } from "../i18n";
+import { useAppTheme } from "../app/theme";
 
 const PENDING_JOB_KEY = "pending_job_id";
 
 export default function HomeScreen() {
   const { t } = useTranslation();
+  const { colors } = useAppTheme();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [url, setUrl] = useState("");
   const [jobId, setJobId] = useState<string | null>(null);
@@ -64,12 +66,13 @@ export default function HomeScreen() {
     <Screen>
       <View style={styles.formGroup}>
         <View style={styles.fieldHeader}>
-          <Ionicons name="link-outline" size={18} color="#8b5c48" />
-          <Text style={styles.fieldLabel}>{t("home.pasteUrl")}</Text>
+          <Ionicons name="link-outline" size={18} color={colors.tint} />
+          <Text style={[styles.fieldLabel, { color: colors.secondaryText }]}>{t("home.pasteUrl")}</Text>
         </View>
         <View style={styles.inputRow}>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.primaryText }]}
+            placeholderTextColor={colors.secondaryText}
             placeholder={t("home.pasteUrl")}
             value={url}
             onChangeText={setUrl}
@@ -79,23 +82,23 @@ export default function HomeScreen() {
             onSubmitEditing={() => void handleSubmit()}
             returnKeyType="done"
           />
-          <Pressable accessibilityLabel={t("home.paste")} accessibilityRole="button" style={styles.pasteButton} onPress={handlePaste}>
-            <Ionicons name="clipboard-outline" size={21} color="#8b5c48" />
+          <Pressable accessibilityLabel={t("home.paste")} accessibilityRole="button" style={[styles.pasteButton, { backgroundColor: colors.elevatedSurface }]} onPress={handlePaste}>
+            <Ionicons name="clipboard-outline" size={21} color={colors.tint} />
           </Pressable>
         </View>
       </View>
-      <Pressable accessibilityRole="button" style={[styles.submitButton, (!url.trim() || submit.isPending) && styles.disabled]} onPress={handleSubmit} disabled={!url.trim() || submit.isPending}>
-        {submit.isPending ? <ActivityIndicator color="#fff9f3" /> : <><Ionicons name="arrow-down" size={20} color="#fff9f3" /><Text style={styles.submitText}>{t("home.convert")}</Text></>}
+      <Pressable accessibilityRole="button" style={[styles.submitButton, { backgroundColor: colors.tint }, (!url.trim() || submit.isPending) && styles.disabled]} onPress={handleSubmit} disabled={!url.trim() || submit.isPending}>
+        {submit.isPending ? <ActivityIndicator color={colors.tintText} /> : <><Ionicons name="arrow-down" size={20} color={colors.tintText} /><Text style={[styles.submitText, { color: colors.tintText }]}>{t("home.convert")}</Text></>}
       </Pressable>
 
       {cacheState === "error" && job?.status === "ready" && (
         <StatusCard error title={t("home.cacheFailed")} icon="alert-circle-outline">
-          <Pressable accessibilityRole="button" style={styles.retryButton} onPress={retryCache}><Text style={styles.retryText}>{t("home.retryCache")}</Text></Pressable>
+          <Pressable accessibilityRole="button" style={styles.retryButton} onPress={retryCache}><Text style={[styles.retryText, { color: colors.tint }]}>{t("home.retryCache")}</Text></Pressable>
         </StatusCard>
       )}
       {job?.status === "failed" && (
         <StatusCard error title={t("home.conversionFailed")} icon="alert-circle-outline">
-          {job.progressPhase ? <Text style={styles.statusText}>{t("home.failedAt", { phase: t(`progress.${job.progressPhase === "downloading" ? "downloading" : job.progressPhase === "transcoding" ? "transcoding" : job.progressPhase === "uploading" ? "saving" : job.progressPhase === "starting" ? "preparing" : "queued"}`) })}</Text> : null}
+          {job.progressPhase ? <Text style={[styles.statusText, { color: colors.secondaryText }]}>{t("home.failedAt", { phase: t(`progress.${job.progressPhase === "downloading" ? "downloading" : job.progressPhase === "transcoding" ? "transcoding" : job.progressPhase === "uploading" ? "saving" : job.progressPhase === "starting" ? "preparing" : "queued"}`) })}</Text> : null}
         </StatusCard>
       )}
       {job?.status === "expired" && <StatusCard error title={t("home.expired")} icon="time-outline" />}
@@ -104,17 +107,17 @@ export default function HomeScreen() {
         const { title, detail, activeStep } = getHomeProgressInfo(job ?? { status: "queued", progressPhase: null, attemptCount: 0, lastErrorMessage: null }, cacheState, t);
         return (
           <StatusCard title={title} icon={playableTrack ? "checkmark-circle" : "cloud-download-outline"}>
-            <Text style={styles.statusText}>{detail}</Text>
+            <Text style={[styles.statusText, { color: colors.secondaryText }]}>{detail}</Text>
             {playableTrack ? (
-              <Pressable accessibilityRole="button" style={styles.playButton} onPress={() => { void playTrack(playableTrack, tracks); navigation.navigate("Player", { jobId: playableTrack.jobId }); }}>
-                <Ionicons name="play" size={19} color="#fff9f3" /><Text style={styles.playText}>{t("common.play")}</Text>
+              <Pressable accessibilityRole="button" style={[styles.playButton, { backgroundColor: colors.tint }]} onPress={() => { void playTrack(playableTrack, tracks); navigation.navigate("Player", { jobId: playableTrack.jobId }); }}>
+                <Ionicons name="play" size={19} color={colors.tintText} /><Text style={[styles.playText, { color: colors.tintText }]}>{t("common.play")}</Text>
               </Pressable>
             ) : null}
             <View style={styles.stepsRow}>
               {PROGRESS_STEPS.map((step, index) => (
                 <View key={step} style={styles.stepItem}>
-                  <View style={[styles.stepDot, index <= activeStep && styles.stepActive]}>{index < activeStep ? <Ionicons name="checkmark" size={11} color="#fff9f3" /> : null}</View>
-                  {index < PROGRESS_STEPS.length - 1 ? <View style={[styles.stepLine, index < activeStep && styles.stepLineActive]} /> : null}
+                  <View style={[styles.stepDot, { backgroundColor: index <= activeStep ? colors.tint : colors.elevatedSurface }]}>{index < activeStep ? <Ionicons name="checkmark" size={11} color={colors.tintText} /> : null}</View>
+                  {index < PROGRESS_STEPS.length - 1 ? <View style={[styles.stepLine, { backgroundColor: index < activeStep ? colors.tint : colors.elevatedSurface }]} /> : null}
                 </View>
               ))}
             </View>
@@ -126,7 +129,8 @@ export default function HomeScreen() {
 }
 
 function StatusCard({ title, icon, error = false, children }: { title: string; icon: "alert-circle-outline" | "time-outline" | "checkmark-circle" | "cloud-download-outline"; error?: boolean; children?: React.ReactNode }) {
-  return <View style={[styles.statusCard, error && styles.errorCard]}><View style={styles.statusHeading}><Ionicons name={icon} size={20} color={error ? "#b42318" : "#8b5c48"} /><Text style={[styles.statusTitle, error && styles.errorTitle]}>{title}</Text></View>{children}</View>;
+  const { colors } = useAppTheme();
+  return <View style={[styles.statusCard, { backgroundColor: colors.surface, borderColor: colors.border }, error && { borderColor: colors.destructive }]}><View style={styles.statusHeading}><Ionicons name={icon} size={20} color={error ? colors.destructive : colors.tint} /><Text style={[styles.statusTitle, { color: error ? colors.destructive : colors.primaryText }]}>{title}</Text></View>{children}</View>;
 }
 
 const styles = StyleSheet.create({

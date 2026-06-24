@@ -6,10 +6,12 @@ import { getAllTracks } from "../features/playlist/storage";
 import { SERVER_URL } from "../features/settings/storage";
 import { formatFileSize } from "../i18n/formatters";
 import { useAppLanguage, useTranslation } from "../i18n";
+import { useAppTheme } from "../app/theme";
 
 export default function SettingsScreen() {
   const [storageInfo, setStorageInfo] = useState<string>("");
   const { t } = useTranslation();
+  const { colors } = useAppTheme();
   const { preference, language, setLanguage } = useAppLanguage();
 
   const checkStorage = async () => {
@@ -20,7 +22,7 @@ export default function SettingsScreen() {
 
   return (
     <Screen>
-      <Section title={t("settings.language")}>
+      <Section title={t("settings.language")} colors={colors}>
         <View style={styles.languageChoices}>
           {(["system", "zh-CN", "en"] as const).map((option) => {
             const selected = preference === option;
@@ -30,56 +32,56 @@ export default function SettingsScreen() {
                 accessibilityRole="button"
                 accessibilityState={{ selected }}
                 key={option}
-                style={[styles.languageButton, selected && styles.languageButtonSelected]}
+                style={[styles.languageButton, selected && { backgroundColor: colors.tint }]}
                 onPress={() => void setLanguage(option)}
               >
-                <Text numberOfLines={1} style={[styles.languageText, selected && styles.languageTextSelected]}>{label}</Text>
+                <Text numberOfLines={1} style={[styles.languageText, { color: selected ? colors.tintText : colors.secondaryText }]}>{label}</Text>
               </Pressable>
             );
           })}
         </View>
       </Section>
 
-      <Section title={t("settings.checkStorage")}>
+      <Section title={t("settings.checkStorage")} colors={colors}>
         <Pressable accessibilityRole="button" onPress={checkStorage} style={styles.settingRow}>
-          <View style={[styles.rowIcon, styles.storageIcon]}><Ionicons name="folder-outline" size={20} color="#8b5c48" /></View>
+          <View style={[styles.rowIcon, { backgroundColor: colors.elevatedSurface }]}><Ionicons name="folder-outline" size={20} color={colors.tint} /></View>
           <View style={styles.rowContent}>
-            <Text style={styles.rowTitle}>{t("settings.checkStorage")}</Text>
-            <Text numberOfLines={1} style={styles.rowDetail}>{storageInfo || t("settings.storage", { count: 0, size: formatFileSize(0, language) })}</Text>
+            <Text style={[styles.rowTitle, { color: colors.primaryText }]}>{t("settings.checkStorage")}</Text>
+            <Text numberOfLines={1} style={[styles.rowDetail, { color: colors.secondaryText }]}>{storageInfo || t("settings.storage", { count: 0, size: formatFileSize(0, language) })}</Text>
           </View>
-          <Ionicons name="chevron-forward" size={18} color="#9a8d81" />
+          <Ionicons name="chevron-forward" size={18} color={colors.secondaryText} />
         </Pressable>
       </Section>
 
-      <Section title={t("settings.about")}>
+      <Section title={t("settings.about")} colors={colors}>
         <View style={styles.aboutHeader}>
-          <View style={[styles.rowIcon, styles.aboutIcon]}><Ionicons name="play-circle" size={20} color="#fff9f3" /></View>
+          <View style={[styles.rowIcon, { backgroundColor: colors.tint }]}><Ionicons name="play-circle" size={20} color={colors.tintText} /></View>
           <View style={styles.rowContent}>
-            <Text style={styles.rowTitle}>TubeCast</Text>
-            <Text style={styles.rowDetail}>{t("settings.description")}</Text>
+            <Text style={[styles.rowTitle, { color: colors.primaryText }]}>TubeCast</Text>
+            <Text style={[styles.rowDetail, { color: colors.secondaryText }]}>{t("settings.description")}</Text>
           </View>
         </View>
-        <View style={styles.separator} />
+        <View style={[styles.separator, { backgroundColor: colors.border }]} />
         <View style={styles.settingRow}>
-          <View style={[styles.rowIcon, styles.serverIcon]}><Ionicons name="server-outline" size={18} color="#6f6256" /></View>
+          <View style={[styles.rowIcon, { backgroundColor: colors.elevatedSurface }]}><Ionicons name="server-outline" size={18} color={colors.secondaryText} /></View>
           <View style={styles.rowContent}>
-            <Text style={styles.rowTitle}>API</Text>
-            <Text numberOfLines={1} style={styles.rowDetail}>{SERVER_URL}</Text>
+            <Text style={[styles.rowTitle, { color: colors.primaryText }]}>API</Text>
+            <Text numberOfLines={1} style={[styles.rowDetail, { color: colors.secondaryText }]}>{SERVER_URL}</Text>
           </View>
         </View>
-        <View style={styles.separator} />
+        <View style={[styles.separator, { backgroundColor: colors.border }]} />
         <Pressable accessibilityRole="link" onPress={() => void Linking.openURL("https://github.com/Tomyail/tubecast")} style={styles.settingRow}>
-          <View style={[styles.rowIcon, styles.sourceIcon]}><Ionicons name="logo-github" size={19} color="#fff9f3" /></View>
-          <Text style={[styles.rowTitle, styles.sourceTitle]}>{t("settings.source")}</Text>
-          <Ionicons name="arrow-up-right-box" size={18} color="#8b5c48" />
+          <View style={[styles.rowIcon, { backgroundColor: colors.primaryText }]}><Ionicons name="logo-github" size={19} color={colors.surface} /></View>
+          <Text style={[styles.rowTitle, { color: colors.tint }]}>{t("settings.source")}</Text>
+          <Ionicons name="arrow-up-right-box" size={18} color={colors.tint} />
         </Pressable>
       </Section>
     </Screen>
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return <View style={styles.section}><Text style={styles.sectionTitle}>{title}</Text><View style={styles.group}>{children}</View></View>;
+function Section({ title, colors, children }: { title: string; colors: ReturnType<typeof useAppTheme>["colors"]; children: React.ReactNode }) {
+  return <View style={styles.section}><Text style={[styles.sectionTitle, { color: colors.secondaryText }]}>{title}</Text><View style={[styles.group, { backgroundColor: colors.surface, borderColor: colors.border }]}>{children}</View></View>;
 }
 
 const styles = StyleSheet.create({

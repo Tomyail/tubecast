@@ -16,11 +16,13 @@ import { useCacheReadyJob } from "../features/jobs/hooks";
 import { usePlayer } from "../features/player/context";
 import { useTranslation } from "../i18n";
 import { formatDuration } from "../i18n/formatters";
+import { useAppTheme } from "../app/theme";
 
 type IoniconName = NonNullable<ComponentProps<typeof Ionicons>["name"]>;
 
 export default function PlayerScreen() {
   const { t } = useTranslation();
+  const { colors } = useAppTheme();
   const {
     activeTrack,
     isPlaying,
@@ -59,8 +61,8 @@ export default function PlayerScreen() {
     return (
       <Screen>
         <View style={styles.emptyState}>
-          <Ionicons name="musical-notes-outline" size={36} color="#8b7d70" />
-          <Text style={styles.empty}>{t("player.noTrack")}</Text>
+          <Ionicons name="musical-notes-outline" size={36} color={colors.secondaryText} />
+          <Text style={[styles.empty, { color: colors.secondaryText }]}>{t("player.noTrack")}</Text>
         </View>
       </Screen>
     );
@@ -81,11 +83,11 @@ export default function PlayerScreen() {
     <Screen scroll={false}>
       <View style={styles.container}>
         <View style={styles.trackHeader}>
-          <View style={styles.artwork}>
+          <View style={[styles.artwork, { backgroundColor: colors.elevatedSurface }]}>
             {activeTrack.thumbnailUrl ? (
               <Image resizeMode="cover" source={{ uri: activeTrack.thumbnailUrl }} style={styles.artworkImage} />
             ) : (
-              <Ionicons name="musical-note" size={44} color="#b65a36" />
+              <Ionicons name="musical-note" size={44} color={colors.tint} />
             )}
           </View>
 
@@ -96,23 +98,23 @@ export default function PlayerScreen() {
             onPress={openSource}
             style={styles.titleBlock}
           >
-            <Text numberOfLines={3} style={styles.title}>{activeTrack.title || t("common.untitled")}</Text>
+            <Text numberOfLines={3} style={[styles.title, { color: colors.primaryText }]}>{activeTrack.title || t("common.untitled")}</Text>
             <View style={styles.sourceLink}>
-              <Ionicons name="link-outline" size={14} color="#8b5c48" />
-              <Text numberOfLines={1} style={styles.sourceUrl}>{activeTrack.sourceUrl}</Text>
+              <Ionicons name="link-outline" size={14} color={colors.tint} />
+              <Text numberOfLines={1} style={[styles.sourceUrl, { color: colors.tint }]}>{activeTrack.sourceUrl}</Text>
             </View>
           </Pressable>
         </View>
 
-        <View style={[styles.statusPill, sourceStatus.variant === "error" && styles.statusPillError]}>
-          <Ionicons name={sourceStatus.icon} size={15} color={sourceStatus.variant === "error" ? "#b42318" : "#6f6256"} />
-          <Text style={[styles.statusText, sourceStatus.variant === "error" && styles.statusTextError]}>{sourceStatus.label}</Text>
+        <View style={[styles.statusPill, { backgroundColor: sourceStatus.variant === "error" ? colors.elevatedSurface : colors.elevatedSurface }]}>
+          <Ionicons name={sourceStatus.icon} size={15} color={sourceStatus.variant === "error" ? colors.destructive : colors.secondaryText} />
+          <Text style={[styles.statusText, { color: sourceStatus.variant === "error" ? colors.destructive : colors.secondaryText }]}>{sourceStatus.label}</Text>
         </View>
 
-        {playbackError ? <Text style={styles.errorText}>{playbackError}</Text> : null}
+        {playbackError ? <Text style={[styles.errorText, { color: colors.destructive }]}>{playbackError}</Text> : null}
         {cacheState === "error" ? (
           <Pressable accessibilityRole="button" onPress={retryCache} style={styles.retryCacheButton}>
-            <Text style={styles.retryCacheText}>{t("player.retryCache")}</Text>
+            <Text style={[styles.retryCacheText, { color: colors.tint }]}>{t("player.retryCache")}</Text>
           </Pressable>
         ) : null}
 
@@ -128,15 +130,15 @@ export default function PlayerScreen() {
             style={styles.progressTouchTarget}
             {...panResponder.panHandlers}
           >
-            <View style={styles.progressRail}>
-              <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
-              <View style={[styles.progressThumb, { left: `${progress * 100}%` }]} />
+            <View style={[styles.progressRail, { backgroundColor: colors.border }]}>
+              <View style={[styles.progressFill, { backgroundColor: colors.tint, width: `${progress * 100}%` }]} />
+              <View style={[styles.progressThumb, { backgroundColor: colors.tint, borderColor: colors.surface, left: `${progress * 100}%` }]} />
             </View>
           </View>
 
           <View style={styles.timeRow}>
-            <Text style={styles.time}>{playbackLoading ? t("player.loading") : formatDuration(currentTime)}</Text>
-            <Text style={styles.time}>{duration > 0 ? `-${formatDuration(remaining)}` : "--:--"}</Text>
+            <Text style={[styles.time, { color: colors.secondaryText }]}>{playbackLoading ? t("player.loading") : formatDuration(currentTime)}</Text>
+            <Text style={[styles.time, { color: colors.secondaryText }]}>{duration > 0 ? `-${formatDuration(remaining)}` : "--:--"}</Text>
           </View>
 
           <View style={styles.controls}>
@@ -147,19 +149,19 @@ export default function PlayerScreen() {
               onPress={playPrevious}
               style={styles.controlButton}
             >
-              <Ionicons name="play-skip-back" size={30} color="#3f3026" />
+              <Ionicons name="play-skip-back" size={30} color={colors.primaryText} />
             </Pressable>
             <Pressable
               accessibilityLabel={isPlaying ? t("common.pause") : t("common.play")}
               accessibilityRole="button"
               disabled={playbackLoading}
               onPress={() => void togglePlayback()}
-              style={[styles.primaryControl, playbackLoading && styles.primaryControlDisabled]}
+              style={[styles.primaryControl, { backgroundColor: colors.tint }, playbackLoading && styles.primaryControlDisabled]}
             >
               {playbackLoading ? (
-                <ActivityIndicator color="#fff9f3" />
+                <ActivityIndicator color={colors.tintText} />
               ) : (
-                <Ionicons name={isPlaying ? "pause" : "play"} size={35} color="#fff9f3" />
+                <Ionicons name={isPlaying ? "pause" : "play"} size={35} color={colors.tintText} />
               )}
             </Pressable>
             <Pressable
@@ -169,7 +171,7 @@ export default function PlayerScreen() {
               onPress={playNext}
               style={styles.controlButton}
             >
-              <Ionicons name="play-skip-forward" size={30} color="#3f3026" />
+              <Ionicons name="play-skip-forward" size={30} color={colors.primaryText} />
             </Pressable>
           </View>
         </View>

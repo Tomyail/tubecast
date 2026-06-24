@@ -6,9 +6,11 @@ import { formatDuration } from "../api";
 import type { RootStackParamList } from "../app/navigation/types";
 import { usePlayer } from "../features/player/context";
 import { useTranslation } from "../i18n";
+import { useAppTheme } from "../app/theme";
 
 export default function MiniPlayer({ tabBarHeight }: { tabBarHeight: number }) {
   const { t } = useTranslation();
+  const { colors, isDark } = useAppTheme();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { activeTrack, currentTime, duration, isPlaying, togglePlayback } = usePlayer();
 
@@ -18,7 +20,7 @@ export default function MiniPlayer({ tabBarHeight }: { tabBarHeight: number }) {
 
   return (
     <View pointerEvents="box-none" style={[styles.shell, { bottom: tabBarHeight }]}>
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: isDark ? colors.elevatedSurface : "#211c18", borderTopColor: colors.border }]}>
         <Pressable
           accessibilityLabel={activeTrack.title || activeTrack.sourceUrl}
           accessibilityRole="button"
@@ -26,10 +28,10 @@ export default function MiniPlayer({ tabBarHeight }: { tabBarHeight: number }) {
           onPress={() => navigation.navigate("Player", { jobId: activeTrack.jobId })}
         >
         <View style={styles.textWrap}>
-          <Text style={styles.title} numberOfLines={1}>
+          <Text style={[styles.title, { color: isDark ? colors.primaryText : "#fff8f0" }]} numberOfLines={1}>
             {activeTrack.title || activeTrack.sourceUrl}
           </Text>
-          <Text style={styles.meta} numberOfLines={1}>
+          <Text style={[styles.meta, { color: isDark ? colors.secondaryText : "#d8c6b4" }]} numberOfLines={1}>
             {formatDuration(currentTime)} / {formatDuration(duration)}
           </Text>
         </View>
@@ -38,10 +40,10 @@ export default function MiniPlayer({ tabBarHeight }: { tabBarHeight: number }) {
           accessibilityLabel={isPlaying ? t("common.pause") : t("common.play")}
           accessibilityRole="button"
           hitSlop={8}
-          style={styles.button}
+          style={[styles.button, { backgroundColor: colors.tint }]}
           onPress={togglePlayback}
         >
-          <Ionicons name={isPlaying ? "pause" : "play"} size={19} color="#fff7ef" />
+          <Ionicons name={isPlaying ? "pause" : "play"} size={19} color={colors.tintText} />
         </Pressable>
       </View>
     </View>

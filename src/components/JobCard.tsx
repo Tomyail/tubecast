@@ -3,6 +3,7 @@ import { formatDuration } from "../api";
 import type { Job } from "../types";
 import StatusBadge from "./StatusBadge";
 import { useTranslation } from "../i18n";
+import { useAppTheme } from "../app/theme";
 
 export default function JobCard({
   job,
@@ -14,14 +15,15 @@ export default function JobCard({
   footer?: React.ReactNode;
 }) {
   const { t } = useTranslation();
+  const { colors } = useAppTheme();
   return (
-    <Pressable style={styles.card} onPress={onPress} disabled={!onPress}>
+    <Pressable style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]} onPress={onPress} disabled={!onPress}>
       <View style={styles.header}>
         <View style={styles.textWrap}>
-          <Text style={styles.title} numberOfLines={1}>
+          <Text style={[styles.title, { color: colors.primaryText }]} numberOfLines={1}>
             {job.title || job.sourceUrl}
           </Text>
-          <Text style={styles.meta} numberOfLines={1}>
+          <Text style={[styles.meta, { color: colors.secondaryText }]} numberOfLines={1}>
             {job.channelName || t("common.unknown")} · {formatDuration(job.durationSeconds)}
           </Text>
         </View>
