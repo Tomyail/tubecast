@@ -34,7 +34,9 @@ function writeJson(p, obj) {
 }
 
 function currentVersion() {
-  return readJson(APP_JSON).expo.version;
+  // 读 package.json.version——这是 CATV 用来命名 tag 的权威源。
+  // (app.json 的 expo.version 由 appjson-updater.cjs 同步过去，但 tag 名始终跟 package.json。)
+  return readJson(path.join(mobileRoot, "package.json")).version;
 }
 
 // buildNumber +1（字符串整数）。必须在 CATV 之前调用——app.json 是 CATV 的 bumpFile，
@@ -65,8 +67,7 @@ function cmdVersion() {
   run("pnpm exec commit-and-tag-version", { cwd: mobileRoot, stdio: "inherit" }); // 2) bump 版本+CHANGELOG+提交+建 tag
   const ver = currentVersion();
   const tag = `v${ver}`;
-  run(`git push origin HEAD --follow-tags`, { cwd: mobileRoot, stdio: "inherit" }); // 3) push 提交+tag 到公开 mobile 仓库
-  run(`git push origin ${tag}`, { cwd: mobileRoot, stdio: "inherit" }); // 兜底：确保 tag 真的 push 了
+  run(`git push origin HEAD --follow-tags`, { cwd: mobileRoot, stdio: "inherit" }); // 3) push 提交 + annotated tag（v1.x）到公开 mobile 仓库
   const notes = latestChangelogSection(); // 4) 用 CHANGELOG 最新一段建【草稿】release
   const tmp = path.join(mobileRoot, `.release-notes-${tag}.md`);
   writeFileSync(tmp, notes + "\n");

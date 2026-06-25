@@ -2,6 +2,6 @@
   "tag-prefix": "v",
   "bumpFiles": [
     { "filename": "package.json", "type": "json" },
-    { "filename": "app.json", "type": "json", "data": { "expo": { "version": null } } }
+    { "filename": "app.json", "updater": "scripts/appjson-updater.cjs" }
   ]
 }
