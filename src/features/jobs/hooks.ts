@@ -27,7 +27,6 @@ export function useJobStatus(jobId: string | null) {
 }
 
 export type CacheState = "idle" | "caching" | "cached" | "error";
-export type DownloadState = "idle" | "downloading" | "done" | "error";
 
 export function useCacheReadyJob(jobId: string | null) {
   const { data: job } = useJobStatus(jobId);
@@ -91,19 +90,4 @@ export function useCacheReadyJob(jobId: string | null) {
   }, [doCache]);
 
   return { cacheState, cacheError, retryCache, job };
-}
-
-export function useDownloadReadyJob(jobId: string | null) {
-  const { cacheState, cacheError, retryCache, job } = useCacheReadyJob(jobId);
-  const downloadState: DownloadState =
-    cacheState === "caching" ? "downloading" :
-    cacheState === "cached" ? "done" :
-    cacheState === "error" ? "error" :
-    "idle";
-  return {
-    downloadState,
-    downloadError: cacheError,
-    retry: retryCache,
-    job,
-  };
 }

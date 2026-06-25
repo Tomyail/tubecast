@@ -1,2 +1,2 @@
 export { useDiscover } from "./hooks";
-export type { DiscoverItem, DiscoverResponse } from "./types";
+export type { DiscoverItem } from "./types";

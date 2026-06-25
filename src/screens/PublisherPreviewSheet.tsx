@@ -1,4 +1,3 @@
-import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute, type RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -79,8 +78,7 @@ function formatRelativeTime(isoDate: string, t: (key: string, options?: { count:
 }
 
 // Videos that are awaiting the user's in-sheet "Convert" confirmation.
-// Once confirmed they flip to converting (written into submittedJobsStorage
-// and the local jobLookup), and the sheet stays open.
+// Confirmed jobs are persisted so the next feed refresh can show converting.
 type ConfirmingSet = Set<string>;
 
 export default function PublisherPreviewSheet() {
@@ -99,7 +97,6 @@ export default function PublisherPreviewSheet() {
 
   const [items, setItems] = useState<FeedItemWithStatus[] | null>(null);
   const [loadError, setLoadError] = useState<boolean>(false);
-  const [jobLookup, setJobLookup] = useState<JobLookup>({});
   const [confirming, setConfirming] = useState<ConfirmingSet>(new Set());
   const [tracksCache, setTracksCache] = useState<Track[]>([]);
 
@@ -139,7 +136,6 @@ export default function PublisherPreviewSheet() {
     try {
       const { lookup, tracks } = await buildJobLookup();
       setTracksCache(tracks);
-      setJobLookup(lookup);
       const fetched = await fetchFeedItems([displaySource]);
       const withStatus = matchJobStatus(fetched, lookup);
       setItems(withStatus);
@@ -200,11 +196,6 @@ export default function PublisherPreviewSheet() {
         sourceUrl: item.sourceUrl,
         submittedAt: new Date().toISOString(),
       });
-      // Flip this row to converting in-place; sheet stays open.
-      setJobLookup((prev) => ({
-        ...prev,
-        [item.platformItemId]: { status: "converting", jobId: result.id },
-      }));
       setConfirming((prev) => {
         const next = new Set(prev);
         next.delete(item.platformItemId);
