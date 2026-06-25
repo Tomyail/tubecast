@@ -14,6 +14,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.tomyail.tubecast",
+      "deploymentTarget": "16.4",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
