@@ -51,12 +51,13 @@ function bumpBuildNumber() {
   return next;
 }
 
-// CHANGELOG.md 里最新一个版本段（第一个 "## [" 到下一个 "## [" 之间）。
+// CHANGELOG.md 里最新一个版本段。兼容两种 conventional-changelog 标题：
+//   带比较链接 "## [1.1.0](url) (date)"  与  首版无链接 "## 1.1.0 (date)"。
 function latestChangelogSection() {
   const text = readFileSync(CHANGELOG, "utf8");
-  const sections = text.split(/\n(?=## \[)/); // [标题块, 最新版, 更早...]
+  const sections = text.split(/\n(?=## \[?\d)/); // [标题块, 最新版, 更早...]
   if (sections.length < 2) {
-    throw new Error("CHANGELOG.md 里找不到版本段（## [x.y.z]）。先跑过一次 release:version 或 bootstrap。");
+    throw new Error("CHANGELOG.md 里找不到版本段（## x.y.z）。先跑过一次 release:version 或 bootstrap。");
   }
   return sections[1].trim();
 }
