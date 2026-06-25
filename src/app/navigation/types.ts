@@ -4,6 +4,7 @@ export type RootStackParamList = {
   AddChannel: undefined;
   ManageChannels: undefined;
   Convert: { jobId?: string; sourceUrl?: string };
+  PublisherPreview: { channelId: string; channelName: string | null };
 };
 
 export type RootTabParamList = {

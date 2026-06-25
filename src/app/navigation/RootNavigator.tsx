@@ -14,6 +14,7 @@ import PlayerScreen from "../../screens/PlayerScreen";
 import SettingsScreen from "../../screens/SettingsScreen";
 import AddChannelScreen from "../../screens/AddChannelScreen";
 import ManageChannelsScreen from "../../screens/ManageChannelsScreen";
+import PublisherPreviewSheet from "../../screens/PublisherPreviewSheet";
 import MiniPlayer from "../../components/MiniPlayer";
 import { Pressable, Text, View } from "react-native";
 import { useTranslation } from "../../i18n";
@@ -190,6 +191,15 @@ export default function RootNavigator() {
           options={{
             presentation: "formSheet",
             title: t("home.title"),
+            headerLeft: () => <CloseModalButton />,
+          }}
+        />
+        <Stack.Screen
+          name="PublisherPreview"
+          component={PublisherPreviewSheet}
+          options={{
+            presentation: "formSheet",
+            title: t("player.publisher"),
             headerLeft: () => <CloseModalButton />,
           }}
         />

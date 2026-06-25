@@ -1,4 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { ComponentProps } from "react";
 import { useCallback, useMemo, useState } from "react";
 import {
@@ -17,12 +19,14 @@ import { usePlayer } from "../features/player/context";
 import { useTranslation } from "../i18n";
 import { formatDuration } from "../i18n/formatters";
 import { useAppTheme } from "../app/theme";
+import type { RootStackParamList } from "../app/navigation/types";
 
 type IoniconName = NonNullable<ComponentProps<typeof Ionicons>["name"]>;
 
 export default function PlayerScreen() {
   const { t } = useTranslation();
   const { colors } = useAppTheme();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const {
     activeTrack,
     isPlaying,
@@ -104,6 +108,28 @@ export default function PlayerScreen() {
               <Text numberOfLines={1} style={[styles.sourceUrl, { color: colors.tint }]}>{activeTrack.sourceUrl}</Text>
             </View>
           </Pressable>
+
+          {activeTrack.channelId ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t("player.publisher")}
+              onPress={() => navigation.navigate("PublisherPreview", {
+                channelId: activeTrack.channelId!,
+                channelName: activeTrack.channelName,
+              })}
+              style={styles.publisherRow}
+            >
+              <View style={[styles.publisherAvatar, { backgroundColor: colors.elevatedSurface }]}>
+                <Text style={[styles.publisherAvatarText, { color: colors.tint }]}>
+                  {(activeTrack.channelName ?? activeTrack.channelId).slice(0, 1).toUpperCase()}
+                </Text>
+              </View>
+              <Text numberOfLines={1} style={[styles.publisherName, { color: colors.primaryText }]}>
+                {activeTrack.channelName ?? activeTrack.channelId}
+              </Text>
+              <Ionicons name="chevron-forward" size={16} color={colors.secondaryText} />
+            </Pressable>
+          ) : null}
         </View>
 
         <View style={[styles.statusPill, { backgroundColor: sourceStatus.variant === "error" ? colors.elevatedSurface : colors.elevatedSurface }]}>
@@ -223,6 +249,10 @@ const styles = StyleSheet.create({
   title: { color: "#241a12", fontSize: 22, fontWeight: "700", lineHeight: 28, textAlign: "center" },
   sourceLink: { alignItems: "center", flexDirection: "row", gap: 5, maxWidth: "100%" },
   sourceUrl: { color: "#8b5c48", fontSize: 13, maxWidth: "90%" },
+  publisherRow: { alignItems: "center", flexDirection: "row", gap: 8, marginTop: 4, maxWidth: "100%" },
+  publisherAvatar: { alignItems: "center", borderRadius: 14, height: 28, justifyContent: "center", width: 28 },
+  publisherAvatarText: { fontSize: 13, fontWeight: "700" },
+  publisherName: { flex: 1, fontSize: 14, fontWeight: "500" },
   statusPill: {
     alignItems: "center",
     alignSelf: "center",
