@@ -7,6 +7,7 @@ import { StatusBar } from "expo-status-bar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { RootStackParamList, RootTabParamList } from "./types";
 import HomeScreen from "../../screens/HomeScreen";
+import ConvertScreen from "../../screens/ConvertScreen";
 import FeedScreen from "../../screens/FeedScreen";
 import PlaylistScreen from "../../screens/PlaylistScreen";
 import PlayerScreen from "../../screens/PlayerScreen";
@@ -180,6 +181,15 @@ export default function RootNavigator() {
           options={{
             presentation: "formSheet",
             title: t("feed.manageChannels"),
+            headerLeft: () => <CloseModalButton />,
+          }}
+        />
+        <Stack.Screen
+          name="Convert"
+          component={ConvertScreen}
+          options={{
+            presentation: "formSheet",
+            title: t("home.title"),
             headerLeft: () => <CloseModalButton />,
           }}
         />
