@@ -12,6 +12,16 @@ vi.mock("expo-audio", () => ({
   useAudioPlayerStatus: vi.fn(),
 }));
 
+// player/context 经 useTranslation → i18n → expo-localization 传递 import
+// react-native（其 index.js 含 Flow 语法 `import typeof`，vitest 的 Rollup 解析不了）。
+// 被测的 4 个函数都是纯函数，不实际调用 localization，mock 掉即可切断 RN 加载链。
+vi.mock("expo-localization", () => ({
+  getLocales: () => [{ languageTag: "en-US", languageCode: "en", textDirection: "ltr" }],
+  useLocales: () => [{ languageTag: "en-US", languageCode: "en", textDirection: "ltr" }],
+  getCalendars: () => [],
+  useCalendars: () => [],
+}));
+
 vi.mock("@react-native-async-storage/async-storage", () => ({
   default: {
     getItem: vi.fn(() => Promise.resolve(null)),
