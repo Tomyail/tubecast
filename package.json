@@ -3,12 +3,20 @@
   "version": "1.0.0",
   "packageManager": "pnpm@10.28.1",
   "main": "index.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Tomyail/tubecast.git"
+  },
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
     "release:ios": "expo prebuild --platform ios --no-install && expo run:ios --device --configuration Release",
+    "release:version": "node scripts/release.mjs version",
+    "release:archive": "node scripts/release.mjs archive",
+    "release:publish": "node scripts/release.mjs publish",
+    "release:rebuild": "node scripts/release.mjs rebuild",
     "test": "vitest run"
   },
   "dependencies": {
@@ -41,6 +49,7 @@
   "devDependencies": {
     "@types/react": "~19.2.2",
     "babel-preset-expo": "~56.0.15",
+    "commit-and-tag-version": "^12.7.3",
     "typescript": "~6.0.3",
     "vitest": "^3.2.4"
   },
