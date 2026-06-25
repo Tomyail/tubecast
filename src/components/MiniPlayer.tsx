@@ -2,7 +2,7 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { formatDuration } from "../api";
+import { formatDuration } from "../i18n/formatters";
 import type { RootStackParamList } from "../app/navigation/types";
 import { usePlayer } from "../features/player/context";
 import { useTranslation } from "../i18n";

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { submitJob, getJob, fetchLibrary, hideLibraryItem } from "./api";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { submitJob, getJob } from "./api";
 import { ensureTrackCached } from "./cache";
 import { trackFromReadyJob } from "./track";
 import { usePlaylist } from "../playlist/context";
@@ -106,21 +106,4 @@ export function useDownloadReadyJob(jobId: string | null) {
     retry: retryCache,
     job,
   };
-}
-
-export function useLibraryList() {
-  return useQuery({
-    queryKey: ["library"],
-    queryFn: () => fetchLibrary(),
-  });
-}
-
-export function useHideLibraryItem() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (jobId: string) => hideLibraryItem(jobId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["library"] });
-    },
-  });
 }

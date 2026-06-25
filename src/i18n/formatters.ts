@@ -6,8 +6,12 @@ export function formatFileSize(bytes: number | null | undefined, locale: string)
 }
 
 export function formatDuration(seconds: number | null | undefined): string {
-  if (seconds == null || seconds <= 0) return "--:--";
-  const minutes = Math.floor(seconds / 60);
-  const remaining = Math.floor(seconds % 60);
-  return `${minutes}:${remaining.toString().padStart(2, "0")}`;
+  if (!seconds || Number.isNaN(seconds)) return "--:--";
+  const s = Math.max(0, Math.floor(seconds));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const r = s % 60;
+  return h > 0
+    ? `${h}:${String(m).padStart(2, "0")}:${String(r).padStart(2, "0")}`
+    : `${m}:${String(r).padStart(2, "0")}`;
 }

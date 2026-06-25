@@ -83,12 +83,3 @@ export async function getDownloadUrl(id: string): Promise<string> {
   const res = await request<{ url: string }>(`/api/jobs/${id}/download`);
   return res.url;
 }
-
-export async function fetchLibrary(): Promise<JobResponse[]> {
-  const res = await request<{ jobs: JobResponse[] }>("/api/library?limit=50");
-  return res.jobs;
-}
-
-export async function hideLibraryItem(jobId: string): Promise<{ hidden: boolean }> {
-  return request(`/api/library/${jobId}`, { method: "DELETE" });
-}

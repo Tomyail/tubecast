@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { formatDuration } from "../api";
+import { formatDuration } from "../i18n/formatters";
 import type { Job } from "../types";
 import StatusBadge from "./StatusBadge";
 import { useTranslation } from "../i18n";
