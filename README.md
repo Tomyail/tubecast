@@ -30,6 +30,14 @@ TubeCast is an independent Expo / React Native client for iOS and Android. It is
 - Create playlists, reorder tracks, and retain playback progress.
 - Play audio in the background with a persistent mini player.
 
+## Try the beta
+
+TubeCast is available via TestFlight for iOS:
+
+**[Join the TestFlight beta](https://testflight.apple.com/join/Pze9SjbP)**
+
+Android is not distributed publicly at this time. See [Local builds](#local-builds) to build from source.
+
 ## Installation
 
 ### Requirements
