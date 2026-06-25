@@ -79,4 +79,26 @@ describe("matchJobStatus", () => {
     const result = matchJobStatus([item], lookup);
     expect(result[0].status).toBe("new");
   });
+
+  it("maps a mixed batch to all three statuses in one pass", () => {
+    // Three-state mapping used by the publisher preview sheet:
+    //   ready/processing/queued/missing -> ready/converting/new
+    const batch = [
+      makeItem({ platformItemId: "v_ready", title: "Ready one" }),
+      makeItem({ platformItemId: "v_processing", title: "Processing one" }),
+      makeItem({ platformItemId: "v_queued", title: "Queued one" }),
+      makeItem({ platformItemId: "v_missing", title: "Brand new one" }),
+    ];
+    const result = matchJobStatus(batch, lookup);
+    expect(result).toHaveLength(4);
+    const byId = Object.fromEntries(result.map((r) => [r.platformItemId, r]));
+    expect(byId.v_ready.status).toBe("ready");
+    expect(byId.v_ready.jobId).toBe("job1");
+    expect(byId.v_processing.status).toBe("converting");
+    expect(byId.v_processing.jobId).toBe("job2");
+    expect(byId.v_queued.status).toBe("converting");
+    expect(byId.v_queued.jobId).toBe("job4");
+    expect(byId.v_missing.status).toBe("new");
+    expect(byId.v_missing.jobId).toBeUndefined();
+  });
 });

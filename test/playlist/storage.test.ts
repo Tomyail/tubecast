@@ -129,4 +129,34 @@ describe("playlist storage track migration", () => {
       cacheStatus: "none",
     });
   });
+
+  it("defaults channelId/channelName to null for legacy persisted tracks", async () => {
+    // A track persisted before channelId/channelName existed has neither field.
+    storeTracks({
+      "job-1": baseTrack(),
+    });
+
+    const tracks = await getAllTracks();
+
+    expect(tracks[0]).toMatchObject({
+      channelId: null,
+      channelName: null,
+    });
+  });
+
+  it("preserves channelId/channelName when present on a persisted track", async () => {
+    storeTracks({
+      "job-1": baseTrack({
+        channelId: "UC_x5XG1OV2P6uZZ5FSM9Ttw",
+        channelName: "Google Developers",
+      }),
+    });
+
+    const tracks = await getAllTracks();
+
+    expect(tracks[0]).toMatchObject({
+      channelId: "UC_x5XG1OV2P6uZZ5FSM9Ttw",
+      channelName: "Google Developers",
+    });
+  });
 });

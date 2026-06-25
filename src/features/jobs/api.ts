@@ -15,6 +15,9 @@ export interface JobResponse {
   title: string | null;
   durationSeconds: number | null;
   thumbnailUrl: string | null;
+  channelId: string | null;
+  channelName: string | null;
+  sourceId: string | null;
   audioFormat: string | null;
   contentType: string | null;
   audioFileSize: number | null;

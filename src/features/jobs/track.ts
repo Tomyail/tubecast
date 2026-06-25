@@ -21,5 +21,7 @@ export function trackFromReadyJob(
     cacheError: null,
     playCount: 0,
     lastPlayedAt: null,
+    channelId: job.channelId ?? null,
+    channelName: job.channelName ?? null,
   };
 }

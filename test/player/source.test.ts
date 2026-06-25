@@ -76,6 +76,8 @@ const makeTrack = (overrides: Partial<Track> = {}): Track => ({
   cacheError: null,
   playCount: 0,
   lastPlayedAt: null,
+  channelId: null,
+  channelName: null,
   ...overrides,
 });
 

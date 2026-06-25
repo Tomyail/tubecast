@@ -8,6 +8,7 @@ export type Job = {
   sourceId: string | null;
   title: string | null;
   channelName: string | null;
+  channelId: string | null;
   thumbnailUrl: string | null;
   durationSeconds: number | null;
   status: JobStatus;

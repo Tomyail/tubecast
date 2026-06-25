@@ -19,6 +19,8 @@ export interface Track {
   cacheError?: string | null;
   playCount: number;
   lastPlayedAt: string | null;
+  channelId: string | null;
+  channelName: string | null;
 }
 
 export interface Playlist {
@@ -67,6 +69,8 @@ function normalizeTrack(rawTrack: Partial<Track> & { id: string; jobId: string }
     cacheError: rawTrack.cacheError ?? null,
     playCount: rawTrack.playCount || 0,
     lastPlayedAt: rawTrack.lastPlayedAt ?? null,
+    channelId: rawTrack.channelId ?? null,
+    channelName: rawTrack.channelName ?? null,
   };
 
   if (track.cacheStatus === "cached") {
