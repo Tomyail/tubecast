@@ -101,6 +101,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     if (!activeTrack || !status) return;
     if (status.didJustFinish) {
       incrementPlayCount(activeTrack.id);
+      // 播放完毕后清除保存的进度，否则再次点击该曲目会 seek 到接近结尾的位置
+      AsyncStorage.removeItem(`${PROGRESS_KEY}${activeTrack.id}`);
       playNext();
     }
   }, [status?.didJustFinish]);
@@ -141,7 +143,12 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     let position = 0;
     try {
       const raw = await AsyncStorage.getItem(`${PROGRESS_KEY}${track.id}`);
-      if (raw) position = JSON.parse(raw).position || 0;
+      if (raw) {
+        const saved = JSON.parse(raw).position || 0;
+        // 保存的进度若已接近曲目结尾（历史脏数据 / didJustFinish 清除前的残留），
+        // 视为已播完，从头开始而非 seek 到末尾导致"点击不播放"
+        position = saved >= track.durationSeconds - 1 ? 0 : saved;
+      }
     } catch {}
 
     await setAudioModeAsync({

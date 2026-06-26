@@ -22,7 +22,7 @@ export default function PlaylistScreen() {
   const { colors } = useAppTheme();
   const navigation = useNavigation<NativeStackNavigationProp<PlaylistStackParamList>>();
   const { tracks, deleteTrack, deleteTracks, reorderTracks } = usePlaylist();
-  const { playTrack, activeTrack, isPlaying, stopPlayback } = usePlayer();
+  const { playTrack, togglePlayback, activeTrack, isPlaying, stopPlayback } = usePlayer();
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
@@ -93,6 +93,11 @@ export default function PlaylistScreen() {
   };
 
   const handlePlay = (track: Track) => {
+    // 点击正在播放的曲目时切换暂停/继续，而非重新走 replace+seek 流程
+    if (activeTrack?.id === track.id) {
+      void togglePlayback();
+      return;
+    }
     playTrack(track, tracks);
   };
 
