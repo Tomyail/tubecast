@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
-import { ActivityIndicator, Image, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Image } from "expo-image";
 import type { RootStackParamList } from "../app/navigation/types";
 import Screen from "../components/Screen";
 import { useAddChannel } from "../features/youtubeFeed/hooks";
@@ -91,7 +92,7 @@ export default function AddChannelScreen() {
           <View style={styles.previewHeader}>
             <View style={[styles.thumbnail, { backgroundColor: colors.elevatedSurface }]}>
               {preview.thumbnailUrl ? (
-                <Image resizeMode="cover" source={{ uri: preview.thumbnailUrl }} style={styles.thumbnailImage} />
+                <Image source={{ uri: preview.thumbnailUrl }} style={styles.thumbnailImage} contentFit="cover" transition={300} />
               ) : (
                 <Ionicons name="play" size={22} color={colors.tint} />
               )}

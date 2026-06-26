@@ -1,7 +1,8 @@
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
+import { Image } from "expo-image";
 import { formatDuration } from "../i18n/formatters";
 import type { RootStackParamList } from "../app/navigation/types";
 import { usePlayer } from "../features/player/context";
@@ -33,7 +34,7 @@ export default function MiniPlayer({ tabBarHeight }: { tabBarHeight: number }) {
         <View style={styles.thumbRow}>
           <View style={[styles.thumbnail, { backgroundColor: colors.elevatedSurface }]}>
             {activeTrack.thumbnailUrl ? (
-              <Image resizeMode="cover" source={{ uri: activeTrack.thumbnailUrl }} style={styles.thumbnailImage} />
+              <Image source={{ uri: activeTrack.thumbnailUrl }} style={styles.thumbnailImage} contentFit="cover" transition={300} />
             ) : (
               <Ionicons name="musical-note" size={20} color={colors.tint} />
             )}

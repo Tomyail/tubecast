@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import type { ComponentProps } from "react";
-import { Alert, ActivityIndicator, FlatList, Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, ActivityIndicator, FlatList, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Image } from "expo-image";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import Screen from "../components/Screen";
@@ -265,7 +266,7 @@ function VideoThumbnail({ thumbnailUrl }: { thumbnailUrl: string | null }) {
   return (
     <View style={[styles.thumbnail, { backgroundColor: colors.elevatedSurface }]}>
       {thumbnailUrl ? (
-        <Image resizeMode="cover" source={{ uri: thumbnailUrl }} style={styles.thumbnailImage} />
+        <Image source={{ uri: thumbnailUrl }} style={styles.thumbnailImage} contentFit="cover" transition={300} />
       ) : (
         <Ionicons name="play" size={22} color={colors.tint} />
       )}

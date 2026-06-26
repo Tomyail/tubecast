@@ -31,6 +31,7 @@
     "expo-audio": "~56.0.12",
     "expo-clipboard": "~56.0.4",
     "expo-file-system": "^56.0.8",
+    "expo-image": "^56.0.11",
     "expo-localization": "~56.0.6",
     "expo-modules-core": "56.0.17",
     "expo-secure-store": "^56.0.4",

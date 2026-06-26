@@ -1,4 +1,5 @@
-import { ActivityIndicator, Image, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import type { DiscoverItem } from "../features/discover/types";
 import { useAppTheme } from "../app/theme";
@@ -27,7 +28,7 @@ export default function DiscoverCard({
     >
       <View style={[styles.thumbWrap, { backgroundColor: colors.elevatedSurface }]}>
         {item.thumbnailUrl ? (
-          <Image source={{ uri: item.thumbnailUrl }} style={styles.thumb} />
+          <Image source={{ uri: item.thumbnailUrl }} style={styles.thumb} contentFit="cover" transition={300} />
         ) : (
           <View style={styles.thumbPlaceholder}>
             <Ionicons name="musical-note" size={28} color={colors.secondaryText} />

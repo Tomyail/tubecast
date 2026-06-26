@@ -5,13 +5,13 @@ import type { ComponentProps } from "react";
 import { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  Image,
   Linking,
   PanResponder,
   StyleSheet,
   Text,
   View,
 } from "react-native";
+import { Image } from "expo-image";
 import Screen from "../components/Screen";
 import Touchable from "../components/Touchable";
 import { useCacheReadyJob } from "../features/jobs/hooks";
@@ -89,7 +89,7 @@ export default function PlayerScreen() {
         <View style={styles.trackHeader}>
           <View style={[styles.artwork, { backgroundColor: colors.elevatedSurface }]}>
             {activeTrack.thumbnailUrl ? (
-              <Image resizeMode="cover" source={{ uri: activeTrack.thumbnailUrl }} style={styles.artworkImage} />
+              <Image source={{ uri: activeTrack.thumbnailUrl }} style={styles.artworkImage} contentFit="cover" transition={300} />
             ) : (
               <Ionicons name="musical-note" size={44} color={colors.tint} />
             )}

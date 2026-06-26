@@ -27,6 +27,34 @@ const dark: AppColors = {
   tint: "#e68a64", tintText: "#24140f", success: "#8fd49e", destructive: "#ffb4ab", destructiveSurface: "#3a2422",
 };
 
+// 设计 token：字号 / 间距 / 圆角 scale。从既有 magic number 归纳而来，
+// 供新代码与渐进迁移使用；旧 StyleSheet 中的 magic number 暂保留，避免一次性大diff。
+// token 是静态的（不随明暗主题变化），故作为独立常量导出而非放进 context。
+export const typography = {
+  caption: 12, // 辅助/元信息
+  body: 14, // 正文
+  bodyLg: 16, // 正文强调 / 行内按钮
+  title: 17, // 卡片/行标题
+  titleLg: 20, // 区块大标题
+  headline: 22, // 屏幕级标题
+} as const;
+
+export const spacing = {
+  xs: 4,
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 24,
+} as const;
+
+export const radii = {
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 20,
+  pill: 999,
+} as const;
+
 const ThemeContext = createContext<{ colors: AppColors; isDark: boolean }>({ colors: light, isDark: false });
 
 export function AppThemeProvider({ children }: { children: ReactNode }) {

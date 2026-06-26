@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Alert, FlatList, Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { Image } from "expo-image";
 import Screen from "../components/Screen";
 import { useRemoveChannel, useSubscribedChannels } from "../features/youtubeFeed/hooks";
 import type { FeedSource } from "../features/youtubeFeed/types";
@@ -33,7 +34,7 @@ export default function ManageChannelsScreen() {
           <View style={[styles.row, { borderBottomColor: colors.border }]}>
             <View style={[styles.thumbnail, { backgroundColor: colors.elevatedSurface }]}>
               {item.thumbnailUrl ? (
-                <Image resizeMode="cover" source={{ uri: item.thumbnailUrl }} style={styles.thumbnailImage} />
+                <Image source={{ uri: item.thumbnailUrl }} style={styles.thumbnailImage} contentFit="cover" transition={300} />
               ) : (
                 <Ionicons name="play" size={20} color={colors.tint} />
               )}

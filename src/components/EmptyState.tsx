@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import type { ComponentProps } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { useAppTheme } from "../app/theme";
+import { useAppTheme, typography, spacing, radii } from "../app/theme";
 import Touchable from "./Touchable";
 
 type IoniconName = NonNullable<ComponentProps<typeof Ionicons>["name"]>;
@@ -43,9 +43,9 @@ export default function EmptyState({
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: "center", justifyContent: "center", gap: 12, padding: 24 },
-  title: { fontSize: 17, fontWeight: "700", textAlign: "center" },
-  description: { fontSize: 14, textAlign: "center" },
-  cta: { minHeight: 44, borderRadius: 12, paddingHorizontal: 20, alignItems: "center", justifyContent: "center" },
-  ctaText: { fontSize: 16, fontWeight: "600" },
+  container: { flex: 1, alignItems: "center", justifyContent: "center", gap: spacing.md, padding: spacing.xl },
+  title: { fontSize: typography.title, fontWeight: "700", textAlign: "center" },
+  description: { fontSize: typography.body, textAlign: "center" },
+  cta: { minHeight: 44, borderRadius: radii.md, paddingHorizontal: 20, alignItems: "center", justifyContent: "center" },
+  ctaText: { fontSize: typography.bodyLg, fontWeight: "600" },
 });
