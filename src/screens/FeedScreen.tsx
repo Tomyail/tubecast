@@ -23,7 +23,7 @@ import { getFeedProgressLabel } from "../features/jobs/progress";
 import { useTranslation } from "../i18n";
 import { useAppTheme } from "../app/theme";
 
-const BOTTOM_WITH_PLAYER = 120;
+const MINI_PLAYER_HEIGHT = 64;
 const BOTTOM_BASE = 24;
 type IoniconName = NonNullable<ComponentProps<typeof Ionicons>["name"]>;
 
@@ -88,7 +88,7 @@ export default function FeedScreen() {
   }
 
   return (
-    <Screen scroll={false}>
+    <Screen reserveMiniPlayerSpace={false} scroll={false}>
       {channels.length > 0 && (
         <View style={[styles.pillsRow, { borderBottomColor: colors.border }]}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.channelScroll}>
@@ -173,7 +173,7 @@ export default function FeedScreen() {
           refreshing={isLoading}
           onRefresh={refetch}
           ListEmptyComponent={<Text style={[styles.emptyFeed, { color: colors.secondaryText }]}>{t("feed.noVideos")}</Text>}
-          contentContainerStyle={[styles.listContent, { paddingBottom: activeTrack ? BOTTOM_WITH_PLAYER : BOTTOM_BASE }]}
+          contentContainerStyle={[styles.listContent, { paddingBottom: activeTrack ? MINI_PLAYER_HEIGHT : BOTTOM_BASE }]}
         />
       )}
     </Screen>

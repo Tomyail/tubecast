@@ -9,14 +9,16 @@ const BOTTOM_BASE = 24;
 
 export default function Screen({
   children,
+  reserveMiniPlayerSpace = true,
   scroll = true,
 }: {
   children: ReactNode;
+  reserveMiniPlayerSpace?: boolean;
   scroll?: boolean;
 }) {
   const { activeTrack } = usePlayer();
   const { colors } = useAppTheme();
-  const paddingBottom = activeTrack ? BOTTOM_WITH_PLAYER : BOTTOM_BASE;
+  const paddingBottom = reserveMiniPlayerSpace && activeTrack ? BOTTOM_WITH_PLAYER : BOTTOM_BASE;
 
   const content = scroll ? (
     <ScrollView contentContainerStyle={[styles.scrollContent, { paddingBottom }]}>{children}</ScrollView>

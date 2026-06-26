@@ -176,7 +176,7 @@ export default function PlaylistScreen() {
   };
 
   return (
-    <Screen scroll={false}>
+    <Screen reserveMiniPlayerSpace={false} scroll={false}>
       {tracks.length === 0 ? (
         <Text style={[styles.empty, { color: colors.secondaryText }]}>{t("playlist.empty")}</Text>
       ) : (
