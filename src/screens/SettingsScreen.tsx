@@ -12,7 +12,7 @@ import { useAppTheme } from "../app/theme";
 export default function SettingsScreen() {
   const [storageInfo, setStorageInfo] = useState<string>("");
   const { t } = useTranslation();
-  const { colors } = useAppTheme();
+  const { colors, preference: themePreference, setTheme } = useAppTheme();
   const { preference, language, setLanguage } = useAppLanguage();
 
   const checkStorage = async () => {
@@ -30,7 +30,7 @@ export default function SettingsScreen() {
   return (
     <Screen>
       <Section title={t("settings.language")} colors={colors}>
-        <View style={styles.languageChoices}>
+        <View style={styles.choices}>
           {(["system", "zh-CN", "en"] as const).map((option) => {
             const selected = preference === option;
             const label = t(`settings.${option === "zh-CN" ? "chinese" : option === "en" ? "english" : "system"}`);
@@ -39,10 +39,29 @@ export default function SettingsScreen() {
                 accessibilityRole="button"
                 accessibilityState={{ selected }}
                 key={option}
-                style={[styles.languageButton, selected && { backgroundColor: colors.tint }]}
+                style={[styles.choiceButton, selected && { backgroundColor: colors.tint }]}
                 onPress={() => void setLanguage(option)}
               >
-                <Text numberOfLines={1} style={[styles.languageText, { color: selected ? colors.tintText : colors.secondaryText }]}>{label}</Text>
+                <Text numberOfLines={1} style={[styles.choiceText, { color: selected ? colors.tintText : colors.secondaryText }]}>{label}</Text>
+              </Touchable>
+            );
+          })}
+        </View>
+      </Section>
+
+      <Section title={t("settings.theme")} colors={colors}>
+        <View style={styles.choices}>
+          {(["system", "light", "dark"] as const).map((option) => {
+            const selected = themePreference === option;
+            return (
+              <Touchable
+                accessibilityRole="button"
+                accessibilityState={{ selected }}
+                key={option}
+                style={[styles.choiceButton, selected && { backgroundColor: colors.tint }]}
+                onPress={() => void setTheme(option)}
+              >
+                <Text numberOfLines={1} style={[styles.choiceText, { color: selected ? colors.tintText : colors.secondaryText }]}>{t(`settings.${option}`)}</Text>
               </Touchable>
             );
           })}
@@ -94,9 +113,9 @@ const styles = StyleSheet.create({
   section: { gap: 8 },
   sectionTitle: { color: "#6f6256", fontSize: 13, fontWeight: "600", paddingHorizontal: 4, textTransform: "uppercase" },
   group: { borderRadius: 16, borderWidth: 1, overflow: "hidden" },
-  languageChoices: { flexDirection: "row", gap: 8, padding: 10 },
-  languageButton: { alignItems: "center", borderRadius: 10, flex: 1, justifyContent: "center", minHeight: 40, paddingHorizontal: 8 },
-  languageText: { color: "#6f6256", fontSize: 14 },
+  choices: { flexDirection: "row", gap: 8, padding: 10 },
+  choiceButton: { alignItems: "center", borderRadius: 10, flex: 1, justifyContent: "center", minHeight: 40, paddingHorizontal: 8 },
+  choiceText: { color: "#6f6256", fontSize: 14 },
   settingRow: { alignItems: "center", flexDirection: "row", gap: 12, minHeight: 64, paddingHorizontal: 14, paddingVertical: 10 },
   aboutHeader: { alignItems: "center", flexDirection: "row", gap: 12, minHeight: 72, paddingHorizontal: 14, paddingVertical: 12 },
   rowIcon: { alignItems: "center", borderRadius: 10, height: 36, justifyContent: "center", width: 36 },

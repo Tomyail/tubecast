@@ -1,5 +1,7 @@
-import { createContext, type ReactNode, useContext, useMemo } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { createContext, type ReactNode, useContext, useEffect, useMemo, useState } from "react";
 import { useColorScheme } from "react-native";
+import { resolveTheme, type AppThemePreference } from "./theme-preference";
 
 export type AppColors = {
   background: string;
@@ -55,11 +57,46 @@ export const radii = {
   pill: 999,
 } as const;
 
-const ThemeContext = createContext<{ colors: AppColors; isDark: boolean }>({ colors: light, isDark: false });
+const THEME_KEY = "settings_theme";
 
+type ThemeContextValue = {
+  colors: AppColors;
+  isDark: boolean;
+  preference: AppThemePreference;
+  setTheme: (next: AppThemePreference) => Promise<void>;
+};
+
+const ThemeContext = createContext<ThemeContextValue>({
+  colors: light,
+  isDark: false,
+  preference: "system",
+  setTheme: async () => {},
+});
+
+// 偏好的持久化与解析对标 i18n/I18nProvider:system 为默认乐观初值(避免启动白屏),
+// AsyncStorage 读到存储值后再修正;system 模式下 isDark 随 useColorScheme() 实时变化。
 export function AppThemeProvider({ children }: { children: ReactNode }) {
-  const isDark = useColorScheme() === "dark";
-  const value = useMemo(() => ({ colors: isDark ? dark : light, isDark }), [isDark]);
+  const systemScheme = useColorScheme();
+  const [preference, setPreference] = useState<AppThemePreference>("system");
+
+  useEffect(() => {
+    AsyncStorage.getItem(THEME_KEY).then((stored) => {
+      if (stored === "light" || stored === "dark" || stored === "system") setPreference(stored);
+    });
+  }, []);
+
+  const isDark = resolveTheme(preference, systemScheme);
+
+  const value = useMemo<ThemeContextValue>(() => ({
+    colors: isDark ? dark : light,
+    isDark,
+    preference,
+    setTheme: async (next) => {
+      await AsyncStorage.setItem(THEME_KEY, next);
+      setPreference(next);
+    },
+  }), [isDark, preference]);
+
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
