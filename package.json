@@ -17,6 +17,9 @@
     "release:archive": "node scripts/release.mjs archive",
     "release:publish": "node scripts/release.mjs publish",
     "release:rebuild": "node scripts/release.mjs rebuild",
+    "release:sync-ios": "node scripts/release.mjs sync-ios",
+    "release:testflight": "node scripts/release.mjs testflight",
+    "release:testflight-tag": "node scripts/release.mjs testflight-tag",
     "test": "vitest run"
   },
   "dependencies": {

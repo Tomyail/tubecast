@@ -7,12 +7,13 @@
 //   pnpm --filter mobile release:archive   B 前: expo prebuild（把 buildNumber 写进 native 工程）
 //   pnpm --filter mobile release:publish   C: 草稿 release 转正 + 根仓库子模块指针 bump
 //   pnpm --filter mobile release:rebuild   热修: 只 buildNumber+1（不动 marketing 版本）后重打包重传
+//   pnpm --filter mobile release:testflight TestFlight: prebuild + 同步 Xcode 版本 + 打 testflight/<version>-<build> tag
 //
 // 跨两个仓库：mobile（公开 GitHub Tomyail/tubecast）+ 根（私有 Gitea yt-audio）。
 // 全程用 git -C / cwd，绝不 cd（避免权限提示与不可重入）。
 
 import { execSync } from "node:child_process";
-import { readFileSync, writeFileSync, rmSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync, rmSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -21,6 +22,8 @@ const mobileRoot = path.resolve(__dirname, ".."); // mobile/
 const repoRoot = path.resolve(mobileRoot, ".."); // 根仓库
 const APP_JSON = path.join(mobileRoot, "app.json");
 const CHANGELOG = path.join(mobileRoot, "CHANGELOG.md");
+const IOS_INFO_PLIST = path.join(mobileRoot, "ios", "TubeCast", "Info.plist");
+const IOS_PROJECT = path.join(mobileRoot, "ios", "TubeCast.xcodeproj", "project.pbxproj");
 const GH_REPO = "Tomyail/tubecast";
 
 function run(cmd, opts = {}) {
@@ -37,6 +40,51 @@ function currentVersion() {
   // 读 package.json.version——这是 CATV 用来命名 tag 的权威源。
   // (app.json 的 expo.version 由 appjson-updater.cjs 同步过去，但 tag 名始终跟 package.json。)
   return readJson(path.join(mobileRoot, "package.json")).version;
+}
+
+function currentBuildNumber() {
+  const app = readJson(APP_JSON);
+  const buildNumber = app.expo?.ios?.buildNumber;
+  if (!buildNumber) throw new Error("app.json 缺少 expo.ios.buildNumber。");
+  return String(buildNumber);
+}
+
+function syncNativeIosVersion() {
+  const app = readJson(APP_JSON);
+  const version = app.expo?.version;
+  const buildNumber = currentBuildNumber();
+  if (!version) throw new Error("app.json 缺少 expo.version。");
+  if (!existsSync(IOS_INFO_PLIST) || !existsSync(IOS_PROJECT)) {
+    throw new Error("ios 原生工程不存在。先运行 release:archive 或 expo prebuild。");
+  }
+
+  let plist = readFileSync(IOS_INFO_PLIST, "utf8");
+  plist = plist.replace(
+    /(<key>CFBundleShortVersionString<\/key>\s*<string>)[^<]+(<\/string>)/,
+    `$1${version}$2`,
+  );
+  plist = plist.replace(/(<key>CFBundleVersion<\/key>\s*<string>)[^<]+(<\/string>)/, `$1${buildNumber}$2`);
+  writeFileSync(IOS_INFO_PLIST, plist);
+
+  let project = readFileSync(IOS_PROJECT, "utf8");
+  project = project.replace(/CURRENT_PROJECT_VERSION = [^;]+;/g, `CURRENT_PROJECT_VERSION = ${buildNumber};`);
+  project = project.replace(/MARKETING_VERSION = [^;]+;/g, `MARKETING_VERSION = ${version};`);
+  writeFileSync(IOS_PROJECT, project);
+
+  console.log(`✅ Xcode 版本已同步：${version} (${buildNumber})`);
+}
+
+function testflightTagName() {
+  return `testflight/${currentVersion()}-${currentBuildNumber()}`;
+}
+
+function tagExists(tag) {
+  try {
+    execSync(`git rev-parse -q --verify refs/tags/${tag}`, { cwd: mobileRoot, stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 // buildNumber +1（字符串整数）。必须在 CATV 之前调用——app.json 是 CATV 的 bumpFile，
@@ -85,7 +133,29 @@ function cmdVersion() {
 // ---- archive：prebuild，把 buildNumber 写进 native 工程 ----
 function cmdArchive() {
   run("pnpm exec expo prebuild --platform ios --clean", { cwd: mobileRoot, stdio: "inherit" });
+  syncNativeIosVersion();
   console.log("\n✅ prebuild 完成。现在在 Xcode 打开 mobile/ios/TubeCast.xcworkspace → Product → Archive → 导出 IPA → Transporter 上传。");
+}
+
+function cmdSyncIos() {
+  syncNativeIosVersion();
+}
+
+function cmdTestflightTag() {
+  const tag = testflightTagName();
+  if (tagExists(tag)) {
+    console.log(`✅ tag 已存在：${tag}`);
+  } else {
+    run(`git tag ${tag}`, { cwd: mobileRoot, stdio: "inherit" });
+    console.log(`✅ 已创建 tag：${tag}`);
+  }
+  run(`git push origin refs/tags/${tag}`, { cwd: mobileRoot, stdio: "inherit" });
+  console.log(`✅ 已推送 tag：${tag}`);
+}
+
+function cmdTestflight() {
+  cmdArchive();
+  cmdTestflightTag();
 }
 
 // ---- C: 转正 release + 根仓库指针 bump ----
@@ -109,14 +179,25 @@ function cmdRebuild() {
   console.log(`\n✅ buildNumber → ${bn}（marketing 版本不变）。重跑 release:archive 重新打包上传。`);
 }
 
-const COMMANDS = { version: cmdVersion, publish: cmdPublish, archive: cmdArchive, rebuild: cmdRebuild };
+const COMMANDS = {
+  version: cmdVersion,
+  publish: cmdPublish,
+  archive: cmdArchive,
+  rebuild: cmdRebuild,
+  "sync-ios": cmdSyncIos,
+  testflight: cmdTestflight,
+  "testflight-tag": cmdTestflightTag,
+};
 const cmd = process.argv[2];
 if (!cmd || !COMMANDS[cmd]) {
-  console.error("用法: release.mjs <version|publish|archive|rebuild>");
+  console.error("用法: release.mjs <version|publish|archive|rebuild|sync-ios|testflight|testflight-tag>");
   console.error("  version  A 段：bump 版本/buildNumber + CHANGELOG + tag + 草稿 release");
   console.error("  archive  B 前：expo prebuild（写 buildNumber 进工程）");
   console.error("  publish  C 段：草稿转正 + 根仓库指针 bump");
   console.error("  rebuild  热修：只 buildNumber+1，重打包重传");
+  console.error("  sync-ios 同步 app.json 版本到 Xcode 原生工程");
+  console.error("  testflight 生成 iOS 工程并打 testflight/<version>-<build> tag");
+  console.error("  testflight-tag 只打并推送 testflight/<version>-<build> tag");
   process.exit(1);
 }
 COMMANDS[cmd]();
