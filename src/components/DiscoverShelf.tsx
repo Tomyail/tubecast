@@ -8,10 +8,12 @@ export default function DiscoverShelf({
   title,
   items,
   onPressItem,
+  pendingJobId = null,
 }: {
   title: string;
   items: DiscoverItem[];
   onPressItem: (item: DiscoverItem) => void;
+  pendingJobId?: string | null;
 }) {
   const { colors } = useAppTheme();
   if (items.length === 0) return null;
@@ -21,7 +23,12 @@ export default function DiscoverShelf({
       <Text style={[styles.title, { color: colors.primaryText }]}>{title}</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {items.map((item) => (
-          <DiscoverCard key={item.jobId} item={item} onPress={() => onPressItem(item)} />
+          <DiscoverCard
+            key={item.jobId}
+            item={item}
+            onPress={() => onPressItem(item)}
+            pending={pendingJobId === item.jobId}
+          />
         ))}
       </ScrollView>
     </View>

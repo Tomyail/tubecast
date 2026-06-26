@@ -2,11 +2,13 @@ import { useRef, useState, useCallback, useLayoutEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
-import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, StyleSheet, Text, View } from "react-native";
 import DraggableFlatList, { ScaleDecorator, RenderItemParams } from "react-native-draggable-flatlist";
 import { Swipeable } from "react-native-gesture-handler";
 import { Directory, File, Paths } from "expo-file-system";
 import Screen from "../components/Screen";
+import EmptyState from "../components/EmptyState";
+import Touchable from "../components/Touchable";
 import { usePlaylist } from "../features/playlist/context";
 import { usePlayer } from "../features/player/context";
 import type { Track } from "../features/playlist/storage";
@@ -131,22 +133,22 @@ export default function PlaylistScreen() {
         : t("playlist.title"),
       headerLeft: isEditMode
         ? () => (
-            <Pressable onPress={toggleSelectAll} style={styles.navigationAction}>
+            <Touchable onPress={toggleSelectAll} style={styles.navigationAction}>
               <Text style={[styles.headerAction, { color: colors.tint }]}>{allSelected ? t("playlist.clearAll") : t("playlist.selectAll")}</Text>
-            </Pressable>
+            </Touchable>
           )
         : undefined,
       headerRight: isEditMode
         ? () => (
-            <Pressable onPress={exitEditMode} style={styles.navigationAction}>
+            <Touchable onPress={exitEditMode} style={styles.navigationAction}>
               <Text style={[styles.headerAction, { color: colors.tint }]}>{t("common.done")}</Text>
-            </Pressable>
+            </Touchable>
           )
         : tracks.length > 0
           ? () => (
-              <Pressable onPress={enterEditMode} style={styles.navigationAction}>
+              <Touchable onPress={enterEditMode} style={styles.navigationAction}>
                 <Text style={[styles.headerAction, { color: colors.tint }]}>{t("playlist.edit")}</Text>
-              </Pressable>
+              </Touchable>
             )
           : undefined,
     });
@@ -178,7 +180,7 @@ export default function PlaylistScreen() {
   return (
     <Screen reserveMiniPlayerSpace={false} scroll={false}>
       {tracks.length === 0 ? (
-        <Text style={[styles.empty, { color: colors.secondaryText }]}>{t("playlist.empty")}</Text>
+        <EmptyState icon="musical-notes-outline" title={t("playlist.empty")} />
       ) : (
         <DraggableFlatList
           data={tracks}
@@ -193,10 +195,10 @@ export default function PlaylistScreen() {
 
       {isEditMode && (
         <View style={[styles.actionBar, { backgroundColor: colors.surface, borderTopColor: colors.border }, activeTrack && styles.actionBarWithPlayer]}>
-          <Pressable style={styles.actionBarCancel} onPress={exitEditMode}>
+          <Touchable style={styles.actionBarCancel} onPress={exitEditMode}>
             <Text style={[styles.actionBarCancelText, { color: colors.secondaryText }]}>{t("common.cancel")}</Text>
-          </Pressable>
-          <Pressable
+          </Touchable>
+          <Touchable
             style={[
               styles.actionBarDelete,
               { backgroundColor: colors.destructive },
@@ -208,7 +210,7 @@ export default function PlaylistScreen() {
             <Text style={[styles.actionBarDeleteText, { color: colors.tintText }]}>
               {selectedIds.size > 0 ? t("playlist.deleteSelected", { count: selectedIds.size }) : t("common.delete")}
             </Text>
-          </Pressable>
+          </Touchable>
         </View>
       )}
     </Screen>
@@ -247,7 +249,7 @@ function SwipeableTrackItem({
   const swipeRef = useRef<Swipeable>(null);
 
   const rowContent = (
-    <Pressable
+    <Touchable
       style={[
         styles.trackItem,
         { backgroundColor: colors.background },
@@ -262,9 +264,9 @@ function SwipeableTrackItem({
           {isSelected && <Ionicons name="checkmark" size={15} color={colors.tintText} />}
         </View>
       ) : (
-        <Pressable accessibilityLabel="Reorder track" accessibilityRole="button" onLongPress={onDrag} style={styles.dragHandle}>
+        <Touchable accessibilityLabel="Reorder track" accessibilityRole="button" onLongPress={onDrag} style={styles.dragHandle}>
           <Ionicons name="reorder-three-outline" size={22} color={colors.secondaryText} />
-        </Pressable>
+        </Touchable>
       )}
 
       <View style={styles.trackContent}>
@@ -291,7 +293,7 @@ function SwipeableTrackItem({
           <View style={[styles.unplayedDot, { backgroundColor: colors.tint }]} />
         ) : null
       )}
-    </Pressable>
+    </Touchable>
   );
 
   if (isEditMode) {
@@ -302,7 +304,7 @@ function SwipeableTrackItem({
     <Swipeable
       ref={swipeRef}
       renderRightActions={() => (
-        <Pressable
+        <Touchable
           style={[styles.deleteAction, { backgroundColor: colors.destructive }]}
           onPress={() => {
             swipeRef.current?.close();
@@ -310,7 +312,7 @@ function SwipeableTrackItem({
           }}
         >
           <Text style={[styles.deleteActionText, { color: colors.tintText }]}>{t("common.delete")}</Text>
-        </Pressable>
+        </Touchable>
       )}
       overshootRight={false}
     >
@@ -322,7 +324,6 @@ function SwipeableTrackItem({
 const styles = StyleSheet.create({
   headerAction: { fontSize: 16, color: "#b65a36", fontWeight: "600" },
   navigationAction: { paddingHorizontal: 4, paddingVertical: 8 },
-  empty: { color: "#6f6256", fontSize: 16, textAlign: "center", marginTop: 40 },
   trackItem: {
     flexDirection: "row",
     alignItems: "center",

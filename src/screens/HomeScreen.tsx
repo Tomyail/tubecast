@@ -1,10 +1,13 @@
+import { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from "react-native";
 import type { RootStackParamList } from "../app/navigation/types";
 import Screen from "../components/Screen";
 import DiscoverShelf from "../components/DiscoverShelf";
+import EmptyState from "../components/EmptyState";
+import Touchable from "../components/Touchable";
 import { useDiscover } from "../features/discover";
 import type { DiscoverItem } from "../features/discover/types";
 import { getJob, submitJob } from "../features/jobs/api";
@@ -24,7 +27,10 @@ export default function HomeScreen() {
   const { playTrack } = usePlayer();
 
   // 点击卡片兜底（决策 8）：实时查 job，未过期直接播；否则用 sourceId 重建 URL 重新转换。
+  // pendingJobId 给点击后到跳转前的即时反馈（getJob() 期间无其他视觉变化）。
+  const [pendingJobId, setPendingJobId] = useState<string | null>(null);
   const handlePressItem = async (item: DiscoverItem) => {
+    setPendingJobId(item.jobId);
     try {
       const job = await getJob(item.jobId);
       // audio_expires_at 是 SQLite datetime('now','+Nh') 写的 UTC 字串（空格分隔、无时区后缀），
@@ -45,6 +51,8 @@ export default function HomeScreen() {
       navigation.navigate("Convert", { jobId: result.id });
     } catch {
       Alert.alert(t("common.error"), t("errors.generic"));
+    } finally {
+      setPendingJobId(null);
     }
   };
 
@@ -61,31 +69,38 @@ export default function HomeScreen() {
         ) : isError ? (
           <View style={styles.center}>
             <Text style={[styles.errorText, { color: colors.destructive }]}>{t("discover.loadFailed")}</Text>
-            <Pressable accessibilityRole="button" style={[styles.retryButton, { backgroundColor: colors.tint }]} onPress={() => refetch()}>
+            <Touchable
+              accessibilityRole="button"
+              style={[styles.retryButton, { backgroundColor: colors.tint }]}
+              onPress={() => refetch()}
+            >
               <Text style={[styles.retryText, { color: colors.tintText }]}>{t("common.retry")}</Text>
-            </Pressable>
+            </Touchable>
           </View>
         ) : bothEmpty ? (
-          <View style={styles.center}>
-            <Text style={[styles.muted, { color: colors.secondaryText }]}>{t("discover.empty")}</Text>
-          </View>
+          <EmptyState
+            icon="compass-outline"
+            title={t("discover.empty")}
+            actionLabel={t("home.pasteUrl")}
+            onAction={() => navigation.navigate("Convert", {})}
+          />
         ) : (
           <ScrollView contentContainerStyle={styles.scrollContent}>
-            <DiscoverShelf title={t("discover.recent")} items={data?.recent ?? []} onPressItem={handlePressItem} />
-            <DiscoverShelf title={t("discover.popular")} items={data?.popular ?? []} onPressItem={handlePressItem} />
+            <DiscoverShelf title={t("discover.recent")} items={data?.recent ?? []} onPressItem={handlePressItem} pendingJobId={pendingJobId} />
+            <DiscoverShelf title={t("discover.popular")} items={data?.popular ?? []} onPressItem={handlePressItem} pendingJobId={pendingJobId} />
           </ScrollView>
         )}
 
         {/* FAB：相对 root 的 absolute 子元素。Screen 在 MiniPlayer 显示时自动增大
             paddingBottom，root（flex:1）随之收缩，FAB 自动上抬避让，无需额外分支。 */}
-        <Pressable
+        <Touchable
           accessibilityRole="button"
           accessibilityLabel={t("home.pasteUrl")}
           style={[styles.fab, { backgroundColor: colors.tint }]}
           onPress={() => navigation.navigate("Convert", {})}
         >
           <Ionicons name="add" size={30} color={colors.tintText} />
-        </Pressable>
+        </Touchable>
       </View>
     </Screen>
   );

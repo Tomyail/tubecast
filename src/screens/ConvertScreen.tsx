@@ -4,9 +4,10 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Alert, StyleSheet, Text, TextInput, View } from "react-native";
 import type { RootStackParamList } from "../app/navigation/types";
 import Screen from "../components/Screen";
+import Touchable from "../components/Touchable";
 import { useSubmitJob, useCacheReadyJob, useJobStatus } from "../features/jobs/hooks";
 import { getConversionFailureMessage } from "../features/jobs/errors";
 import { getHomeProgressInfo, PROGRESS_STEPS } from "../features/jobs/progress";
@@ -108,18 +109,18 @@ export default function ConvertScreen() {
             onSubmitEditing={() => void handleSubmit()}
             returnKeyType="done"
           />
-          <Pressable accessibilityLabel={t("home.paste")} accessibilityRole="button" style={[styles.pasteButton, { backgroundColor: colors.elevatedSurface }]} onPress={handlePaste}>
+          <Touchable accessibilityLabel={t("home.paste")} accessibilityRole="button" style={[styles.pasteButton, { backgroundColor: colors.elevatedSurface }]} onPress={handlePaste}>
             <Ionicons name="clipboard-outline" size={21} color={colors.tint} />
-          </Pressable>
+          </Touchable>
         </View>
       </View>
-      <Pressable accessibilityRole="button" style={[styles.submitButton, { backgroundColor: colors.tint }, (!url.trim() || submit.isPending) && styles.disabled]} onPress={handleSubmit} disabled={!url.trim() || submit.isPending}>
+      <Touchable accessibilityRole="button" style={[styles.submitButton, { backgroundColor: colors.tint }, (!url.trim() || submit.isPending) && styles.disabled]} onPress={handleSubmit} disabled={!url.trim() || submit.isPending}>
         {submit.isPending ? <ActivityIndicator color={colors.tintText} /> : <><Ionicons name="arrow-down" size={20} color={colors.tintText} /><Text style={[styles.submitText, { color: colors.tintText }]}>{t("home.convert")}</Text></>}
-      </Pressable>
+      </Touchable>
 
       {cacheState === "error" && job?.status === "ready" && (
         <StatusCard error title={t("home.cacheFailed")} icon="alert-circle-outline">
-          <Pressable accessibilityRole="button" style={styles.retryButton} onPress={retryCache}><Text style={[styles.retryText, { color: colors.tint }]}>{t("home.retryCache")}</Text></Pressable>
+          <Touchable accessibilityRole="button" style={styles.retryButton} onPress={retryCache}><Text style={[styles.retryText, { color: colors.tint }]}>{t("home.retryCache")}</Text></Touchable>
         </StatusCard>
       )}
       {job?.status === "failed" && (
@@ -136,9 +137,9 @@ export default function ConvertScreen() {
           <StatusCard title={title} icon={playableTrack ? "checkmark-circle" : "cloud-download-outline"}>
             <Text style={[styles.statusText, { color: colors.secondaryText }]}>{detail}</Text>
             {playableTrack ? (
-              <Pressable accessibilityRole="button" style={[styles.playButton, { backgroundColor: colors.tint }]} onPress={() => { void playTrack(playableTrack, tracks); navigation.navigate("Player", { jobId: playableTrack.jobId }); }}>
+              <Touchable accessibilityRole="button" style={[styles.playButton, { backgroundColor: colors.tint }]} onPress={() => { void playTrack(playableTrack, tracks); navigation.navigate("Player", { jobId: playableTrack.jobId }); }}>
                 <Ionicons name="play" size={19} color={colors.tintText} /><Text style={[styles.playText, { color: colors.tintText }]}>{t("common.play")}</Text>
-              </Pressable>
+              </Touchable>
             ) : null}
             <View style={styles.stepsRow}>
               {PROGRESS_STEPS.map((step, index) => (

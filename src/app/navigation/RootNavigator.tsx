@@ -16,7 +16,8 @@ import AddChannelScreen from "../../screens/AddChannelScreen";
 import ManageChannelsScreen from "../../screens/ManageChannelsScreen";
 import PublisherPreviewSheet from "../../screens/PublisherPreviewSheet";
 import MiniPlayer from "../../components/MiniPlayer";
-import { Pressable, Text, View } from "react-native";
+import Touchable from "../../components/Touchable";
+import { Text, View } from "react-native";
 import { useTranslation } from "../../i18n";
 import { useAppTheme } from "../theme";
 
@@ -94,9 +95,9 @@ function CloseModalButton() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   return (
-    <Pressable accessibilityRole="button" onPress={() => navigation.goBack()} style={{ paddingVertical: 8 }}>
+    <Touchable accessibilityRole="button" onPress={() => navigation.goBack()} style={{ paddingVertical: 8 }}>
       <Text style={{ color: colors.tint, fontSize: 17 }}>{t("common.cancel")}</Text>
-    </Pressable>
+    </Touchable>
   );
 }
 
@@ -175,7 +176,7 @@ export default function RootNavigator() {
             // 自定义 headerLeft 只渲染箭头，绕开原生 back-title 行为。
             headerLeft: ({ canGoBack }) =>
               canGoBack ? (
-                <Pressable
+                <Touchable
                   accessibilityLabel={t("common.back")}
                   accessibilityRole="button"
                   hitSlop={8}
@@ -183,7 +184,7 @@ export default function RootNavigator() {
                   style={{ paddingHorizontal: 8 }}
                 >
                   <Ionicons name="chevron-back" size={28} color={colors.primaryText} />
-                </Pressable>
+                </Touchable>
               ) : null,
           })}
         />

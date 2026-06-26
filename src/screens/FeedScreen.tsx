@@ -1,9 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
 import type { ComponentProps } from "react";
-import { Alert, ActivityIndicator, FlatList, Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, ActivityIndicator, FlatList, Image, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import Screen from "../components/Screen";
+import EmptyState from "../components/EmptyState";
+import Touchable from "../components/Touchable";
 import { useFeedVideos, useSubscribedChannels } from "../features/youtubeFeed/hooks";
 import { useSubmitJob, useCacheReadyJob } from "../features/jobs/hooks";
 import { isLiveUnsupportedJob } from "../features/jobs/errors";
@@ -76,14 +78,13 @@ export default function FeedScreen() {
   if (channels.length === 0 && !isLoading) {
     return (
       <Screen>
-        <View style={styles.emptyContainer}>
-          <Text style={[styles.emptyTitle, { color: colors.primaryText }]}>{t("feed.noSubscriptions")}</Text>
-          <Text style={[styles.emptyText, { color: colors.secondaryText }]}>{t("feed.addToBrowse")}</Text>
-          <Pressable accessibilityRole="button" style={[styles.addChannelButton, { backgroundColor: colors.tint }]} onPress={() => navigation.navigate("AddChannel")}>
-            <Ionicons name="add" size={20} color={colors.tintText} />
-            <Text style={[styles.addChannelButtonText, { color: colors.tintText }]}>{t("feed.addChannel")}</Text>
-          </Pressable>
-        </View>
+        <EmptyState
+          icon="newspaper-outline"
+          title={t("feed.noSubscriptions")}
+          description={t("feed.addToBrowse")}
+          actionLabel={t("feed.addChannel")}
+          onAction={() => navigation.navigate("AddChannel")}
+        />
       </Screen>
     );
   }
@@ -93,14 +94,15 @@ export default function FeedScreen() {
       {channels.length > 0 && (
         <View style={[styles.pillsRow, { borderBottomColor: colors.border }]}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.channelScroll}>
-            <Pressable
+            <Touchable
+              accessibilityRole="button"
               style={[styles.pill, { backgroundColor: colors.elevatedSurface }, !selectedChannel && { backgroundColor: colors.tint }]}
               onPress={() => setSelectedChannel(null)}
             >
               <Text style={[styles.pillText, { color: colors.secondaryText }, !selectedChannel && { color: colors.tintText }]}>{t("feed.all")}</Text>
-            </Pressable>
+            </Touchable>
             {channels.map((ch) => (
-              <Pressable
+              <Touchable
                 accessibilityRole="button"
                 key={ch.platformSourceId}
                 style={[styles.pill, { backgroundColor: colors.elevatedSurface }, selectedChannel === ch.platformSourceId && { backgroundColor: colors.tint }]}
@@ -109,26 +111,26 @@ export default function FeedScreen() {
                   <Text style={[styles.pillText, { color: colors.secondaryText }, selectedChannel === ch.platformSourceId && { color: colors.tintText }]} numberOfLines={1}>
                   {ch.title}
                 </Text>
-              </Pressable>
+              </Touchable>
             ))}
           </ScrollView>
           <View style={styles.channelActions}>
-            <Pressable
+            <Touchable
               accessibilityLabel={t("feed.manageChannels")}
               accessibilityRole="button"
               style={[styles.manageButton, { backgroundColor: colors.elevatedSurface }]}
               onPress={() => navigation.navigate("ManageChannels")}
             >
               <Ionicons name="ellipsis-horizontal" size={20} color={colors.secondaryText} />
-            </Pressable>
-            <Pressable
+            </Touchable>
+            <Touchable
               accessibilityLabel={t("feed.addChannel")}
               accessibilityRole="button"
               style={[styles.addButton, { backgroundColor: colors.tint }]}
               onPress={() => navigation.navigate("AddChannel")}
             >
               <Ionicons name="add" size={24} color={colors.tintText} />
-            </Pressable>
+            </Touchable>
           </View>
         </View>
       )}
@@ -296,7 +298,7 @@ function VideoAction({
   const label = isReady ? t("common.play") : status === "failed" ? t("common.retry") : t("feed.convert");
 
   return (
-    <Pressable
+    <Touchable
       accessibilityLabel={label}
       accessibilityRole="button"
       disabled={disabled}
@@ -304,7 +306,7 @@ function VideoAction({
       style={[styles.actionButton, { backgroundColor: status === "failed" ? colors.destructive : colors.tint }, disabled && styles.actionButtonDisabled]}
     >
       <Ionicons name={icon} size={22} color={colors.tintText} />
-    </Pressable>
+    </Touchable>
   );
 }
 
@@ -326,9 +328,6 @@ const styles = StyleSheet.create({
   pillText: { color: "#6f6256", fontSize: 13 },
   addButton: { alignItems: "center", backgroundColor: "#b65a36", borderRadius: 22, height: 44, justifyContent: "center", marginLeft: 4, width: 44 },
   manageButton: { alignItems: "center", backgroundColor: "#eee6dc", borderRadius: 22, height: 44, justifyContent: "center", width: 44 },
-  emptyContainer: { alignItems: "center", flex: 1, justifyContent: "center", padding: 32 },
-  emptyTitle: { color: "#241a12", fontSize: 20, fontWeight: "700", marginBottom: 8 },
-  emptyText: { color: "#6f6256", fontSize: 15, textAlign: "center" },
   loadingContainer: { alignItems: "center", flex: 1, justifyContent: "center" },
   loadingText: { color: "#6f6256", fontSize: 15, marginTop: 8 },
   errorText: { color: "#b42318", fontSize: 15 },
@@ -346,6 +345,4 @@ const styles = StyleSheet.create({
   actionButton: { alignItems: "center", backgroundColor: "#b65a36", borderRadius: 22, height: 44, justifyContent: "center", width: 44 },
   actionButtonDisabled: { opacity: 0.45 },
   actionPlaceholder: { height: 44, width: 44 },
-  addChannelButton: { alignItems: "center", backgroundColor: "#b65a36", borderRadius: 12, flexDirection: "row", gap: 8, marginTop: 20, minHeight: 44, paddingHorizontal: 20 },
-  addChannelButtonText: { color: "#fff9f3", fontSize: 16, fontWeight: "600" },
 });

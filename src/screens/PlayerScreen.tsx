@@ -8,12 +8,12 @@ import {
   Image,
   Linking,
   PanResponder,
-  Pressable,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 import Screen from "../components/Screen";
+import Touchable from "../components/Touchable";
 import { useCacheReadyJob } from "../features/jobs/hooks";
 import { usePlayer } from "../features/player/context";
 import { useTranslation } from "../i18n";
@@ -95,7 +95,7 @@ export default function PlayerScreen() {
             )}
           </View>
 
-          <Pressable
+          <Touchable
             accessibilityHint={t("player.openSource")}
             accessibilityLabel={activeTrack.title || t("common.untitled")}
             accessibilityRole="link"
@@ -105,12 +105,12 @@ export default function PlayerScreen() {
             <Text numberOfLines={3} style={[styles.title, { color: colors.primaryText }]}>{activeTrack.title || t("common.untitled")}</Text>
             <View style={styles.sourceLink}>
               <Ionicons name="link-outline" size={14} color={colors.tint} />
-              <Text numberOfLines={1} style={[styles.sourceUrl, { color: colors.tint }]}>{activeTrack.sourceUrl}</Text>
+              <Text numberOfLines={1} style={[styles.sourceUrl, { color: colors.tint }]}>YouTube</Text>
             </View>
-          </Pressable>
+          </Touchable>
 
           {activeTrack.channelId ? (
-            <Pressable
+            <Touchable
               accessibilityRole="button"
               accessibilityLabel={t("player.publisher")}
               onPress={() => navigation.navigate("PublisherPreview", {
@@ -128,7 +128,7 @@ export default function PlayerScreen() {
                 {activeTrack.channelName ?? activeTrack.channelId}
               </Text>
               <Ionicons name="chevron-forward" size={16} color={colors.secondaryText} />
-            </Pressable>
+            </Touchable>
           ) : null}
         </View>
 
@@ -139,9 +139,9 @@ export default function PlayerScreen() {
 
         {playbackError ? <Text style={[styles.errorText, { color: colors.destructive }]}>{playbackError}</Text> : null}
         {cacheState === "error" ? (
-          <Pressable accessibilityRole="button" onPress={retryCache} style={styles.retryCacheButton}>
+          <Touchable accessibilityRole="button" onPress={retryCache} style={styles.retryCacheButton}>
             <Text style={[styles.retryCacheText, { color: colors.tint }]}>{t("player.retryCache")}</Text>
-          </Pressable>
+          </Touchable>
         ) : null}
 
         <View style={styles.playbackArea}>
@@ -168,7 +168,7 @@ export default function PlayerScreen() {
           </View>
 
           <View style={styles.controls}>
-            <Pressable
+            <Touchable
               accessibilityLabel={t("player.previous")}
               accessibilityRole="button"
               hitSlop={8}
@@ -176,8 +176,8 @@ export default function PlayerScreen() {
               style={styles.controlButton}
             >
               <Ionicons name="play-skip-back" size={30} color={colors.primaryText} />
-            </Pressable>
-            <Pressable
+            </Touchable>
+            <Touchable
               accessibilityLabel={isPlaying ? t("common.pause") : t("common.play")}
               accessibilityRole="button"
               disabled={playbackLoading}
@@ -189,8 +189,8 @@ export default function PlayerScreen() {
               ) : (
                 <Ionicons name={isPlaying ? "pause" : "play"} size={35} color={colors.tintText} />
               )}
-            </Pressable>
-            <Pressable
+            </Touchable>
+            <Touchable
               accessibilityLabel={t("player.next")}
               accessibilityRole="button"
               hitSlop={8}
@@ -198,7 +198,7 @@ export default function PlayerScreen() {
               style={styles.controlButton}
             >
               <Ionicons name="play-skip-forward" size={30} color={colors.primaryText} />
-            </Pressable>
+            </Touchable>
           </View>
         </View>
       </View>

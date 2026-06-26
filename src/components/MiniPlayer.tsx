@@ -30,23 +30,21 @@ export default function MiniPlayer({ tabBarHeight }: { tabBarHeight: number }) {
           style={styles.tapArea}
           onPress={() => navigation.navigate("Player", { jobId: activeTrack.jobId })}
         >
-        <View style={styles.textWrap}>
-          <View style={styles.thumbRow}>
-            <View style={[styles.thumbnail, { backgroundColor: colors.elevatedSurface }]}>
-              {activeTrack.thumbnailUrl ? (
-                <Image resizeMode="cover" source={{ uri: activeTrack.thumbnailUrl }} style={styles.thumbnailImage} />
-              ) : (
-                <Ionicons name="musical-note" size={20} color={colors.tint} />
-              )}
-            </View>
-            <View style={styles.textWrap}>
-              <Text style={[styles.title, { color: isDark ? colors.primaryText : "#fff8f0" }]} numberOfLines={1}>
-                {activeTrack.title || activeTrack.sourceUrl}
-              </Text>
-              <Text style={[styles.meta, { color: isDark ? colors.secondaryText : "#d8c6b4" }]} numberOfLines={1}>
-                {formatDuration(currentTime)} / {formatDuration(duration)}
-              </Text>
-            </View>
+        <View style={styles.thumbRow}>
+          <View style={[styles.thumbnail, { backgroundColor: colors.elevatedSurface }]}>
+            {activeTrack.thumbnailUrl ? (
+              <Image resizeMode="cover" source={{ uri: activeTrack.thumbnailUrl }} style={styles.thumbnailImage} />
+            ) : (
+              <Ionicons name="musical-note" size={20} color={colors.tint} />
+            )}
+          </View>
+          <View style={styles.textWrap}>
+            <Text style={[styles.title, { color: isDark ? colors.primaryText : "#fff8f0" }]} numberOfLines={1}>
+              {activeTrack.title || activeTrack.sourceUrl}
+            </Text>
+            <Text style={[styles.meta, { color: isDark ? colors.secondaryText : "#d8c6b4" }]} numberOfLines={1}>
+              {formatDuration(currentTime)} / {formatDuration(duration)}
+            </Text>
           </View>
         </View>
         </Touchable>

@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
+import { Linking, StyleSheet, Text, View } from "react-native";
 import Screen from "../components/Screen";
+import Touchable from "../components/Touchable";
 import { getAllTracks } from "../features/playlist/storage";
 import { SERVER_URL } from "../features/settings/storage";
 import { formatFileSize } from "../i18n/formatters";
@@ -34,7 +35,7 @@ export default function SettingsScreen() {
             const selected = preference === option;
             const label = t(`settings.${option === "zh-CN" ? "chinese" : option === "en" ? "english" : "system"}`);
             return (
-              <Pressable
+              <Touchable
                 accessibilityRole="button"
                 accessibilityState={{ selected }}
                 key={option}
@@ -42,20 +43,20 @@ export default function SettingsScreen() {
                 onPress={() => void setLanguage(option)}
               >
                 <Text numberOfLines={1} style={[styles.languageText, { color: selected ? colors.tintText : colors.secondaryText }]}>{label}</Text>
-              </Pressable>
+              </Touchable>
             );
           })}
         </View>
       </Section>
 
       <Section title={t("settings.checkStorage")} colors={colors}>
-        <Pressable accessibilityRole="button" onPress={checkStorage} style={styles.settingRow}>
+        <Touchable accessibilityRole="button" onPress={checkStorage} style={styles.settingRow}>
           <View style={[styles.rowIcon, { backgroundColor: colors.elevatedSurface }]}><Ionicons name="folder-outline" size={20} color={colors.tint} /></View>
           <View style={styles.rowContent}>
             <Text style={[styles.rowTitle, { color: colors.primaryText }]}>{t("settings.checkStorage")}</Text>
             <Text numberOfLines={1} style={[styles.rowDetail, { color: colors.secondaryText }]}>{storageInfo || t("settings.storage", { count: 0, size: formatFileSize(0, language) })}</Text>
           </View>
-        </Pressable>
+        </Touchable>
       </Section>
 
       <Section title={t("settings.about")} colors={colors}>
@@ -75,11 +76,11 @@ export default function SettingsScreen() {
           </View>
         </View>
         <View style={[styles.separator, { backgroundColor: colors.border }]} />
-        <Pressable accessibilityRole="link" onPress={() => void Linking.openURL("https://github.com/Tomyail/tubecast")} style={styles.settingRow}>
+        <Touchable accessibilityRole="link" onPress={() => void Linking.openURL("https://github.com/Tomyail/tubecast")} style={styles.settingRow}>
           <View style={[styles.rowIcon, { backgroundColor: colors.elevatedSurface }]}><Ionicons name="logo-github" size={20} color={colors.tint} /></View>
           <Text style={[styles.rowTitle, { color: colors.tint }]}>{t("settings.source")}</Text>
           <Ionicons name="arrow-up-right-box" size={18} color={colors.tint} />
-        </Pressable>
+        </Touchable>
       </Section>
     </Screen>
   );
