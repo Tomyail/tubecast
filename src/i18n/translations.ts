@@ -2,7 +2,7 @@ export const resources = {
   en: {
     translation: {
       nav: { home: "Home", feed: "Feed", playlist: "Playlist", settings: "Settings", player: "Now Playing" },
-      common: { error: "Error", cancel: "Cancel", remove: "Remove", delete: "Delete", retry: "Retry", play: "Play", pause: "Pause", loading: "Loading…", unknown: "Unknown", untitled: "Untitled", done: "Done" },
+      common: { error: "Error", cancel: "Cancel", remove: "Remove", delete: "Delete", retry: "Retry", play: "Play", pause: "Pause", loading: "Loading…", unknown: "Unknown", untitled: "Untitled", done: "Done", back: "Back" },
       home: { title: "Convert Audio", pasteUrl: "Paste YouTube URL", paste: "Paste", convert: "Convert", cacheFailed: "Caching failed", retryCache: "Retry caching", conversionFailed: "Conversion failed", failedAt: "Failed during {{phase}}", expired: "Audio has expired. Please submit the URL again.", progress: { queued: "Queued", download: "Download", transcode: "Transcode", save: "Save", playable: "Playable" } },
       discover: { recent: "Recently Converted", popular: "Most Converted", loading: "Loading…", loadFailed: "Failed to load. Tap to retry.", empty: "No recommendations yet." },
       progress: { playable: "Playable", cachingToDevice: "Caching to your device in the background", cached: "Cached", availableOffline: "Available offline", cacheFailedStreaming: "Caching failed; streaming is still available", retrying: "Retrying", retryingDetail: "The previous attempt failed; retrying automatically", queued: "Queued", queuedDetail: "Waiting for the conversion service", preparing: "Preparing conversion", preparingDetail: "Preparing audio conversion", downloading: "Downloading", downloadingDetail: "Getting audio from YouTube", transcoding: "Transcoding", transcodingDetail: "Converting to a playable format", saving: "Saving", savingDetail: "Saving the audio file", processing: "Processing", ready: "Completed" },
@@ -18,7 +18,7 @@ export const resources = {
   "zh-CN": {
     translation: {
       nav: { home: "首页", feed: "订阅", playlist: "播放列表", settings: "设置", player: "正在播放" },
-      common: { error: "错误", cancel: "取消", remove: "移除", delete: "删除", retry: "重试", play: "播放", pause: "暂停", loading: "加载中…", unknown: "未知", untitled: "未命名", done: "完成" },
+      common: { error: "错误", cancel: "取消", remove: "移除", delete: "删除", retry: "重试", play: "播放", pause: "暂停", loading: "加载中…", unknown: "未知", untitled: "未命名", done: "完成", back: "返回" },
       home: { title: "转换音频", pasteUrl: "粘贴 YouTube 链接", paste: "粘贴", convert: "转换", cacheFailed: "缓存失败", retryCache: "重试缓存", conversionFailed: "转换失败", failedAt: "失败发生在{{phase}}阶段", expired: "音频已过期，请重新提交链接。", progress: { queued: "排队", download: "下载", transcode: "转码", save: "保存", playable: "可播放" } },
       discover: { recent: "最近转换", popular: "转换最多", loading: "加载中…", loadFailed: "加载失败，点击重试。", empty: "暂无推荐内容。" },
       progress: { playable: "可播放", cachingToDevice: "正在后台缓存到手机", cached: "已缓存", availableOffline: "可离线播放", cacheFailedStreaming: "缓存失败，仍可在线播放", retrying: "重试中", retryingDetail: "上次尝试失败，正在自动重试", queued: "排队中", queuedDetail: "等待转换服务接收任务", preparing: "准备转换", preparingDetail: "正在准备音频转换", downloading: "下载中", downloadingDetail: "正在从 YouTube 获取音频", transcoding: "转码中", transcodingDetail: "正在转换为可播放格式", saving: "保存中", savingDetail: "正在保存音频文件", processing: "处理中", ready: "已完成" },
