@@ -235,19 +235,23 @@ function VideoCard({
       <View style={styles.cardContent}>
         <Text style={[styles.cardTitle, { color: colors.primaryText }]} numberOfLines={2}>{video.title}</Text>
         <Text style={[styles.cardMeta, { color: colors.secondaryText }]}>{video.sourceTitle} · {formatRelativeTime(video.publishedAt, t)}</Text>
-        {status === "converting" && (
-          <View style={styles.inlineStatus}>
-            <ActivityIndicator size="small" color={colors.tint} />
-            <Text style={[styles.phaseLabel, { color: colors.tint }]} numberOfLines={1}>
-            {getFeedProgressLabel(
-              job ?? { status: "queued", progressPhase: null, attemptCount: 0, lastErrorMessage: null }
-            , t).label}
-            </Text>
-          </View>
-        )}
-        {status === "ready" && cacheState === "caching" && <Text style={[styles.cacheLabel, { color: colors.secondaryText }]}>{t("feed.caching")}</Text>}
-        {status === "ready" && cacheState === "error" && <Text style={[styles.cacheLabel, { color: colors.destructive }]}>{t("feed.cacheFailed")}</Text>}
-        {status === "failed" && liveUnsupported && <Text style={[styles.cacheLabel, { color: colors.destructive }]}>{t("errors.liveUnsupported")}</Text>}
+        {/* 状态行区域预留固定高度：点击下载后 converting/ready/failed 的状态行在此出现，
+            无论是否渲染内容都占位，避免 cardContent 高度随状态切换跳动。 */}
+        <View style={styles.statusRow}>
+          {status === "converting" && (
+            <View style={styles.inlineStatus}>
+              <ActivityIndicator size="small" color={colors.tint} />
+              <Text style={[styles.phaseLabel, { color: colors.tint }]} numberOfLines={1}>
+              {getFeedProgressLabel(
+                job ?? { status: "queued", progressPhase: null, attemptCount: 0, lastErrorMessage: null }
+              , t).label}
+              </Text>
+            </View>
+          )}
+          {status === "ready" && cacheState === "caching" && <Text style={[styles.cacheLabel, { color: colors.secondaryText }]}>{t("feed.caching")}</Text>}
+          {status === "ready" && cacheState === "error" && <Text style={[styles.cacheLabel, { color: colors.destructive }]}>{t("feed.cacheFailed")}</Text>}
+          {status === "failed" && liveUnsupported && <Text style={[styles.cacheLabel, { color: colors.destructive }]}>{t("errors.liveUnsupported")}</Text>}
+        </View>
       </View>
       <VideoAction
         disabled={liveUnsupported}
@@ -340,6 +344,7 @@ const styles = StyleSheet.create({
   cardContent: { flex: 1, gap: 4 },
   cardTitle: { color: "#241a12", fontSize: 16, fontWeight: "600", lineHeight: 20 },
   cardMeta: { color: "#85776a", fontSize: 13 },
+  statusRow: { minHeight: 20, justifyContent: "center" },
   inlineStatus: { alignItems: "center", flexDirection: "row", gap: 5 },
   phaseLabel: { color: "#8b5c48", flex: 1, fontSize: 12, fontWeight: "600" },
   cacheLabel: { color: "#85776a", fontSize: 12 },
