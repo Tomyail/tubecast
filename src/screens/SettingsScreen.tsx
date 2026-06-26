@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
 import Screen from "../components/Screen";
 import { getAllTracks } from "../features/playlist/storage";
@@ -19,6 +19,12 @@ export default function SettingsScreen() {
     const totalBytes = tracks.reduce((sum, track) => sum + (track.fileSize || 0), 0);
     setStorageInfo(t("settings.storage", { count: tracks.length, size: formatFileSize(totalBytes, language) }));
   };
+
+  // 进入设置页自动刷新一次存储空间信息，仍可点击行手动刷新
+  useEffect(() => {
+    void checkStorage();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Screen>
@@ -49,13 +55,12 @@ export default function SettingsScreen() {
             <Text style={[styles.rowTitle, { color: colors.primaryText }]}>{t("settings.checkStorage")}</Text>
             <Text numberOfLines={1} style={[styles.rowDetail, { color: colors.secondaryText }]}>{storageInfo || t("settings.storage", { count: 0, size: formatFileSize(0, language) })}</Text>
           </View>
-          <Ionicons name="chevron-forward" size={18} color={colors.secondaryText} />
         </Pressable>
       </Section>
 
       <Section title={t("settings.about")} colors={colors}>
         <View style={styles.aboutHeader}>
-          <View style={[styles.rowIcon, { backgroundColor: colors.tint }]}><Ionicons name="play-circle" size={20} color={colors.tintText} /></View>
+          <View style={[styles.rowIcon, { backgroundColor: colors.elevatedSurface }]}><Ionicons name="play-circle" size={20} color={colors.tint} /></View>
           <View style={styles.rowContent}>
             <Text style={[styles.rowTitle, { color: colors.primaryText }]}>TubeCast</Text>
             <Text style={[styles.rowDetail, { color: colors.secondaryText }]}>{t("settings.description")}</Text>
@@ -63,7 +68,7 @@ export default function SettingsScreen() {
         </View>
         <View style={[styles.separator, { backgroundColor: colors.border }]} />
         <View style={styles.settingRow}>
-          <View style={[styles.rowIcon, { backgroundColor: colors.elevatedSurface }]}><Ionicons name="server-outline" size={18} color={colors.secondaryText} /></View>
+          <View style={[styles.rowIcon, { backgroundColor: colors.elevatedSurface }]}><Ionicons name="server-outline" size={20} color={colors.tint} /></View>
           <View style={styles.rowContent}>
             <Text style={[styles.rowTitle, { color: colors.primaryText }]}>API</Text>
             <Text numberOfLines={1} style={[styles.rowDetail, { color: colors.secondaryText }]}>{SERVER_URL}</Text>
@@ -71,7 +76,7 @@ export default function SettingsScreen() {
         </View>
         <View style={[styles.separator, { backgroundColor: colors.border }]} />
         <Pressable accessibilityRole="link" onPress={() => void Linking.openURL("https://github.com/Tomyail/tubecast")} style={styles.settingRow}>
-          <View style={[styles.rowIcon, { backgroundColor: colors.primaryText }]}><Ionicons name="logo-github" size={19} color={colors.surface} /></View>
+          <View style={[styles.rowIcon, { backgroundColor: colors.elevatedSurface }]}><Ionicons name="logo-github" size={20} color={colors.tint} /></View>
           <Text style={[styles.rowTitle, { color: colors.tint }]}>{t("settings.source")}</Text>
           <Ionicons name="arrow-up-right-box" size={18} color={colors.tint} />
         </Pressable>
