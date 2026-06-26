@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { mergeAndSortItems, matchJobStatus, type JobLookup } from "../../src/features/youtubeFeed/feed";
+import { markItemConverting, markItemNew, markItemReady, mergeAndSortItems, matchJobStatus, type JobLookup } from "../../src/features/youtubeFeed/feed";
 import type { FeedItem } from "../../src/features/youtubeFeed/types";
 
 const makeItem = (overrides: Partial<FeedItem> = {}): FeedItem => ({
@@ -100,5 +100,47 @@ describe("matchJobStatus", () => {
     expect(byId.v_queued.jobId).toBe("job4");
     expect(byId.v_missing.status).toBe("new");
     expect(byId.v_missing.jobId).toBeUndefined();
+  });
+});
+
+describe("markItemConverting", () => {
+  it("updates the submitted item so publisher preview reflects conversion immediately", () => {
+    const result = markItemConverting(
+      [
+        { ...makeItem({ platformItemId: "v1" }), status: "new" },
+        { ...makeItem({ platformItemId: "v2" }), status: "new" },
+      ],
+      "v2",
+      "job2",
+    );
+
+    expect(result?.[0]).toMatchObject({ platformItemId: "v1", status: "new" });
+    expect(result?.[1]).toMatchObject({ platformItemId: "v2", status: "converting", jobId: "job2" });
+  });
+
+  it("keeps null item state unchanged while videos are loading", () => {
+    expect(markItemConverting(null, "v1", "job1")).toBeNull();
+  });
+});
+
+describe("publisher preview item status updates", () => {
+  it("marks a converted item as ready when polling sees the job complete", () => {
+    const result = markItemReady(
+      [{ ...makeItem({ platformItemId: "v1" }), status: "converting", jobId: "job1" }],
+      "v1",
+      "job1",
+    );
+
+    expect(result?.[0]).toMatchObject({ platformItemId: "v1", status: "ready", jobId: "job1" });
+  });
+
+  it("marks a failed converted item as new so it can be retried", () => {
+    const result = markItemNew(
+      [{ ...makeItem({ platformItemId: "v1" }), status: "converting", jobId: "job1" }],
+      "v1",
+    );
+
+    expect(result?.[0]).toMatchObject({ platformItemId: "v1", status: "new" });
+    expect(result?.[0].jobId).toBeUndefined();
   });
 });

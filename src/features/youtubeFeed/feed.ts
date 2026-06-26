@@ -37,3 +37,41 @@ export function matchJobStatus(
     return { ...video, status: "new" as const };
   });
 }
+
+export function markItemConverting(
+  items: FeedItemWithStatus[] | null,
+  platformItemId: string,
+  jobId: string,
+): FeedItemWithStatus[] | null {
+  if (!items) return items;
+  return items.map((item) =>
+    item.platformItemId === platformItemId
+      ? { ...item, status: "converting" as const, jobId }
+      : item,
+  );
+}
+
+export function markItemReady(
+  items: FeedItemWithStatus[] | null,
+  platformItemId: string,
+  jobId: string,
+): FeedItemWithStatus[] | null {
+  if (!items) return items;
+  return items.map((item) =>
+    item.platformItemId === platformItemId
+      ? { ...item, status: "ready" as const, jobId }
+      : item,
+  );
+}
+
+export function markItemNew(
+  items: FeedItemWithStatus[] | null,
+  platformItemId: string,
+): FeedItemWithStatus[] | null {
+  if (!items) return items;
+  return items.map((item) =>
+    item.platformItemId === platformItemId
+      ? { ...item, status: "new" as const, jobId: undefined }
+      : item,
+  );
+}

@@ -11,6 +11,9 @@ import {
 } from "react-native";
 import Screen from "../components/Screen";
 import { useSubmitJob } from "../features/jobs/hooks";
+import { getJob } from "../features/jobs/api";
+import { trackFromReadyJob } from "../features/jobs/track";
+import { usePlaylist } from "../features/playlist/context";
 import { getAllTracks } from "../features/playlist/storage";
 import type { Track } from "../features/playlist/storage";
 import { usePlayer } from "../features/player/context";
@@ -23,7 +26,7 @@ import {
   useSubscribeChannel,
 } from "../features/youtubeFeed/hooks";
 import { fetchFeedItems } from "../features/youtubeFeed/api";
-import { matchJobStatus, type JobLookup } from "../features/youtubeFeed/feed";
+import { markItemConverting, markItemNew, markItemReady, matchJobStatus, type JobLookup } from "../features/youtubeFeed/feed";
 import type { FeedItemWithStatus, FeedSource } from "../features/youtubeFeed/types";
 import {
   getSubmittedFeedJobs,
@@ -77,10 +80,6 @@ function formatRelativeTime(isoDate: string, t: (key: string, options?: { count:
   return t("feed.ago.day", { count: days });
 }
 
-// Videos that are awaiting the user's in-sheet "Convert" confirmation.
-// Confirmed jobs are persisted so the next feed refresh can show converting.
-type ConfirmingSet = Set<string>;
-
 export default function PublisherPreviewSheet() {
   const { t } = useTranslation();
   const { colors } = useAppTheme();
@@ -88,6 +87,7 @@ export default function PublisherPreviewSheet() {
   const route = useRoute<PublisherRoute>();
   const { channelId, channelName } = route.params;
   const { playTrack } = usePlayer();
+  const { addTrack } = usePlaylist();
 
   const subscription = useChannelSubscription(channelId);
   const subscribeMutation = useSubscribeChannel();
@@ -97,7 +97,7 @@ export default function PublisherPreviewSheet() {
 
   const [items, setItems] = useState<FeedItemWithStatus[] | null>(null);
   const [loadError, setLoadError] = useState<boolean>(false);
-  const [confirming, setConfirming] = useState<ConfirmingSet>(new Set());
+  const [submittingIds, setSubmittingIds] = useState<Set<string>>(new Set());
   const [tracksCache, setTracksCache] = useState<Track[]>([]);
 
   const displaySource: FeedSource = useMemo(
@@ -150,6 +150,53 @@ export default function PublisherPreviewSheet() {
     void loadVideos();
   }, [loadVideos]);
 
+  useEffect(() => {
+    const convertingItems = items?.filter((item) => item.status === "converting" && item.jobId) ?? [];
+    if (convertingItems.length === 0) return;
+
+    let cancelled = false;
+    const poll = async () => {
+      const results = await Promise.all(
+        convertingItems.map(async (item) => {
+          try {
+            return { item, job: await getJob(item.jobId!) };
+          } catch {
+            return null;
+          }
+        }),
+      );
+      if (cancelled) return;
+
+      for (const result of results) {
+        if (!result) continue;
+        const { item, job } = result;
+        if (job.status === "ready") {
+          const track = trackFromReadyJob(job);
+          await addTrack(track);
+          if (cancelled) return;
+          setTracksCache((prev) =>
+            prev.some((existing) => existing.id === track.id)
+              ? prev.map((existing) => (existing.id === track.id ? track : existing))
+              : [...prev, track],
+          );
+          setItems((prev) => markItemReady(prev, item.platformItemId, job.id));
+        } else if (job.status === "failed" || job.status === "expired") {
+          setItems((prev) => markItemNew(prev, item.platformItemId));
+        }
+      }
+    };
+
+    void poll();
+    const intervalId = setInterval(() => {
+      void poll();
+    }, 3000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(intervalId);
+    };
+  }, [addTrack, items]);
+
   const handleToggleSubscribe = () => {
     if (isSubscribed) {
       void unsubscribeMutation.mutate(channelId);
@@ -178,17 +225,10 @@ export default function PublisherPreviewSheet() {
       navigation.navigate("Convert", { jobId: item.jobId });
       return;
     }
-    if (item.status === "new") {
-      // Enter in-sheet confirm state for this row.
-      setConfirming((prev) => {
-        const next = new Set(prev);
-        next.add(item.platformItemId);
-        return next;
-      });
-    }
   };
 
   const handleConfirmConvert = async (item: FeedItemWithStatus) => {
+    setSubmittingIds((prev) => new Set(prev).add(item.platformItemId));
     try {
       const result = await submitJob.mutateAsync(item.sourceUrl);
       await saveSubmittedFeedJob(item.platformItemId, {
@@ -196,13 +236,15 @@ export default function PublisherPreviewSheet() {
         sourceUrl: item.sourceUrl,
         submittedAt: new Date().toISOString(),
       });
-      setConfirming((prev) => {
+      setItems((prev) => markItemConverting(prev, item.platformItemId, result.id));
+    } catch {
+      // Keep the row as new so the user can retry.
+    } finally {
+      setSubmittingIds((prev) => {
         const next = new Set(prev);
         next.delete(item.platformItemId);
         return next;
       });
-    } catch {
-      // Leave the row in confirm state so the user can retry.
     }
   };
 
@@ -266,8 +308,7 @@ export default function PublisherPreviewSheet() {
             <Text style={[styles.empty, { color: colors.secondaryText }]}>{t("publisher.empty")}</Text>
           ) : (
             topThree.map((item) => {
-              const isConfirming = confirming.has(item.platformItemId);
-              const isSubmitting = isConfirming && submitJob.isPending;
+              const isSubmitting = submittingIds.has(item.platformItemId);
               return (
                 <View
                   key={`${item.platform}:${item.platformItemId}`}
@@ -282,22 +323,7 @@ export default function PublisherPreviewSheet() {
                     </Text>
                   </View>
 
-                  {isConfirming ? (
-                    <Pressable
-                      accessibilityRole="button"
-                      disabled={isSubmitting}
-                      onPress={() => void handleConfirmConvert(item)}
-                      style={[styles.convertButton, { backgroundColor: colors.tint, opacity: isSubmitting ? 0.6 : 1 }]}
-                    >
-                      {isSubmitting ? (
-                        <ActivityIndicator color={colors.tintText} size="small" />
-                      ) : (
-                        <Text style={[styles.convertText, { color: colors.tintText }]}>
-                          {t("publisher.convert")}
-                        </Text>
-                      )}
-                    </Pressable>
-                  ) : item.status === "ready" ? (
+                  {item.status === "ready" ? (
                     <Pressable
                       accessibilityRole="button"
                       onPress={() => handleRowPress(item)}
@@ -320,12 +346,17 @@ export default function PublisherPreviewSheet() {
                   ) : (
                     <Pressable
                       accessibilityRole="button"
-                      onPress={() => handleRowPress(item)}
-                      style={[styles.convertButton, { backgroundColor: colors.tint }]}
+                      disabled={isSubmitting}
+                      onPress={() => void handleConfirmConvert(item)}
+                      style={[styles.convertButton, { backgroundColor: colors.tint, opacity: isSubmitting ? 0.6 : 1 }]}
                     >
-                      <Text style={[styles.convertText, { color: colors.tintText }]}>
-                        {t("publisher.convert")}
-                      </Text>
+                      {isSubmitting ? (
+                        <ActivityIndicator color={colors.tintText} size="small" />
+                      ) : (
+                        <Text style={[styles.convertText, { color: colors.tintText }]}>
+                          {t("publisher.convert")}
+                        </Text>
+                      )}
                     </Pressable>
                   )}
                 </View>
