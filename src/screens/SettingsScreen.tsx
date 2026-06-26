@@ -1,13 +1,30 @@
 import { Ionicons } from "@expo/vector-icons";
+import Constants from "expo-constants";
 import { useEffect, useState } from "react";
 import { Linking, StyleSheet, Text, View } from "react-native";
+import appConfig from "../../app.json";
 import Screen from "../components/Screen";
 import Touchable from "../components/Touchable";
 import { getAllTracks } from "../features/playlist/storage";
-import { SERVER_URL } from "../features/settings/storage";
 import { formatFileSize } from "../i18n/formatters";
 import { useAppLanguage, useTranslation } from "../i18n";
 import { useAppTheme } from "../app/theme";
+
+type BuildExtra = {
+  buildCommit?: string;
+};
+
+const expoConfig = Constants.expoConfig;
+const buildExtra = expoConfig?.extra as BuildExtra | undefined;
+const appVersion = expoConfig?.version ?? appConfig.expo.version;
+const buildNumber = expoConfig?.ios?.buildNumber ?? appConfig.expo.ios.buildNumber;
+const buildCommit = buildExtra?.buildCommit ?? "unknown";
+const displayCommit = buildCommit === "unknown" ? buildCommit : buildCommit.slice(0, 12);
+const buildInfo = `v${appVersion} (${buildNumber}) · ${displayCommit}`;
+const sourceUrl =
+  buildCommit === "unknown"
+    ? "https://github.com/Tomyail/tubecast"
+    : `https://github.com/Tomyail/tubecast/commit/${buildCommit}`;
 
 export default function SettingsScreen() {
   const [storageInfo, setStorageInfo] = useState<string>("");
@@ -87,17 +104,12 @@ export default function SettingsScreen() {
           </View>
         </View>
         <View style={[styles.separator, { backgroundColor: colors.border }]} />
-        <View style={styles.settingRow}>
-          <View style={[styles.rowIcon, { backgroundColor: colors.elevatedSurface }]}><Ionicons name="server-outline" size={20} color={colors.tint} /></View>
+        <Touchable accessibilityRole="link" onPress={() => void Linking.openURL(sourceUrl)} style={styles.settingRow}>
+          <View style={[styles.rowIcon, { backgroundColor: colors.elevatedSurface }]}><Ionicons name="information-circle-outline" size={20} color={colors.tint} /></View>
           <View style={styles.rowContent}>
-            <Text style={[styles.rowTitle, { color: colors.primaryText }]}>API</Text>
-            <Text numberOfLines={1} style={[styles.rowDetail, { color: colors.secondaryText }]}>{SERVER_URL}</Text>
+            <Text style={[styles.rowTitle, { color: colors.primaryText }]}>{t("settings.version")}</Text>
+            <Text numberOfLines={1} style={[styles.rowDetail, { color: colors.secondaryText }]}>{buildInfo}</Text>
           </View>
-        </View>
-        <View style={[styles.separator, { backgroundColor: colors.border }]} />
-        <Touchable accessibilityRole="link" onPress={() => void Linking.openURL("https://github.com/Tomyail/tubecast")} style={styles.settingRow}>
-          <View style={[styles.rowIcon, { backgroundColor: colors.elevatedSurface }]}><Ionicons name="logo-github" size={20} color={colors.tint} /></View>
-          <Text style={[styles.rowTitle, { color: colors.tint }]}>{t("settings.source")}</Text>
           <Ionicons name="arrow-up-right-box" size={18} color={colors.tint} />
         </Touchable>
       </Section>
