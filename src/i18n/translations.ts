@@ -12,7 +12,7 @@ export const resources = {
       player: { noTrack: "No track playing", loading: "Loading audio…", caching: "Caching", cached: "Cached", cacheFailed: "Caching failed", streaming: "Streaming", notCached: "Not cached", retryCache: "Retry caching", expired: "Audio has expired. Please convert it again.", failed: "Playback failed. Please try again.", previous: "Previous track", next: "Next track", seek: "Playback position", openSource: "Open video source", publisher: "Publisher" },
       publisher: { recentVideos: "Recent Videos", subscribe: "Subscribe", subscribed: "Subscribed", unsubscribe: "Unsubscribe", convert: "Convert", converting: "Converting", ready: "Ready", loadFailed: "Failed to load. Tap to retry.", retry: "Retry", empty: "No recent videos" },
       settings: { title: "Settings", language: "Language", system: "Follow system", chinese: "简体中文", english: "English", checkStorage: "Check Storage", storage: "{{count}} tracks, {{size}}", about: "About", description: "TubeCast — your personal YouTube audio library", source: "Source code" },
-      errors: { generic: "Something went wrong. Please try again.", network: "Network request failed. Please try again." },
+      errors: { generic: "Something went wrong. Please try again.", network: "Network request failed. Please try again.", liveUnsupported: "Live videos are not supported yet." },
     },
   },
   "zh-CN": {
@@ -28,7 +28,7 @@ export const resources = {
       player: { noTrack: "当前没有播放曲目", loading: "正在加载音频…", caching: "缓存中", cached: "已缓存", cacheFailed: "缓存失败", streaming: "在线播放", notCached: "未缓存", retryCache: "重试缓存", expired: "音频已过期，请重新转换。", failed: "播放失败，请重试。", previous: "上一首", next: "下一首", seek: "播放位置", openSource: "打开视频来源", publisher: "发布者" },
       publisher: { recentVideos: "最近视频", subscribe: "订阅", subscribed: "已订阅", unsubscribe: "取消订阅", convert: "转换", converting: "转换中", ready: "可播放", loadFailed: "加载失败，点击重试。", retry: "重试", empty: "最近没有新视频" },
       settings: { title: "设置", language: "语言", system: "跟随系统", chinese: "简体中文", english: "English", checkStorage: "查看存储空间", storage: "{{count}} 首曲目，{{size}}", about: "关于", description: "TubeCast — 你的个人 YouTube 音频库", source: "源代码" },
-      errors: { generic: "操作失败，请重试。", network: "网络请求失败，请重试。" },
+      errors: { generic: "操作失败，请重试。", network: "网络请求失败，请重试。", liveUnsupported: "暂不支持转换直播视频。" },
     },
   },
 } as const;

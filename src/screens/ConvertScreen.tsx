@@ -8,6 +8,7 @@ import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, TextInput, View 
 import type { RootStackParamList } from "../app/navigation/types";
 import Screen from "../components/Screen";
 import { useSubmitJob, useCacheReadyJob, useJobStatus } from "../features/jobs/hooks";
+import { getConversionFailureMessage } from "../features/jobs/errors";
 import { getHomeProgressInfo, PROGRESS_STEPS } from "../features/jobs/progress";
 import { trackFromReadyJob } from "../features/jobs/track";
 import { usePlayer } from "../features/player/context";
@@ -85,6 +86,7 @@ export default function ConvertScreen() {
   };
 
   const showProgress = ((jobId && job != null) || cacheState === "caching" || cacheState === "cached") && job?.status !== "failed" && job?.status !== "expired";
+  const failureMessage = getConversionFailureMessage(job, t);
 
   return (
     <Screen>
@@ -122,6 +124,7 @@ export default function ConvertScreen() {
       )}
       {job?.status === "failed" && (
         <StatusCard error title={t("home.conversionFailed")} icon="alert-circle-outline">
+          {failureMessage ? <Text style={[styles.statusText, { color: colors.secondaryText }]}>{failureMessage}</Text> : null}
           {job.progressPhase ? <Text style={[styles.statusText, { color: colors.secondaryText }]}>{t("home.failedAt", { phase: t(`progress.${job.progressPhase === "downloading" ? "downloading" : job.progressPhase === "transcoding" ? "transcoding" : job.progressPhase === "uploading" ? "saving" : job.progressPhase === "starting" ? "preparing" : "queued"}`) })}</Text> : null}
         </StatusCard>
       )}

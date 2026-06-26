@@ -6,6 +6,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import Screen from "../components/Screen";
 import { useFeedVideos, useSubscribedChannels } from "../features/youtubeFeed/hooks";
 import { useSubmitJob, useCacheReadyJob } from "../features/jobs/hooks";
+import { isLiveUnsupportedJob } from "../features/jobs/errors";
 import { trackFromReadyJob } from "../features/jobs/track";
 import { usePlaylist } from "../features/playlist/context";
 import { usePlayer } from "../features/player/context";
@@ -205,6 +206,7 @@ function VideoCard({
     allTracks.find((t) => t.sourceUrl === video.sourceUrl) ??
     null;
   const playableTrack = track ?? (job?.status === "ready" ? trackFromReadyJob(job) : null);
+  const liveUnsupported = job?.status === "failed" && isLiveUnsupportedJob(job);
 
   const status = jobId
     ? track !== null || job?.status === "ready" ? "ready"
@@ -242,8 +244,10 @@ function VideoCard({
         )}
         {status === "ready" && cacheState === "caching" && <Text style={[styles.cacheLabel, { color: colors.secondaryText }]}>{t("feed.caching")}</Text>}
         {status === "ready" && cacheState === "error" && <Text style={[styles.cacheLabel, { color: colors.destructive }]}>{t("feed.cacheFailed")}</Text>}
+        {status === "failed" && liveUnsupported && <Text style={[styles.cacheLabel, { color: colors.destructive }]}>{t("errors.liveUnsupported")}</Text>}
       </View>
       <VideoAction
+        disabled={liveUnsupported}
         isSubmitting={isSubmitting}
         onConvert={() => onConvert(video)}
         onPlay={playableTrack ? () => onPlay(playableTrack) : undefined}
@@ -273,12 +277,14 @@ function VideoAction({
   onConvert,
   onPlay,
   t,
+  disabled = false,
 }: {
   status: "new" | "converting" | "ready" | "failed";
   isSubmitting: boolean;
   onConvert: () => void;
   onPlay?: () => void;
   t: (key: string) => string;
+  disabled?: boolean;
 }) {
   const { colors } = useAppTheme();
   if (status === "converting" || isSubmitting) {
@@ -293,9 +299,9 @@ function VideoAction({
     <Pressable
       accessibilityLabel={label}
       accessibilityRole="button"
-      disabled={isReady ? false : false}
+      disabled={disabled}
       onPress={isReady ? onPlay : onConvert}
-      style={[styles.actionButton, { backgroundColor: status === "failed" ? colors.destructive : colors.tint }]}
+      style={[styles.actionButton, { backgroundColor: status === "failed" ? colors.destructive : colors.tint }, disabled && styles.actionButtonDisabled]}
     >
       <Ionicons name={icon} size={22} color={colors.tintText} />
     </Pressable>
@@ -340,6 +346,7 @@ const styles = StyleSheet.create({
   phaseLabel: { color: "#8b5c48", flex: 1, fontSize: 12, fontWeight: "600" },
   cacheLabel: { color: "#85776a", fontSize: 12 },
   actionButton: { alignItems: "center", backgroundColor: "#b65a36", borderRadius: 22, height: 44, justifyContent: "center", width: 44 },
+  actionButtonDisabled: { opacity: 0.45 },
   retryButton: { backgroundColor: "#9a5b3d" },
   actionPlaceholder: { height: 44, width: 44 },
   addChannelButton: { alignItems: "center", backgroundColor: "#b65a36", borderRadius: 12, flexDirection: "row", gap: 8, marginTop: 20, minHeight: 44, paddingHorizontal: 20 },

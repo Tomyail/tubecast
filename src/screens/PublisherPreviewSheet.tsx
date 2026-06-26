@@ -12,6 +12,7 @@ import {
 import Screen from "../components/Screen";
 import { useSubmitJob } from "../features/jobs/hooks";
 import { getJob } from "../features/jobs/api";
+import { isLiveUnsupportedJob } from "../features/jobs/errors";
 import { trackFromReadyJob } from "../features/jobs/track";
 import { usePlaylist } from "../features/playlist/context";
 import { getAllTracks } from "../features/playlist/storage";
@@ -98,6 +99,7 @@ export default function PublisherPreviewSheet() {
   const [items, setItems] = useState<FeedItemWithStatus[] | null>(null);
   const [loadError, setLoadError] = useState<boolean>(false);
   const [submittingIds, setSubmittingIds] = useState<Set<string>>(new Set());
+  const [unsupportedIds, setUnsupportedIds] = useState<Set<string>>(new Set());
   const [tracksCache, setTracksCache] = useState<Track[]>([]);
 
   const displaySource: FeedSource = useMemo(
@@ -151,7 +153,7 @@ export default function PublisherPreviewSheet() {
   }, [loadVideos]);
 
   useEffect(() => {
-    const convertingItems = items?.filter((item) => item.status === "converting" && item.jobId) ?? [];
+    const convertingItems = items?.filter((item) => item.status === "converting" && item.jobId && !unsupportedIds.has(item.platformItemId)) ?? [];
     if (convertingItems.length === 0) return;
 
     let cancelled = false;
@@ -181,7 +183,11 @@ export default function PublisherPreviewSheet() {
           );
           setItems((prev) => markItemReady(prev, item.platformItemId, job.id));
         } else if (job.status === "failed" || job.status === "expired") {
-          setItems((prev) => markItemNew(prev, item.platformItemId));
+          if (isLiveUnsupportedJob(job)) {
+            setUnsupportedIds((prev) => new Set(prev).add(item.platformItemId));
+          } else {
+            setItems((prev) => markItemNew(prev, item.platformItemId));
+          }
         }
       }
     };
@@ -195,7 +201,7 @@ export default function PublisherPreviewSheet() {
       cancelled = true;
       clearInterval(intervalId);
     };
-  }, [addTrack, items]);
+  }, [addTrack, items, unsupportedIds]);
 
   const handleToggleSubscribe = () => {
     if (isSubscribed) {
@@ -235,6 +241,11 @@ export default function PublisherPreviewSheet() {
         jobId: result.id,
         sourceUrl: item.sourceUrl,
         submittedAt: new Date().toISOString(),
+      });
+      setUnsupportedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(item.platformItemId);
+        return next;
       });
       setItems((prev) => markItemConverting(prev, item.platformItemId, result.id));
     } catch {
@@ -309,6 +320,7 @@ export default function PublisherPreviewSheet() {
           ) : (
             topThree.map((item) => {
               const isSubmitting = submittingIds.has(item.platformItemId);
+              const isUnsupported = unsupportedIds.has(item.platformItemId);
               return (
                 <View
                   key={`${item.platform}:${item.platformItemId}`}
@@ -323,7 +335,11 @@ export default function PublisherPreviewSheet() {
                     </Text>
                   </View>
 
-                  {item.status === "ready" ? (
+                  {isUnsupported ? (
+                    <Text style={[styles.unsupportedText, { color: colors.destructive }]}>
+                      {t("errors.liveUnsupported")}
+                    </Text>
+                  ) : item.status === "ready" ? (
                     <Pressable
                       accessibilityRole="button"
                       onPress={() => handleRowPress(item)}
@@ -394,4 +410,5 @@ const styles = StyleSheet.create({
   statusPillText: { fontSize: 13, fontWeight: "600" },
   convertButton: { borderRadius: 12, paddingHorizontal: 12, paddingVertical: 6 },
   convertText: { fontSize: 13, fontWeight: "600" },
+  unsupportedText: { flexShrink: 0, fontSize: 12, fontWeight: "600", maxWidth: 110, textAlign: "right" },
 });
