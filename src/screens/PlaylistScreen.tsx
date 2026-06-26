@@ -331,8 +331,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     backgroundColor: "#f4ede2",
   },
-  activeTrack: { backgroundColor: "#fff3ee" },
-  selectedTrack: { backgroundColor: "#f8e9df" },
   draggingItem: {
     backgroundColor: "#f0e6d8",
     elevation: 8,
@@ -353,12 +351,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  checkboxSelected: { backgroundColor: "#b65a36" },
   trackContent: { flex: 1 },
   trackTitle: { color: "#241a12", fontSize: 16, fontWeight: "600" },
   trackMeta: { color: "#85776a", fontSize: 13, marginTop: 3 },
-  activeText: { color: "#b65a36" },
-  playedTitle: { color: "#9a8d81" },
   unplayedDot: {
     width: 8,
     height: 8,
@@ -366,9 +361,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#b65a36",
     marginLeft: 8,
   },
-  separator: { height: StyleSheet.hairlineWidth, backgroundColor: "#eee" },
+  separator: { height: StyleSheet.hairlineWidth },
   deleteAction: {
-    backgroundColor: "#FF3B30",
     justifyContent: "center",
     alignItems: "center",
     width: 80,

@@ -1,12 +1,13 @@
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, View } from "react-native";
 import { formatDuration } from "../i18n/formatters";
 import type { RootStackParamList } from "../app/navigation/types";
 import { usePlayer } from "../features/player/context";
 import { useTranslation } from "../i18n";
 import { useAppTheme } from "../app/theme";
+import Touchable from "./Touchable";
 
 export default function MiniPlayer({ tabBarHeight }: { tabBarHeight: number }) {
   const { t } = useTranslation();
@@ -18,25 +19,38 @@ export default function MiniPlayer({ tabBarHeight }: { tabBarHeight: number }) {
     return null;
   }
 
+  const progress = duration > 0 ? Math.min(1, currentTime / duration) : 0;
+
   return (
     <View pointerEvents="box-none" style={[styles.shell, { bottom: tabBarHeight }]}>
       <View style={[styles.card, { backgroundColor: isDark ? colors.elevatedSurface : "#211c18", borderTopColor: colors.border }]}>
-        <Pressable
+        <Touchable
           accessibilityLabel={activeTrack.title || activeTrack.sourceUrl}
           accessibilityRole="button"
           style={styles.tapArea}
           onPress={() => navigation.navigate("Player", { jobId: activeTrack.jobId })}
         >
         <View style={styles.textWrap}>
-          <Text style={[styles.title, { color: isDark ? colors.primaryText : "#fff8f0" }]} numberOfLines={1}>
-            {activeTrack.title || activeTrack.sourceUrl}
-          </Text>
-          <Text style={[styles.meta, { color: isDark ? colors.secondaryText : "#d8c6b4" }]} numberOfLines={1}>
-            {formatDuration(currentTime)} / {formatDuration(duration)}
-          </Text>
+          <View style={styles.thumbRow}>
+            <View style={[styles.thumbnail, { backgroundColor: colors.elevatedSurface }]}>
+              {activeTrack.thumbnailUrl ? (
+                <Image resizeMode="cover" source={{ uri: activeTrack.thumbnailUrl }} style={styles.thumbnailImage} />
+              ) : (
+                <Ionicons name="musical-note" size={20} color={colors.tint} />
+              )}
+            </View>
+            <View style={styles.textWrap}>
+              <Text style={[styles.title, { color: isDark ? colors.primaryText : "#fff8f0" }]} numberOfLines={1}>
+                {activeTrack.title || activeTrack.sourceUrl}
+              </Text>
+              <Text style={[styles.meta, { color: isDark ? colors.secondaryText : "#d8c6b4" }]} numberOfLines={1}>
+                {formatDuration(currentTime)} / {formatDuration(duration)}
+              </Text>
+            </View>
+          </View>
         </View>
-        </Pressable>
-        <Pressable
+        </Touchable>
+        <Touchable
           accessibilityLabel={isPlaying ? t("common.pause") : t("common.play")}
           accessibilityRole="button"
           hitSlop={8}
@@ -44,7 +58,10 @@ export default function MiniPlayer({ tabBarHeight }: { tabBarHeight: number }) {
           onPress={togglePlayback}
         >
           <Ionicons name={isPlaying ? "pause" : "play"} size={19} color={colors.tintText} />
-        </Pressable>
+        </Touchable>
+        <View style={[styles.progressTrack, { backgroundColor: colors.border }]}>
+          <View style={[styles.progressFill, { backgroundColor: colors.tint, width: `${progress * 100}%` }]} />
+        </View>
       </View>
     </View>
   );
@@ -70,6 +87,20 @@ const styles = StyleSheet.create({
   tapArea: {
     flex: 1,
   },
+  thumbRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 10,
+  },
+  thumbnail: {
+    alignItems: "center",
+    borderRadius: 8,
+    height: 44,
+    justifyContent: "center",
+    overflow: "hidden",
+    width: 44,
+  },
+  thumbnailImage: { height: "100%", width: "100%" },
   textWrap: {
     gap: 4,
   },
@@ -89,5 +120,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     width: 44,
+  },
+  progressTrack: {
+    bottom: 0,
+    height: 2,
+    left: 0,
+    position: "absolute",
+    right: 0,
+  },
+  progressFill: {
+    height: 2,
   },
 });

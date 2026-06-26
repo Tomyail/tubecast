@@ -132,7 +132,7 @@ export default function PlayerScreen() {
           ) : null}
         </View>
 
-        <View style={[styles.statusPill, { backgroundColor: sourceStatus.variant === "error" ? colors.elevatedSurface : colors.elevatedSurface }]}>
+        <View style={[styles.statusPill, { backgroundColor: sourceStatus.variant === "error" ? colors.destructiveSurface : colors.elevatedSurface }]}>
           <Ionicons name={sourceStatus.icon} size={15} color={sourceStatus.variant === "error" ? colors.destructive : colors.secondaryText} />
           <Text style={[styles.statusText, { color: sourceStatus.variant === "error" ? colors.destructive : colors.secondaryText }]}>{sourceStatus.label}</Text>
         </View>
@@ -256,7 +256,6 @@ const styles = StyleSheet.create({
   statusPill: {
     alignItems: "center",
     alignSelf: "center",
-    backgroundColor: "#eee6dc",
     borderRadius: 999,
     flexDirection: "row",
     gap: 6,
@@ -264,9 +263,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 7,
   },
-  statusPillError: { backgroundColor: "#fde8e7" },
   statusText: { color: "#6f6256", fontSize: 13, fontWeight: "600" },
-  statusTextError: { color: "#b42318" },
   errorText: { color: "#b42318", fontSize: 14, marginTop: 10, textAlign: "center" },
   retryCacheButton: { alignSelf: "center", paddingHorizontal: 14, paddingVertical: 10 },
   retryCacheText: { color: "#8b5c48", fontSize: 15, fontWeight: "600" },
