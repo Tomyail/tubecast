@@ -12,7 +12,7 @@ import {
   View,
 } from "react-native";
 import { Image } from "expo-image";
-import Screen from "../components/Screen";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Touchable from "../components/Touchable";
 import { useCacheReadyJob } from "../features/jobs/hooks";
 import { usePlayer } from "../features/player/context";
@@ -63,12 +63,19 @@ export default function PlayerScreen() {
 
   if (!activeTrack) {
     return (
-      <Screen>
+      <View style={[styles.screen, { backgroundColor: colors.background }]}>
+        <PlayerHeader
+          canGoBack={navigation.canGoBack()}
+          colors={colors}
+          onBack={() => navigation.goBack()}
+          title={t("nav.player")}
+          backLabel={t("common.back")}
+        />
         <View style={styles.emptyState}>
           <Ionicons name="musical-notes-outline" size={36} color={colors.secondaryText} />
           <Text style={[styles.empty, { color: colors.secondaryText }]}>{t("player.noTrack")}</Text>
         </View>
-      </Screen>
+      </View>
     );
   }
 
@@ -84,7 +91,14 @@ export default function PlayerScreen() {
   };
 
   return (
-    <Screen scroll={false}>
+    <View style={[styles.screen, { backgroundColor: colors.background }]}>
+      <PlayerHeader
+        canGoBack={navigation.canGoBack()}
+        colors={colors}
+        onBack={() => navigation.goBack()}
+        title={t("nav.player")}
+        backLabel={t("common.back")}
+      />
       <View style={styles.container}>
         <View style={styles.trackHeader}>
           <View style={[styles.artwork, { backgroundColor: colors.elevatedSurface }]}>
@@ -202,7 +216,46 @@ export default function PlayerScreen() {
           </View>
         </View>
       </View>
-    </Screen>
+    </View>
+  );
+}
+
+function PlayerHeader({
+  backLabel,
+  canGoBack,
+  colors,
+  onBack,
+  title,
+}: {
+  backLabel: string;
+  canGoBack: boolean;
+  colors: ReturnType<typeof useAppTheme>["colors"];
+  onBack: () => void;
+  title: string;
+}) {
+  const insets = useSafeAreaInsets();
+  return (
+    <View style={[styles.header, { backgroundColor: colors.surface, paddingTop: insets.top }]}>
+      <View style={styles.headerContent}>
+        {canGoBack ? (
+          <Touchable
+            accessibilityLabel={backLabel}
+            accessibilityRole="button"
+            hitSlop={8}
+            onPress={onBack}
+            style={[styles.backButton, { backgroundColor: colors.elevatedSurface }]}
+          >
+            <Ionicons name="chevron-back" size={30} color={colors.primaryText} />
+          </Touchable>
+        ) : (
+          <View style={styles.backButtonPlaceholder} />
+        )}
+        <Text numberOfLines={1} style={[styles.headerTitle, { color: colors.primaryText }]}>
+          {title}
+        </Text>
+        <View style={styles.backButtonPlaceholder} />
+      </View>
+    </View>
   );
 }
 
@@ -220,6 +273,37 @@ function getSourceStatus(
 }
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
+  header: {
+    backgroundColor: "#fff9f3",
+  },
+  headerContent: {
+    alignItems: "center",
+    flexDirection: "row",
+    height: 72,
+    justifyContent: "space-between",
+    paddingHorizontal: 24,
+  },
+  backButton: {
+    alignItems: "center",
+    borderRadius: 28,
+    height: 56,
+    justifyContent: "center",
+    width: 56,
+  },
+  backButtonPlaceholder: {
+    height: 56,
+    width: 56,
+  },
+  headerTitle: {
+    color: "#241a12",
+    flex: 1,
+    fontSize: 20,
+    fontWeight: "700",
+    textAlign: "center",
+  },
   container: {
     flex: 1,
     justifyContent: "space-between",

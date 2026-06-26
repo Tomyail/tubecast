@@ -170,23 +170,7 @@ export default function RootNavigator() {
         <Stack.Screen
           name="Player"
           component={PlayerScreen}
-          options={({ navigation }) => ({
-            title: t("nav.player"),
-            // Tabs 屏 headerShown:false 无标题可取，iOS 原生返回按钮会回退显示路由名 "Tabs"。
-            // 自定义 headerLeft 只渲染箭头，绕开原生 back-title 行为。
-            headerLeft: ({ canGoBack }) =>
-              canGoBack ? (
-                <Touchable
-                  accessibilityLabel={t("common.back")}
-                  accessibilityRole="button"
-                  hitSlop={8}
-                  onPress={() => navigation.goBack()}
-                  style={{ paddingHorizontal: 8 }}
-                >
-                  <Ionicons name="chevron-back" size={28} color={colors.primaryText} />
-                </Touchable>
-              ) : null,
-          })}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="AddChannel"
