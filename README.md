@@ -97,6 +97,8 @@ Releases are cut locally — no CI builds the binary. The flow:
 2. `pnpm release:archive` → Archive in Xcode (`Product → Archive`) → upload to App Store Connect via Transporter → wait for processing → add the build to the TestFlight group by hand.
 3. `pnpm release:publish` — flips the GitHub Release from draft to published and bumps the root repo's submodule pointer.
 
+For same-version TestFlight rebuilds, run `pnpm release:rebuild` and then `pnpm release:testflight`. This bumps only `ios.buildNumber`, tags `testflight/<version>-<build>`, and creates a GitHub prerelease with generated release notes for that build.
+
 Versioning follows [conventional commits](https://www.conventionalcommits.org/) via `commit-and-tag-version` (`feat:` → minor, `fix:` → patch, `BREAKING CHANGE` → major). TestFlight "What's New" is bilingual: English from `CHANGELOG.md`, Chinese written by hand. The first release bootstraps a baseline `v1.0.0` tag from existing history; see `plans/007-mobile-release-flow.md` for the full design.
 
 ## Development

@@ -7,7 +7,7 @@
 //   pnpm --filter mobile release:archive   B 前: expo prebuild（把 buildNumber 写进 native 工程）
 //   pnpm --filter mobile release:publish   C: 草稿 release 转正 + 根仓库子模块指针 bump
 //   pnpm --filter mobile release:rebuild   热修: 只 buildNumber+1（不动 marketing 版本）后重打包重传
-//   pnpm --filter mobile release:testflight TestFlight: prebuild + 同步 Xcode 版本 + 打 testflight/<version>-<build> tag
+//   pnpm --filter mobile release:testflight TestFlight: prebuild + 同步 Xcode 版本 + 打 testflight/<version>-<build> tag + GitHub changelog
 //
 // 跨两个仓库：mobile（公开 GitHub Tomyail/tubecast）+ 根（私有 Gitea yt-audio）。
 // 全程用 git -C / cwd，绝不 cd（避免权限提示与不可重入）。
@@ -87,6 +87,27 @@ function tagExists(tag) {
   }
 }
 
+function githubReleaseExists(tag) {
+  try {
+    execSync(`gh release view "${tag}" -R ${GH_REPO}`, { cwd: mobileRoot, stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function ensureTestflightReleaseNotes(tag) {
+  if (githubReleaseExists(tag)) {
+    console.log(`✅ GitHub Release 已存在：${tag}`);
+    return;
+  }
+  run(`gh release create "${tag}" -R ${GH_REPO} --title "${tag}" --prerelease --generate-notes`, {
+    cwd: mobileRoot,
+    stdio: "inherit",
+  });
+  console.log(`✅ 已生成 GitHub changelog：${tag}`);
+}
+
 // buildNumber +1（字符串整数）。必须在 CATV 之前调用——app.json 是 CATV 的 bumpFile，
 // CATV 提交时会 git add app.json，从而把这次 buildNumber 变更一并纳入版本提交。
 function bumpBuildNumber() {
@@ -151,6 +172,7 @@ function cmdTestflightTag() {
   }
   run(`git push origin refs/tags/${tag}`, { cwd: mobileRoot, stdio: "inherit" });
   console.log(`✅ 已推送 tag：${tag}`);
+  ensureTestflightReleaseNotes(tag);
 }
 
 function cmdTestflight() {
@@ -196,8 +218,8 @@ if (!cmd || !COMMANDS[cmd]) {
   console.error("  publish  C 段：草稿转正 + 根仓库指针 bump");
   console.error("  rebuild  热修：只 buildNumber+1，重打包重传");
   console.error("  sync-ios 同步 app.json 版本到 Xcode 原生工程");
-  console.error("  testflight 生成 iOS 工程并打 testflight/<version>-<build> tag");
-  console.error("  testflight-tag 只打并推送 testflight/<version>-<build> tag");
+  console.error("  testflight 生成 iOS 工程并打 testflight/<version>-<build> tag + GitHub changelog");
+  console.error("  testflight-tag 只打并推送 testflight/<version>-<build> tag + GitHub changelog");
   process.exit(1);
 }
 COMMANDS[cmd]();
