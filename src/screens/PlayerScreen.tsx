@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { ComponentProps } from "react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Linking,
@@ -20,6 +20,7 @@ import { useTranslation } from "../i18n";
 import { formatDuration } from "../i18n/formatters";
 import { useAppTheme } from "../app/theme";
 import type { RootStackParamList } from "../app/navigation/types";
+import { getDisplayedProgressTime, getProgressXFromPageX, getSeekTimeFromDrag } from "./playerProgress";
 
 type IoniconName = NonNullable<ComponentProps<typeof Ionicons>["name"]>;
 
@@ -42,12 +43,71 @@ export default function PlayerScreen() {
   const currentTime = usePlaybackProgress();
   const { cacheState, retryCache } = useCacheReadyJob(activeTrack?.jobId ?? null);
   const [progressWidth, setProgressWidth] = useState(1);
+  const [scrubTime, setScrubTime] = useState<number | null>(null);
+  const [optimisticSeekTime, setOptimisticSeekTime] = useState<number | null>(null);
+  const progressRef = useRef<View>(null);
+  const progressLeftRef = useRef(0);
+  const progressMeasuredRef = useRef(false);
+  const scrubStartXRef = useRef(0);
+  const scrubTimeRef = useRef<number | null>(null);
+  const latestDragDxRef = useRef(0);
 
-  const seekFromX = useCallback((x: number) => {
+  useEffect(() => {
+    scrubTimeRef.current = null;
+    setScrubTime(null);
+    setOptimisticSeekTime(null);
+  }, [activeTrack?.id]);
+
+  useEffect(() => {
+    if (optimisticSeekTime === null) return;
+    if (Math.abs(currentTime - optimisticSeekTime) < 0.75) {
+      setOptimisticSeekTime(null);
+      return;
+    }
+
+    const timeout = setTimeout(() => setOptimisticSeekTime(null), 1200);
+    return () => clearTimeout(timeout);
+  }, [currentTime, optimisticSeekTime]);
+
+  const previewSeekFromDrag = useCallback((dx: number) => {
     if (duration <= 0) return;
-    const percentage = Math.min(1, Math.max(0, x / progressWidth));
-    seekTo(percentage * duration);
-  }, [duration, progressWidth, seekTo]);
+    const seconds = getSeekTimeFromDrag(scrubStartXRef.current, dx, progressWidth, duration);
+    scrubTimeRef.current = seconds;
+    setScrubTime(seconds);
+  }, [duration, progressWidth]);
+
+  const measureProgress = useCallback((onMeasured?: () => void) => {
+    progressRef.current?.measureInWindow((x, _y, width) => {
+      progressLeftRef.current = x;
+      progressMeasuredRef.current = true;
+      if (width > 0) setProgressWidth(width);
+      onMeasured?.();
+    });
+  }, []);
+
+  const startScrubFromPageX = useCallback((pageX: number) => {
+    const start = () => {
+      scrubStartXRef.current = getProgressXFromPageX(pageX, progressLeftRef.current);
+      previewSeekFromDrag(latestDragDxRef.current);
+    };
+
+    if (progressMeasuredRef.current) {
+      start();
+      return;
+    }
+
+    measureProgress(start);
+  }, [measureProgress, previewSeekFromDrag]);
+
+  const commitSeek = useCallback(() => {
+    const seconds = scrubTimeRef.current;
+    if (seconds !== null && duration > 0) {
+      setOptimisticSeekTime(seconds);
+      seekTo(seconds);
+    }
+    scrubTimeRef.current = null;
+    setScrubTime(null);
+  }, [duration, seekTo]);
 
   const seekBy = useCallback((seconds: number) => {
     if (duration <= 0) return;
@@ -57,9 +117,20 @@ export default function PlayerScreen() {
   const panResponder = useMemo(() => PanResponder.create({
     onStartShouldSetPanResponder: () => duration > 0,
     onMoveShouldSetPanResponder: () => duration > 0,
-    onPanResponderGrant: (event) => seekFromX(event.nativeEvent.locationX),
-    onPanResponderMove: (event) => seekFromX(event.nativeEvent.locationX),
-  }), [duration, seekFromX]);
+    onPanResponderGrant: (event) => {
+      latestDragDxRef.current = 0;
+      startScrubFromPageX(event.nativeEvent.pageX);
+    },
+    onPanResponderMove: (_event, gestureState) => {
+      latestDragDxRef.current = gestureState.dx;
+      if (progressMeasuredRef.current) {
+        previewSeekFromDrag(gestureState.dx);
+      }
+    },
+    onPanResponderRelease: commitSeek,
+    onPanResponderTerminationRequest: () => false,
+    onPanResponderTerminate: commitSeek,
+  }), [commitSeek, duration, previewSeekFromDrag, startScrubFromPageX]);
 
   if (!activeTrack) {
     return (
@@ -79,8 +150,9 @@ export default function PlayerScreen() {
     );
   }
 
-  const progress = duration > 0 ? Math.min(1, currentTime / duration) : 0;
-  const remaining = Math.max(0, duration - currentTime);
+  const displayedTime = getDisplayedProgressTime(currentTime, scrubTime, optimisticSeekTime);
+  const progress = duration > 0 ? Math.min(1, displayedTime / duration) : 0;
+  const remaining = Math.max(0, duration - displayedTime);
   const sourceStatus = getSourceStatus(cacheState, activeTrack.cacheStatus, playbackSource, t);
 
   const openSource = () => {
@@ -164,9 +236,13 @@ export default function PlayerScreen() {
             accessibilityActions={[{ name: "increment" }, { name: "decrement" }]}
             accessibilityLabel={t("player.seek")}
             accessibilityRole="adjustable"
-            accessibilityValue={{ min: 0, now: Math.round(currentTime), max: Math.round(duration) }}
+            accessibilityValue={{ min: 0, now: Math.round(displayedTime), max: Math.round(duration) }}
             onAccessibilityAction={(event) => seekBy(event.nativeEvent.actionName === "increment" ? 15 : -15)}
-            onLayout={(event) => setProgressWidth(event.nativeEvent.layout.width)}
+            ref={progressRef}
+            onLayout={(event) => {
+              setProgressWidth(event.nativeEvent.layout.width);
+              measureProgress();
+            }}
             style={styles.progressTouchTarget}
             {...panResponder.panHandlers}
           >
@@ -177,7 +253,7 @@ export default function PlayerScreen() {
           </View>
 
           <View style={styles.timeRow}>
-            <Text style={[styles.time, { color: colors.secondaryText }]}>{playbackLoading ? t("player.loading") : formatDuration(currentTime)}</Text>
+            <Text style={[styles.time, { color: colors.secondaryText }]}>{playbackLoading ? t("player.loading") : formatDuration(displayedTime)}</Text>
             <Text style={[styles.time, { color: colors.secondaryText }]}>{duration > 0 ? `-${formatDuration(remaining)}` : "--:--"}</Text>
           </View>
 
@@ -245,7 +321,7 @@ function PlayerHeader({
             onPress={onBack}
             style={[styles.backButton, { backgroundColor: colors.elevatedSurface }]}
           >
-            <Ionicons name="chevron-back" size={30} color={colors.primaryText} />
+            <Ionicons name="chevron-down" size={30} color={colors.primaryText} />
           </Touchable>
         ) : (
           <View style={styles.backButtonPlaceholder} />
@@ -352,7 +428,7 @@ const styles = StyleSheet.create({
   retryCacheButton: { alignSelf: "center", paddingHorizontal: 14, paddingVertical: 10 },
   retryCacheText: { color: "#8b5c48", fontSize: 15, fontWeight: "600" },
   playbackArea: { gap: 10, paddingBottom: 18 },
-  progressTouchTarget: { height: 44, justifyContent: "center", width: "100%" },
+  progressTouchTarget: { height: 64, justifyContent: "center", width: "100%" },
   progressRail: { backgroundColor: "#ded0c1", borderRadius: 3, height: 6, position: "relative", width: "100%" },
   progressFill: { backgroundColor: "#b65a36", borderRadius: 3, height: 6 },
   progressThumb: {

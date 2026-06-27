@@ -170,7 +170,11 @@ export default function RootNavigator() {
         <Stack.Screen
           name="Player"
           component={PlayerScreen}
-          options={{ headerShown: false }}
+          options={{
+            animation: "slide_from_bottom",
+            headerShown: false,
+            presentation: "modal",
+          }}
         />
         <Stack.Screen
           name="AddChannel"
