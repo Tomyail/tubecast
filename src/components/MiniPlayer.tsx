@@ -9,6 +9,7 @@ import { usePlayer, usePlaybackProgress } from "../features/player/context";
 import { useTranslation } from "../i18n";
 import { useAppTheme } from "../app/theme";
 import Touchable from "./Touchable";
+import MarqueeText from "./MarqueeText";
 
 export default function MiniPlayer({ tabBarHeight }: { tabBarHeight: number }) {
   const { t } = useTranslation();
@@ -41,9 +42,10 @@ export default function MiniPlayer({ tabBarHeight }: { tabBarHeight: number }) {
             )}
           </View>
           <View style={styles.textWrap}>
-            <Text style={[styles.title, { color: isDark ? colors.primaryText : "#fff8f0" }]} numberOfLines={1}>
-              {activeTrack.title || activeTrack.sourceUrl}
-            </Text>
+            <MarqueeText
+              style={[styles.title, { color: isDark ? colors.primaryText : "#fff8f0" }]}
+              text={activeTrack.title || activeTrack.sourceUrl}
+            />
             <Text style={[styles.meta, { color: isDark ? colors.secondaryText : "#d8c6b4" }]} numberOfLines={1}>
               {formatDuration(currentTime)} / {formatDuration(duration)}
             </Text>
@@ -107,6 +109,7 @@ const styles = StyleSheet.create({
   },
   thumbnailImage: { height: "100%", width: "100%" },
   textWrap: {
+    flex: 1,
     gap: 4,
   },
   title: {
