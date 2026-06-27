@@ -16,7 +16,7 @@ import { usePlayer } from "../features/player/context";
 import type { Track } from "../features/playlist/storage";
 import type { FeedItemWithStatus } from "../features/youtubeFeed/types";
 import type { RootStackParamList } from "../app/navigation/types";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, memo } from "react";
 import {
   getSubmittedFeedJobs,
   saveSubmittedFeedJob,
@@ -54,7 +54,7 @@ export default function FeedScreen() {
     ? videos.filter((v) => v.platformSourceId === selectedChannel)
     : videos;
 
-  const handleConvert = async (video: FeedItemWithStatus) => {
+  const handleConvert = useCallback(async (video: FeedItemWithStatus) => {
     setSubmittingIds((prev) => new Set(prev).add(video.platformItemId));
     try {
       const result = await submitJob.mutateAsync(video.sourceUrl);
@@ -74,7 +74,21 @@ export default function FeedScreen() {
         return next;
       });
     }
-  };
+  }, [submitJob, t]);
+
+  const handlePlay = useCallback((track: Track) => {
+    playTrack(track, tracks);
+    navigation.navigate("Player", { jobId: track.jobId });
+  }, [playTrack, tracks, navigation]);
+
+  const handleTerminal = useCallback((platformItemId: string) => {
+    removeSubmittedFeedJob(platformItemId);
+    setSubmittedJobs((prev) => {
+      const next = { ...prev };
+      delete next[platformItemId];
+      return next;
+    });
+  }, []);
 
   if (channels.length === 0 && !isLoading) {
     return (
@@ -152,6 +166,7 @@ export default function FeedScreen() {
       {!isLoading && !error && (
         <FlatList
           data={filteredVideos}
+          removeClippedSubviews
           keyExtractor={(v) => v.platformItemId}
           renderItem={({ item }) => (
             <VideoCard
@@ -159,19 +174,9 @@ export default function FeedScreen() {
               jobId={submittedJobs[item.platformItemId]?.jobId ?? null}
               allTracks={tracks}
               onConvert={handleConvert}
-              onPlay={(track) => {
-                playTrack(track, tracks);
-                navigation.navigate("Player", { jobId: track.jobId });
-              }}
+              onPlay={handlePlay}
               isSubmitting={submittingIds.has(item.platformItemId)}
-              onTerminal={(platformItemId: string) => {
-                removeSubmittedFeedJob(platformItemId);
-                setSubmittedJobs((prev) => {
-                  const next = { ...prev };
-                  delete next[platformItemId];
-                  return next;
-                });
-              }}
+              onTerminal={handleTerminal}
             />
           )}
           refreshing={isLoading}
@@ -184,7 +189,7 @@ export default function FeedScreen() {
   );
 }
 
-function VideoCard({
+const VideoCard = memo(function VideoCard({
   video,
   jobId,
   allTracks,
@@ -263,7 +268,7 @@ function VideoCard({
       />
     </View>
   );
-}
+});
 
 function VideoThumbnail({ thumbnailUrl }: { thumbnailUrl: string | null }) {
   const { colors } = useAppTheme();

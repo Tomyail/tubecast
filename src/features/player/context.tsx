@@ -26,7 +26,6 @@ type PlayerContextValue = {
   isPlaying: boolean;
   isBuffering: boolean;
   playbackLoading: boolean;
-  currentTime: number;
   duration: number;
   playbackSource: PlaybackSource | null;
   playbackError: string | null;
@@ -40,6 +39,8 @@ type PlayerContextValue = {
 };
 
 const PlayerContext = createContext<PlayerContextValue | null>(null);
+// 高频进度值(约 100ms 更新)独立成 context,避免只取 action 的消费者被进度重渲染波及。
+const PlaybackProgressContext = createContext<number>(0);
 const PROGRESS_KEY = "player_progress_";
 const SAVE_INTERVAL = 5000;
 
@@ -275,16 +276,25 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, [currentIndex, queue, playTrack, currentTime, player]);
 
   const value = useMemo<PlayerContextValue>(() => ({
-    activeTrack, queue, isPlaying, isBuffering, playbackLoading, currentTime, duration, playbackSource, playbackError,
+    activeTrack, queue, isPlaying, isBuffering, playbackLoading, duration, playbackSource, playbackError,
     playerPhase: phase,
     playTrack, togglePlayback, seekTo, playNext, playPrevious, stopPlayback,
-  }), [activeTrack, queue, isPlaying, isBuffering, playbackLoading, currentTime, duration, playbackSource, playbackError, phase, playTrack, togglePlayback, seekTo, playNext, playPrevious, stopPlayback]);
+  }), [activeTrack, queue, isPlaying, isBuffering, playbackLoading, duration, playbackSource, playbackError, phase, playTrack, togglePlayback, seekTo, playNext, playPrevious, stopPlayback]);
 
-  return <PlayerContext.Provider value={value}>{children}</PlayerContext.Provider>;
+  return (
+    <PlayerContext.Provider value={value}>
+      <PlaybackProgressContext.Provider value={currentTime}>{children}</PlaybackProgressContext.Provider>
+    </PlayerContext.Provider>
+  );
 }
 
 export function usePlayer() {
   const ctx = useContext(PlayerContext);
   if (!ctx) throw new Error("usePlayer must be used within PlayerProvider");
   return ctx;
+}
+
+// 高频进度(每 ~100ms 更新)。仅进度条/时间显示类组件订阅,避免全树重渲染。
+export function usePlaybackProgress(): number {
+  return useContext(PlaybackProgressContext);
 }

@@ -5,7 +5,7 @@ import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 import { formatDuration } from "../i18n/formatters";
 import type { RootStackParamList } from "../app/navigation/types";
-import { usePlayer } from "../features/player/context";
+import { usePlayer, usePlaybackProgress } from "../features/player/context";
 import { useTranslation } from "../i18n";
 import { useAppTheme } from "../app/theme";
 import Touchable from "./Touchable";
@@ -14,7 +14,8 @@ export default function MiniPlayer({ tabBarHeight }: { tabBarHeight: number }) {
   const { t } = useTranslation();
   const { colors, isDark } = useAppTheme();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { activeTrack, currentTime, duration, isPlaying, playbackLoading, togglePlayback } = usePlayer();
+  const { activeTrack, duration, isPlaying, playbackLoading, togglePlayback } = usePlayer();
+  const currentTime = usePlaybackProgress();
 
   if (!activeTrack) {
     return null;

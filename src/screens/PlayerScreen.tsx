@@ -15,7 +15,7 @@ import { Image } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Touchable from "../components/Touchable";
 import { useCacheReadyJob } from "../features/jobs/hooks";
-import { usePlayer } from "../features/player/context";
+import { usePlayer, usePlaybackProgress } from "../features/player/context";
 import { useTranslation } from "../i18n";
 import { formatDuration } from "../i18n/formatters";
 import { useAppTheme } from "../app/theme";
@@ -31,7 +31,6 @@ export default function PlayerScreen() {
     activeTrack,
     isPlaying,
     playbackLoading,
-    currentTime,
     duration,
     playbackSource,
     playbackError,
@@ -40,6 +39,7 @@ export default function PlayerScreen() {
     playNext,
     playPrevious,
   } = usePlayer();
+  const currentTime = usePlaybackProgress();
   const { cacheState, retryCache } = useCacheReadyJob(activeTrack?.jobId ?? null);
   const [progressWidth, setProgressWidth] = useState(1);
 
