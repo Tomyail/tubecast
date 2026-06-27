@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback, useLayoutEffect } from "react";
+import { useRef, useState, useCallback, useEffect, useLayoutEffect, useMemo } from "react";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
@@ -15,6 +15,8 @@ import type { Track } from "../features/playlist/storage";
 import { useTranslation } from "../i18n";
 import { formatDuration, formatFileSize } from "../i18n/formatters";
 import { useAppTheme } from "../app/theme";
+import { getPlaylistFilterCounts, getVisiblePlaylistTracks } from "./playlistFilter";
+import type { PlaylistFilter } from "./playlistFilter";
 
 type PlaylistStackParamList = { PlaylistRoot: undefined };
 const MINI_PLAYER_HEIGHT = 64;
@@ -27,8 +29,21 @@ export default function PlaylistScreen() {
   const { playTrack, togglePlayback, activeTrack, isPlaying, playbackLoading, stopPlayback } = usePlayer();
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [filter, setFilter] = useState<PlaylistFilter>("all");
 
-  const allSelected = tracks.length > 0 && selectedIds.size === tracks.length;
+  const visibleTracks = useMemo(() => getVisiblePlaylistTracks(tracks, filter), [filter, tracks]);
+  const filterCounts = useMemo(() => getPlaylistFilterCounts(tracks), [tracks]);
+  const visibleTrackIds = useMemo(() => new Set(visibleTracks.map((track) => track.id)), [visibleTracks]);
+  const allSelected = visibleTracks.length > 0 && visibleTracks.every((track) => selectedIds.has(track.id));
+  const canReorder = filter === "all" && !isEditMode;
+
+  useEffect(() => {
+    if (!isEditMode || selectedIds.size === 0) return;
+    setSelectedIds((prev) => {
+      const next = new Set(Array.from(prev).filter((id) => visibleTrackIds.has(id)));
+      return next.size === prev.size ? prev : next;
+    });
+  }, [isEditMode, selectedIds.size, visibleTrackIds]);
 
   const enterEditMode = () => {
     setIsEditMode(true);
@@ -49,9 +64,9 @@ export default function PlaylistScreen() {
     });
   }, []);
 
-  const toggleSelectAll = () => {
-    setSelectedIds(allSelected ? new Set() : new Set(tracks.map((t) => t.id)));
-  };
+  const toggleSelectAll = useCallback(() => {
+    setSelectedIds(allSelected ? new Set() : new Set(visibleTracks.map((t) => t.id)));
+  }, [allSelected, visibleTracks]);
 
   const deleteCachedFile = (track: Track) => {
     const filename =
@@ -101,7 +116,7 @@ export default function PlaylistScreen() {
       void togglePlayback();
       return;
     }
-    void playTrack(track, tracks);
+    void playTrack(track, visibleTracks);
   };
 
   const handleDelete = (track: Track) => {
@@ -145,7 +160,7 @@ export default function PlaylistScreen() {
               <Text style={[styles.headerAction, { color: colors.tint }]}>{t("common.done")}</Text>
             </Touchable>
           )
-        : tracks.length > 0
+        : visibleTracks.length > 0
           ? () => (
               <Touchable onPress={enterEditMode} style={styles.navigationAction}>
                 <Text style={[styles.headerAction, { color: colors.tint }]}>{t("playlist.edit")}</Text>
@@ -153,7 +168,7 @@ export default function PlaylistScreen() {
             )
           : undefined,
     });
-  }, [allSelected, colors.tint, isEditMode, navigation, selectedIds.size, t, tracks.length]);
+  }, [allSelected, colors.tint, isEditMode, navigation, selectedIds.size, t, toggleSelectAll, visibleTracks.length]);
 
   const renderItem = ({ item, drag, isActive }: RenderItemParams<Track>) => {
     const isCurrentTrack = activeTrack?.id === item.id;
@@ -169,7 +184,7 @@ export default function PlaylistScreen() {
           isSelected={selectedIds.has(item.id)}
           onPlay={handlePlay}
           onDelete={handleDelete}
-          onDrag={drag}
+          onDrag={canReorder ? drag : undefined}
           onToggleSelect={toggleSelect}
           t={t}
           locale={i18n.language}
@@ -184,15 +199,46 @@ export default function PlaylistScreen() {
       {tracks.length === 0 ? (
         <EmptyState icon="musical-notes-outline" title={t("playlist.empty")} />
       ) : (
-        <DraggableFlatList
-          data={tracks}
-          keyExtractor={(t) => t.id}
-          renderItem={renderItem}
-          onDragEnd={isEditMode ? () => {} : ({ data }) => reorderTracks(data)}
-          ItemSeparatorComponent={() => <View style={[styles.separator, { backgroundColor: colors.border }]} />}
-          containerStyle={{ flex: 1 }}
-          contentContainerStyle={{ paddingBottom: isEditMode ? 84 + (activeTrack ? MINI_PLAYER_HEIGHT : 0) : activeTrack ? MINI_PLAYER_HEIGHT : 0 }}
-        />
+        <>
+          {!isEditMode && (
+            <View style={[styles.filterBar, { backgroundColor: colors.elevatedSurface, borderColor: colors.border }]}>
+              <Touchable
+                accessibilityRole="button"
+                accessibilityState={{ selected: filter === "all" }}
+                style={[styles.filterSegment, filter === "all" && { backgroundColor: colors.tint }]}
+                onPress={() => setFilter("all")}
+              >
+                <Text style={[styles.filterText, { color: filter === "all" ? colors.tintText : colors.secondaryText }]}>
+                  {t("playlist.filterAll", { count: filterCounts.all })}
+                </Text>
+              </Touchable>
+              <Touchable
+                accessibilityRole="button"
+                accessibilityState={{ selected: filter === "unplayed" }}
+                style={[styles.filterSegment, filter === "unplayed" && { backgroundColor: colors.tint }]}
+                onPress={() => setFilter("unplayed")}
+              >
+                <Text style={[styles.filterText, { color: filter === "unplayed" ? colors.tintText : colors.secondaryText }]}>
+                  {t("playlist.filterUnplayed", { count: filterCounts.unplayed })}
+                </Text>
+              </Touchable>
+            </View>
+          )}
+
+          {visibleTracks.length === 0 ? (
+            <EmptyState icon="checkmark-circle-outline" title={t("playlist.emptyUnplayed")} />
+          ) : (
+            <DraggableFlatList
+              data={visibleTracks}
+              keyExtractor={(t) => t.id}
+              renderItem={renderItem}
+              onDragEnd={canReorder ? ({ data }) => reorderTracks(data) : () => {}}
+              ItemSeparatorComponent={() => <View style={[styles.separator, { backgroundColor: colors.border }]} />}
+              containerStyle={{ flex: 1 }}
+              contentContainerStyle={{ paddingBottom: isEditMode ? 84 + (activeTrack ? MINI_PLAYER_HEIGHT : 0) : activeTrack ? MINI_PLAYER_HEIGHT : 0 }}
+            />
+          )}
+        </>
       )}
 
       {isEditMode && (
@@ -244,7 +290,7 @@ function SwipeableTrackItem({
   isSelected: boolean;
   onPlay: (t: Track) => void;
   onDelete: (t: Track) => void;
-  onDrag: () => void;
+  onDrag?: () => void;
   onToggleSelect: (id: string) => void;
   t: (key: string, options?: Record<string, unknown>) => string;
   locale: string;
@@ -268,9 +314,13 @@ function SwipeableTrackItem({
           {isSelected && <Ionicons name="checkmark" size={15} color={colors.tintText} />}
         </View>
       ) : (
-        <Touchable accessibilityLabel="Reorder track" accessibilityRole="button" onLongPress={onDrag} style={styles.dragHandle}>
-          <Ionicons name="reorder-three-outline" size={22} color={colors.secondaryText} />
-        </Touchable>
+        onDrag ? (
+          <Touchable accessibilityLabel="Reorder track" accessibilityRole="button" onLongPress={onDrag} style={styles.dragHandle}>
+            <Ionicons name="reorder-three-outline" size={22} color={colors.secondaryText} />
+          </Touchable>
+        ) : (
+          <View style={styles.dragHandle} />
+        )
       )}
 
       <View style={styles.trackContent}>
@@ -330,6 +380,24 @@ function SwipeableTrackItem({
 const styles = StyleSheet.create({
   headerAction: { fontSize: 16, color: "#b65a36", fontWeight: "600" },
   navigationAction: { paddingHorizontal: 4, paddingVertical: 8 },
+  filterBar: {
+    flexDirection: "row",
+    marginHorizontal: 16,
+    marginTop: 12,
+    marginBottom: 8,
+    padding: 4,
+    borderRadius: 8,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  filterSegment: {
+    flex: 1,
+    alignItems: "center",
+    borderRadius: 6,
+    justifyContent: "center",
+    minHeight: 36,
+    paddingHorizontal: 10,
+  },
+  filterText: { fontSize: 15, fontWeight: "700" },
   trackItem: {
     flexDirection: "row",
     alignItems: "center",
