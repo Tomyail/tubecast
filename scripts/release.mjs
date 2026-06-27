@@ -251,6 +251,68 @@ function cmdPublish() {
   console.log(`\n✅ C 段完成：${tag} 的 GitHub Release 已公开；根仓库指针已 bump 并 push 到 Gitea。`);
 }
 
+// ---- 只更新 CHANGELOG，不 bump 版本 ----
+function cmdChangelog() {
+  const ver = currentVersion();
+  const lastTag = `v${ver}`;
+  const today = new Date().toISOString().slice(0, 10);
+
+  // 如果没有 v* tag，用仓库第一个提交作为起点
+  let range = `${lastTag}..HEAD`;
+  if (!tagExists(lastTag)) {
+    const root = execSync("git rev-list --max-parents=0 HEAD", {
+      cwd: mobileRoot,
+      encoding: "utf8",
+    }).trim().split(/\r?\n/)[0];
+    range = `${root}..HEAD`;
+    console.log(`ℹ  未找到 ${lastTag}，使用仓库第一个提交作为起点。`);
+  }
+
+  // 只取该版本以来的提交（排除 chore(release) 和 chore(mobile): bump buildNumber）
+  const commits = execSync(
+    `git log --no-merges --pretty=format:"%s" ${range}`,
+    { cwd: mobileRoot, encoding: "utf8" },
+  )
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .filter((line) => !/^chore\((mobile|release)\)/.test(line));
+
+  if (commits.length === 0) {
+    console.log(`ℹ  ${lastTag} 之后没有新提交，跳过。`);
+    return;
+  }
+
+  const groups = { feat: [], fix: [], perf: [], refactor: [], docs: [] };
+  for (const msg of commits) {
+    const m = /^(\w+)(\([^)]+\))?:\s*(.*)/.exec(msg);
+    const type = m ? m[1] : "other";
+    const text = msg;
+    (groups[type] ?? (groups.other = [])).push(text);
+  }
+
+  const lines = [`## ${ver} (${today})`, ""];
+  const labels = { feat: "Features", fix: "Bug Fixes", perf: "Performance", refactor: "Refactoring", docs: "Documentation", other: "Other" };
+
+  for (const [type, msgs] of Object.entries(groups)) {
+    if (!msgs || msgs.length === 0) continue;
+    lines.push(`### ${labels[type] || type}`, "");
+    for (const msg of msgs) lines.push(`* ${msg}`);
+    lines.push("");
+  }
+
+  const section = lines.join("\n");
+  const old = readFileSync(CHANGELOG, "utf8");
+  const headerEnd = old.indexOf("\n## ") === -1 ? old.length : old.indexOf("\n## ");
+  const header = old.slice(0, headerEnd);
+  const rest = old.slice(headerEnd);
+  writeFileSync(CHANGELOG, header + "\n\n" + section + "\n" + rest);
+
+  run(`git add CHANGELOG.md`, { cwd: mobileRoot, stdio: "inherit" });
+  run(`git commit -m "chore(mobile): update CHANGELOG for ${ver}"`, { cwd: mobileRoot, stdio: "inherit" });
+  console.log(`✅ CHANGELOG 已更新（${ver}）并提交。`);
+}
+
 // ---- 热修重传：只 buildNumber+1，不 bump marketing 版本 ----
 function cmdRebuild() {
   const bn = bumpBuildNumber();
@@ -265,18 +327,20 @@ const COMMANDS = {
   publish: cmdPublish,
   archive: cmdArchive,
   rebuild: cmdRebuild,
+  changelog: cmdChangelog,
   "sync-ios": cmdSyncIos,
   testflight: cmdTestflight,
   "testflight-tag": cmdTestflightTag,
 };
 const cmd = process.argv[2];
 if (!cmd || !COMMANDS[cmd]) {
-  console.error("用法: release.mjs <version|publish|archive|rebuild|sync-ios|testflight|testflight-tag>");
-  console.error("  version  A 段：bump 版本/buildNumber + CHANGELOG + tag + 草稿 release");
-  console.error("  archive  B 前：expo prebuild（写 buildNumber 进工程）");
-  console.error("  publish  C 段：草稿转正 + 根仓库指针 bump");
-  console.error("  rebuild  热修：只 buildNumber+1，重打包重传");
-  console.error("  sync-ios 同步 app.json 版本到 Xcode 原生工程");
+  console.error("用法: release.mjs <version|publish|archive|rebuild|changelog|sync-ios|testflight|testflight-tag>");
+  console.error("  version   A 段：bump 版本/buildNumber + CHANGELOG + tag + 草稿 release");
+  console.error("  archive   B 前：expo prebuild（写 buildNumber 进工程）");
+  console.error("  publish   C 段：草稿转正 + 根仓库指针 bump");
+  console.error("  rebuild   热修：只 buildNumber+1，重打包重传");
+  console.error("  changelog 只更新 CHANGELOG（从 git log），不 bump 版本");
+  console.error("  sync-ios  同步 app.json 版本到 Xcode 原生工程");
   console.error("  testflight 生成 iOS 工程并打 testflight/<version>-<build> tag + GitHub changelog");
   console.error("  testflight-tag 只打并推送 testflight/<version>-<build> tag + GitHub changelog");
   process.exit(1);
