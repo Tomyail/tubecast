@@ -56,7 +56,7 @@ vi.mock("expo-file-system", () => ({
   },
 }));
 
-const { isAudioMetadataReady, playbackErrorMessage, resolveCachedLocalUri, resolveTrackSource } = await import(
+const { isAudioMetadataReady, isPlaybackLoadingPhase, isPlaybackStartConfirmed, playbackErrorMessage, resolveCachedLocalUri, resolveTrackSource } = await import(
   "../../src/features/player/context"
 );
 
@@ -121,5 +121,22 @@ describe("player source resolution", () => {
     expect(isAudioMetadataReady(0, 0)).toBe(false);
     expect(isAudioMetadataReady(120, 0)).toBe(true);
     expect(isAudioMetadataReady(0, 1)).toBe(true);
+  });
+
+  it("keeps controls in loading mode only for startup and buffering phases", () => {
+    expect(isPlaybackLoadingPhase("resolving")).toBe(true);
+    expect(isPlaybackLoadingPhase("loading")).toBe(true);
+    expect(isPlaybackLoadingPhase("buffering")).toBe(true);
+    expect(isPlaybackLoadingPhase("playing")).toBe(false);
+    expect(isPlaybackLoadingPhase("paused")).toBe(false);
+    expect(isPlaybackLoadingPhase("error")).toBe(false);
+  });
+
+  it("confirms playback start only near the requested start position", () => {
+    expect(isPlaybackStartConfirmed(0, 0)).toBe(false);
+    expect(isPlaybackStartConfirmed(0.2, 0)).toBe(false);
+    expect(isPlaybackStartConfirmed(0.3, 0)).toBe(true);
+    expect(isPlaybackStartConfirmed(42.3, 42)).toBe(true);
+    expect(isPlaybackStartConfirmed(100, 0)).toBe(false);
   });
 });

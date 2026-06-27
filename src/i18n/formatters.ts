@@ -6,7 +6,7 @@ export function formatFileSize(bytes: number | null | undefined, locale: string)
 }
 
 export function formatDuration(seconds: number | null | undefined): string {
-  if (!seconds || Number.isNaN(seconds)) return "--:--";
+  if (seconds === null || seconds === undefined || Number.isNaN(seconds)) return "--:--";
   const s = Math.max(0, Math.floor(seconds));
   const h = Math.floor(s / 3600);
   const m = Math.floor((s % 3600) / 60);

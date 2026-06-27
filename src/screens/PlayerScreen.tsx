@@ -192,7 +192,7 @@ export default function PlayerScreen() {
               <Ionicons name="play-skip-back" size={30} color={colors.primaryText} />
             </Touchable>
             <Touchable
-              accessibilityLabel={isPlaying ? t("common.pause") : t("common.play")}
+              accessibilityLabel={playbackLoading ? t("player.loading") : isPlaying ? t("common.pause") : t("common.play")}
               accessibilityRole="button"
               disabled={playbackLoading}
               onPress={() => void togglePlayback()}

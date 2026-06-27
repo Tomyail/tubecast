@@ -1,7 +1,7 @@
 import { setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import { Directory, File, Paths } from "expo-file-system";
 import type { ReactNode } from "react";
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { Track } from "../playlist/storage";
 import { usePlaylist } from "../playlist/context";
@@ -9,8 +9,16 @@ import { AudioExpiredError, getDownloadUrl, getJob } from "../jobs/api";
 import { ensureTrackCached } from "../jobs/cache";
 import { trackFromReadyJob } from "../jobs/track";
 import { useTranslation } from "../../i18n";
+import {
+  initialPlayerState,
+  isPlaybackLoadingPhase,
+  phaseFromAudioStatus,
+  playerReducer,
+  type PlaybackSource,
+  type PlayerPhase,
+} from "./state";
 
-export type PlaybackSource = "local" | "remote";
+export type { PlaybackSource, PlayerPhase } from "./state";
 
 type PlayerContextValue = {
   activeTrack: Track | null;
@@ -22,6 +30,7 @@ type PlayerContextValue = {
   duration: number;
   playbackSource: PlaybackSource | null;
   playbackError: string | null;
+  playerPhase: PlayerPhase;
   playTrack: (track: Track, queue?: Track[]) => Promise<void>;
   togglePlayback: () => Promise<void>;
   seekTo: (seconds: number) => void;
@@ -57,65 +66,68 @@ export function playbackErrorMessage(err: unknown, t?: (key: string) => string):
   return t("player.failed");
 }
 
-export function isAudioMetadataReady(duration: number, currentTime: number): boolean {
-  return duration > 0 || currentTime > 0;
+export { isAudioMetadataReady, isPlaybackLoadingPhase, isPlaybackStartConfirmed } from "./state";
+
+function waitForNextTick(): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, 0));
 }
 
 export function PlayerProvider({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
   const { tracks, addTrack, incrementPlayCount } = usePlaylist();
-  const [activeTrack, setActiveTrack] = useState<Track | null>(null);
-  const [queue, setQueue] = useState<Track[]>([]);
-  const [playbackSource, setPlaybackSource] = useState<PlaybackSource | null>(null);
-  const [playbackError, setPlaybackError] = useState<string | null>(null);
-  const [playbackLoading, setPlaybackLoading] = useState(false);
-  const player = useAudioPlayer("");
+  const [state, dispatch] = useReducer(playerReducer, initialPlayerState);
+  const player = useAudioPlayer(null, {
+    keepAudioSessionActive: true,
+    preferredForwardBufferDuration: 15,
+    updateInterval: 100,
+  });
   const status = useAudioPlayerStatus(player);
   const lastSaveRef = useRef(0);
-  const playRequestRef = useRef(0);
+  const requestIdRef = useRef(0);
 
-  const isPlaying = status?.playing ?? false;
-  const isBuffering = status?.isBuffering ?? false;
+  const { activeTrack, queue, playbackSource, playbackError, phase } = state;
+  const playbackLoading = isPlaybackLoadingPhase(phase);
+  const isPlaying = phase === "playing";
+  const isBuffering = phase === "buffering" || (status?.isBuffering ?? false);
   const currentTime = status?.currentTime ?? 0;
-  const duration = status?.duration ?? 0;
+  const duration = status?.duration && status.duration > 0 ? status.duration : activeTrack?.durationSeconds ?? 0;
+
+  useEffect(() => {
+    void setAudioModeAsync({
+      playsInSilentMode: true,
+      shouldPlayInBackground: true,
+      interruptionMode: "doNotMix",
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!activeTrack || phase === "idle" || phase === "resolving") return;
+    if (status?.error) {
+      dispatch({ type: "error", message: t("player.failed") });
+      return;
+    }
+    const nextPhase = phaseFromAudioStatus(state, status, currentTime);
+    if (nextPhase) {
+      dispatch({ type: "status-phase", phase: nextPhase });
+    }
+  }, [activeTrack, currentTime, phase, state, status, status?.error, t]);
 
   // Save progress periodically
   useEffect(() => {
-    if (!activeTrack || !isPlaying) return;
+    if (!activeTrack || phase !== "playing") return;
     const now = Date.now();
     if (now - lastSaveRef.current < SAVE_INTERVAL) return;
     lastSaveRef.current = now;
     AsyncStorage.setItem(`${PROGRESS_KEY}${activeTrack.id}`, JSON.stringify({ position: currentTime }));
-  }, [activeTrack, currentTime, isPlaying]);
+  }, [activeTrack, currentTime, phase]);
 
   useEffect(() => {
     if (!activeTrack) return;
     const updated = tracks.find((track) => track.id === activeTrack.id);
     if (updated && updated !== activeTrack) {
-      setActiveTrack(updated);
+      dispatch({ type: "track-updated", track: updated });
     }
   }, [activeTrack, tracks]);
-
-  // Auto-advance on completion
-  useEffect(() => {
-    if (!activeTrack || !status) return;
-    if (status.didJustFinish) {
-      incrementPlayCount(activeTrack.id);
-      // 播放完毕后清除保存的进度，否则再次点击该曲目会 seek 到接近结尾的位置
-      AsyncStorage.removeItem(`${PROGRESS_KEY}${activeTrack.id}`);
-      playNext();
-    }
-  }, [status?.didJustFinish]);
-
-  useEffect(() => {
-    if (!activeTrack || playbackError) {
-      setPlaybackLoading(false);
-      return;
-    }
-    if (playbackLoading && isAudioMetadataReady(duration, currentTime)) {
-      setPlaybackLoading(false);
-    }
-  }, [activeTrack, currentTime, duration, playbackError, playbackLoading]);
 
   const ensureCacheForTrack = useCallback((track: Track) => {
     void getJob(track.jobId).then(async (job) => {
@@ -130,13 +142,14 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     });
   }, [addTrack]);
 
+  const nextRequestId = useCallback(() => {
+    requestIdRef.current += 1;
+    return requestIdRef.current;
+  }, []);
+
   const playTrack = useCallback(async (track: Track, newQueue?: Track[]) => {
-    const requestId = ++playRequestRef.current;
-    if (newQueue) setQueue(newQueue);
-    setActiveTrack(track);
-    setPlaybackSource(null);
-    setPlaybackError(null);
-    setPlaybackLoading(true);
+    const requestId = nextRequestId();
+    dispatch({ type: "play-request", requestId, track, queue: newQueue });
     ensureCacheForTrack(track);
 
     // Resume from saved position
@@ -150,101 +163,88 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         position = saved >= track.durationSeconds - 1 ? 0 : saved;
       }
     } catch {}
+    if (requestId !== requestIdRef.current) return;
 
-    await setAudioModeAsync({
-      playsInSilentMode: true,
-      shouldPlayInBackground: true,
-      interruptionMode: "doNotMix",
-    });
-    if (requestId !== playRequestRef.current) return;
-
-    try { player.pause(); } catch {}
     try { player.clearLockScreenControls(); } catch {}
+    await waitForNextTick();
+    if (requestId !== requestIdRef.current) return;
 
     let source: { uri: string; source: PlaybackSource };
     try {
       source = await resolveTrackSource(track);
     } catch (err) {
-      if (requestId === playRequestRef.current) {
-        setPlaybackError(playbackErrorMessage(err, t));
-        setPlaybackSource(null);
-        setPlaybackLoading(false);
-      }
+      dispatch({ type: "error", requestId, message: playbackErrorMessage(err, t) });
       return;
     }
-    if (requestId !== playRequestRef.current) return;
+    if (requestId !== requestIdRef.current) return;
 
     try {
       player.replace(source.uri);
-      setPlaybackSource(source.source);
-      setPlaybackError(null);
+      dispatch({ type: "source-ready", requestId, source: source.source });
+      player.setActiveForLockScreen(true, {
+        title: track.title || t("common.untitled"),
+        artist: "TubeCast",
+        artworkUrl: track.thumbnailUrl || undefined,
+      }, {
+        showSeekForward: true,
+        showSeekBackward: true,
+      });
+      if (position > 0) await player.seekTo(position);
+      if (requestId !== requestIdRef.current) return;
+      player.play();
+      dispatch({ type: "play-issued", requestId, startPosition: position });
     } catch (err) {
-      if (requestId === playRequestRef.current) {
-        setPlaybackError(playbackErrorMessage(err, t));
-        setPlaybackSource(null);
-        setPlaybackLoading(false);
-      }
-      return;
+      dispatch({ type: "error", requestId, message: playbackErrorMessage(err, t) });
     }
-    if (requestId !== playRequestRef.current) return;
-
-    player.setActiveForLockScreen(true, {
-      title: track.title || t("common.untitled"),
-      artist: "TubeCast",
-      artworkUrl: track.thumbnailUrl || undefined,
-    }, {
-      showSeekForward: true,
-      showSeekBackward: true,
-    });
-    if (position > 0) player.seekTo(position);
-    if (requestId !== playRequestRef.current) return;
-    player.play();
-  }, [player, ensureCacheForTrack]);
+  }, [ensureCacheForTrack, nextRequestId, player, t]);
 
   const togglePlayback = useCallback(async () => {
-    if (isPlaying) {
+    if (!activeTrack || playbackLoading) return;
+
+    if (phase === "playing" || phase === "buffering") {
       player.pause();
+      dispatch({ type: "pause" });
       return;
     }
 
-    if (activeTrack && playbackSource === "remote") {
+    if (playbackSource === "remote") {
       const latestTrack = tracks.find((track) => track.id === activeTrack.id) ?? activeTrack;
       const localUri = resolveCachedLocalUri(latestTrack);
       if (localUri) {
-        const position = currentTime;
+        const requestId = nextRequestId();
+        dispatch({ type: "play-request", requestId, track: latestTrack, queue });
         try {
           player.replace(localUri);
-          setPlaybackSource("local");
-          setPlaybackLoading(true);
-          if (position > 0) player.seekTo(position);
+          dispatch({ type: "source-ready", requestId, source: "local" });
+          if (currentTime > 0) await player.seekTo(currentTime);
+          if (requestId !== requestIdRef.current) return;
           player.play();
+          dispatch({ type: "play-issued", requestId, startPosition: currentTime });
           return;
-        } catch {
-          setPlaybackError(t("player.failed"));
+        } catch (err) {
+          dispatch({ type: "error", requestId, message: playbackErrorMessage(err, t) });
         }
       }
     }
 
     try {
       player.play();
-      setPlaybackError(null);
+      dispatch({ type: "play-issued", requestId: state.requestId, startPosition: currentTime });
     } catch (err) {
-        setPlaybackError(playbackErrorMessage(err, t));
+      dispatch({ type: "error", message: playbackErrorMessage(err, t) });
     }
-  }, [activeTrack, currentTime, isPlaying, playbackSource, player, tracks]);
+  }, [activeTrack, currentTime, nextRequestId, phase, playbackLoading, playbackSource, player, queue, state.requestId, t, tracks]);
 
   const seekTo = useCallback((seconds: number) => {
-    player.seekTo(seconds);
+    void player.seekTo(seconds);
   }, [player]);
 
   const stopPlayback = useCallback(() => {
+    const requestId = nextRequestId();
     try { player.pause(); } catch {}
-    setActiveTrack(null);
-    setQueue([]);
-    setPlaybackSource(null);
-    setPlaybackError(null);
-    setPlaybackLoading(false);
-  }, [player]);
+    try { player.clearLockScreenControls(); } catch {}
+    dispatch({ type: "stop", requestId });
+  }, [nextRequestId, player]);
 
   const currentIndex = useMemo(() => {
     if (!activeTrack) return -1;
@@ -253,22 +253,32 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   const playNext = useCallback(() => {
     if (currentIndex < queue.length - 1) {
-      playTrack(queue[currentIndex + 1]);
+      void playTrack(queue[currentIndex + 1]);
     }
   }, [currentIndex, queue, playTrack]);
 
+  // Auto-advance on completion
+  useEffect(() => {
+    if (!activeTrack || !status?.didJustFinish) return;
+    incrementPlayCount(activeTrack.id);
+    // 播放完毕后清除保存的进度，否则再次点击该曲目会 seek 到接近结尾的位置
+    AsyncStorage.removeItem(`${PROGRESS_KEY}${activeTrack.id}`);
+    playNext();
+  }, [activeTrack, incrementPlayCount, playNext, status?.didJustFinish]);
+
   const playPrevious = useCallback(() => {
     if (currentTime > 3) {
-      player.seekTo(0);
+      void player.seekTo(0);
     } else if (currentIndex > 0) {
-      playTrack(queue[currentIndex - 1]);
+      void playTrack(queue[currentIndex - 1]);
     }
   }, [currentIndex, queue, playTrack, currentTime, player]);
 
   const value = useMemo<PlayerContextValue>(() => ({
     activeTrack, queue, isPlaying, isBuffering, playbackLoading, currentTime, duration, playbackSource, playbackError,
+    playerPhase: phase,
     playTrack, togglePlayback, seekTo, playNext, playPrevious, stopPlayback,
-  }), [activeTrack, queue, isPlaying, isBuffering, playbackLoading, currentTime, duration, playbackSource, playbackError, playTrack, togglePlayback, seekTo, playNext, playPrevious, stopPlayback]);
+  }), [activeTrack, queue, isPlaying, isBuffering, playbackLoading, currentTime, duration, playbackSource, playbackError, phase, playTrack, togglePlayback, seekTo, playNext, playPrevious, stopPlayback]);
 
   return <PlayerContext.Provider value={value}>{children}</PlayerContext.Provider>;
 }

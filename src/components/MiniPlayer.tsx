@@ -1,7 +1,7 @@
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
-import { StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 import { formatDuration } from "../i18n/formatters";
 import type { RootStackParamList } from "../app/navigation/types";
@@ -14,7 +14,7 @@ export default function MiniPlayer({ tabBarHeight }: { tabBarHeight: number }) {
   const { t } = useTranslation();
   const { colors, isDark } = useAppTheme();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { activeTrack, currentTime, duration, isPlaying, togglePlayback } = usePlayer();
+  const { activeTrack, currentTime, duration, isPlaying, playbackLoading, togglePlayback } = usePlayer();
 
   if (!activeTrack) {
     return null;
@@ -50,13 +50,18 @@ export default function MiniPlayer({ tabBarHeight }: { tabBarHeight: number }) {
         </View>
         </Touchable>
         <Touchable
-          accessibilityLabel={isPlaying ? t("common.pause") : t("common.play")}
+          accessibilityLabel={playbackLoading ? t("player.loading") : isPlaying ? t("common.pause") : t("common.play")}
           accessibilityRole="button"
+          disabled={playbackLoading}
           hitSlop={8}
-          style={[styles.button, { backgroundColor: colors.tint }]}
+          style={[styles.button, { backgroundColor: colors.tint }, playbackLoading && styles.buttonDisabled]}
           onPress={togglePlayback}
         >
-          <Ionicons name={isPlaying ? "pause" : "play"} size={19} color={colors.tintText} />
+          {playbackLoading ? (
+            <ActivityIndicator color={colors.tintText} />
+          ) : (
+            <Ionicons name={isPlaying ? "pause" : "play"} size={19} color={colors.tintText} />
+          )}
         </Touchable>
         <View style={[styles.progressTrack, { backgroundColor: colors.border }]}>
           <View style={[styles.progressFill, { backgroundColor: colors.tint, width: `${progress * 100}%` }]} />
@@ -120,6 +125,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: 44,
   },
+  buttonDisabled: { opacity: 0.6 },
   progressTrack: {
     bottom: 0,
     height: 2,

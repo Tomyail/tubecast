@@ -24,7 +24,7 @@ export default function PlaylistScreen() {
   const { colors } = useAppTheme();
   const navigation = useNavigation<NativeStackNavigationProp<PlaylistStackParamList>>();
   const { tracks, deleteTrack, deleteTracks, reorderTracks } = usePlaylist();
-  const { playTrack, togglePlayback, activeTrack, isPlaying, stopPlayback } = usePlayer();
+  const { playTrack, togglePlayback, activeTrack, isPlaying, playbackLoading, stopPlayback } = usePlayer();
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
@@ -97,10 +97,11 @@ export default function PlaylistScreen() {
   const handlePlay = (track: Track) => {
     // 点击正在播放的曲目时切换暂停/继续，而非重新走 replace+seek 流程
     if (activeTrack?.id === track.id) {
+      if (playbackLoading) return;
       void togglePlayback();
       return;
     }
-    playTrack(track, tracks);
+    void playTrack(track, tracks);
   };
 
   const handleDelete = (track: Track) => {
@@ -161,6 +162,7 @@ export default function PlaylistScreen() {
         <SwipeableTrackItem
           track={item}
           isActive={isCurrentTrack}
+          isLoading={isCurrentTrack && playbackLoading}
           isPlaying={isPlaying}
           isDragging={isActive}
           isEditMode={isEditMode}
@@ -220,6 +222,7 @@ export default function PlaylistScreen() {
 function SwipeableTrackItem({
   track,
   isActive,
+  isLoading,
   isPlaying,
   isDragging,
   isEditMode,
@@ -234,6 +237,7 @@ function SwipeableTrackItem({
 }: {
   track: Track;
   isActive: boolean;
+  isLoading: boolean;
   isPlaying: boolean;
   isDragging: boolean;
   isEditMode: boolean;
@@ -287,7 +291,9 @@ function SwipeableTrackItem({
       </View>
 
       {!isEditMode && (
-        isActive && isPlaying ? (
+        isLoading ? (
+          <Ionicons name="hourglass-outline" size={19} color={colors.tint} />
+        ) : isActive && isPlaying ? (
           <Ionicons name="volume-high" size={19} color={colors.tint} />
         ) : !isActive && track.playCount === 0 ? (
           <View style={[styles.unplayedDot, { backgroundColor: colors.tint }]} />

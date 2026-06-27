@@ -5,7 +5,7 @@ describe("localized formatters", () => {
   it("formats duration consistently for media playback", () => {
     expect(formatDuration(65)).toBe("1:05");
     expect(formatDuration(3900)).toBe("1:05:00");
-    expect(formatDuration(0)).toBe("--:--");
+    expect(formatDuration(0)).toBe("0:00");
     expect(formatDuration(null)).toBe("--:--");
     expect(formatDuration(Number.NaN)).toBe("--:--");
   });
