@@ -23,12 +23,15 @@ TubeCast is an independent Expo / React Native client for iOS and Android. It is
 
 ## Features
 
-- Follow YouTube channels and browse their recent uploads in a podcast-style feed.
-- Add individual videos or feed items to the listening queue.
-- See meaningful conversion states: queued, downloading, transcoding, uploading, and ready.
-- Cache completed audio locally for offline playback.
-- Create playlists, reorder tracks, and retain playback progress.
-- Play audio in the background with a persistent mini player.
+- Convert YouTube videos into audio from a pasted URL, with clear queued, downloading, transcoding, saving, playable, failed, and expired states.
+- Browse recent and popular converted videos on the Home screen, then play or cache them without leaving the app.
+- Follow YouTube channels by URL or handle, manage subscriptions, and browse new uploads in a podcast-style feed.
+- Open publisher previews from subscribed feeds or the player, see recent videos, subscribe or unsubscribe, and convert playable episodes.
+- Cache completed audio locally for offline playback, retry failed cache jobs, and inspect local storage usage.
+- Play audio with a full-screen player, draggable progress bar, previous/next controls, source links, publisher metadata, and cache status.
+- Keep listening in the background with iOS lock-screen metadata and a persistent mini player above the tab bar.
+- Maintain a local playlist/library with playback progress, listened state, reorder support, swipe-to-delete, bulk edit/delete, and an unplayed-only filter.
+- Use light, dark, or system appearance, and switch between English, Simplified Chinese, or system language.
 
 ## Try the beta
 
@@ -59,20 +62,6 @@ Open the Expo development server in Expo Go, or start a native development build
 pnpm android
 pnpm ios
 ```
-
-## Backend
-
-By default, TubeCast connects to the maintainer-operated backend at `https://yt-audio.tomyail.com`. No configuration is required for normal use.
-
-The backend API and media-processing workers are private and are not included in this repository. Their availability and API behavior may change independently of TubeCast releases.
-
-To use a self-hosted compatible backend, set `EXPO_PUBLIC_SERVER_URL` before running or building the app:
-
-```bash
-EXPO_PUBLIC_SERVER_URL=https://your-api.example.com pnpm start
-```
-
-For physical devices, the API must be reachable from the device; your computer's `localhost` address will not work. Do not put credentials in `EXPO_PUBLIC_*` variables, because Expo embeds them in the client bundle.
 
 ## Local builds
 
