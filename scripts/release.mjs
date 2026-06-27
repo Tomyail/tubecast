@@ -78,9 +78,13 @@ function testflightTagName() {
   return `testflight/${currentVersion()}-${currentBuildNumber()}`;
 }
 
+function shellQuote(value) {
+  return `'${String(value).replace(/'/g, `'\\''`)}'`;
+}
+
 function tagExists(tag) {
   try {
-    execSync(`git rev-parse -q --verify refs/tags/${tag}`, { cwd: mobileRoot, stdio: "ignore" });
+    execSync(`git rev-parse -q --verify refs/tags/${shellQuote(tag)}`, { cwd: mobileRoot, stdio: "ignore" });
     return true;
   } catch {
     return false;
@@ -97,15 +101,70 @@ function githubReleaseExists(tag) {
 }
 
 function ensureTestflightReleaseNotes(tag) {
+  const notes = testflightReleaseNotes(tag);
+  const tmp = path.join(mobileRoot, `.release-notes-${tag.replace(/[\\/]/g, "-")}.md`);
+  writeFileSync(tmp, notes + "\n");
   if (githubReleaseExists(tag)) {
-    console.log(`✅ GitHub Release 已存在：${tag}`);
+    run(`gh release edit "${tag}" -R ${GH_REPO} --title "${tag}" --prerelease --notes-file ${tmp}`, {
+      cwd: mobileRoot,
+      stdio: "inherit",
+    });
+    rmSync(tmp, { force: true });
+    console.log(`✅ 已更新 GitHub changelog：${tag}`);
     return;
   }
-  run(`gh release create "${tag}" -R ${GH_REPO} --title "${tag}" --prerelease --generate-notes`, {
+  run(`gh release create "${tag}" -R ${GH_REPO} --title "${tag}" --prerelease --notes-file ${tmp}`, {
     cwd: mobileRoot,
     stdio: "inherit",
   });
+  rmSync(tmp, { force: true });
   console.log(`✅ 已生成 GitHub changelog：${tag}`);
+}
+
+function parseTestflightTag(tag) {
+  const match = /^testflight\/(.+)-(\d+)$/.exec(tag);
+  if (!match) return null;
+  return { version: match[1], build: Number(match[2]) };
+}
+
+function previousTestflightTag(tag) {
+  const current = parseTestflightTag(tag);
+  if (!current) return null;
+  const tags = execSync(`git tag --list ${shellQuote(`testflight/${current.version}-*`)}`, {
+    cwd: mobileRoot,
+    encoding: "utf8",
+  })
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((candidate) => ({ tag: candidate, parsed: parseTestflightTag(candidate) }))
+    .filter(({ parsed }) => parsed && parsed.version === current.version && parsed.build < current.build)
+    .sort((a, b) => b.parsed.build - a.parsed.build);
+  return tags[0]?.tag ?? null;
+}
+
+function testflightReleaseNotes(tag) {
+  const previous = previousTestflightTag(tag);
+  const range = previous ? `${previous}..${tag}` : tag;
+  const commits = execSync(`git log --no-merges --pretty=format:%s ${shellQuote(range)}`, {
+    cwd: mobileRoot,
+    encoding: "utf8",
+  })
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .filter((line) => !/^chore\(mobile\): bump buildNumber to \d+$/.test(line));
+
+  const lines = [`## TestFlight ${tag.replace(/^testflight\//, "")}`];
+  if (previous) lines.push("", `Changes since ${previous}:`);
+  lines.push("");
+  if (commits.length === 0) {
+    lines.push("- Build number only; no app-facing changes.");
+  } else {
+    lines.push(...commits.map((commit) => `- ${commit}`));
+  }
+  lines.push("", `**Full Changelog**: https://github.com/${GH_REPO}/compare/${previous ?? ""}...${tag}`);
+  return lines.join("\n");
 }
 
 // buildNumber +1（字符串整数）。必须在 CATV 之前调用——app.json 是 CATV 的 bumpFile，
