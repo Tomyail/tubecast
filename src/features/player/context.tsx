@@ -70,6 +70,11 @@ export function playbackErrorMessage(err: unknown, t?: (key: string) => string):
   return t("player.failed");
 }
 
+export function getLockScreenArtist(track: Pick<Track, "channelName">): string {
+  const channelName = track.channelName?.trim();
+  return channelName || "TubeCast";
+}
+
 export { isAudioMetadataReady, isPlaybackLoadingPhase, isPlaybackStartConfirmed } from "./state";
 
 function waitForNextTick(): Promise<void> {
@@ -204,7 +209,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       dispatch({ type: "source-ready", requestId, source: source.source });
       player.setActiveForLockScreen(true, {
         title: track.title || t("common.untitled"),
-        artist: "TubeCast",
+        artist: getLockScreenArtist(track),
         artworkUrl: track.thumbnailUrl || undefined,
       }, {
         showSeekForward: true,

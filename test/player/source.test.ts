@@ -56,7 +56,7 @@ vi.mock("expo-file-system", () => ({
   },
 }));
 
-const { isAudioMetadataReady, isPlaybackLoadingPhase, isPlaybackStartConfirmed, playbackErrorMessage, resolveCachedLocalUri, resolveTrackSource } = await import(
+const { getLockScreenArtist, isAudioMetadataReady, isPlaybackLoadingPhase, isPlaybackStartConfirmed, playbackErrorMessage, resolveCachedLocalUri, resolveTrackSource } = await import(
   "../../src/features/player/context"
 );
 
@@ -138,5 +138,11 @@ describe("player source resolution", () => {
     expect(isPlaybackStartConfirmed(0.3, 0)).toBe(true);
     expect(isPlaybackStartConfirmed(42.3, 42)).toBe(true);
     expect(isPlaybackStartConfirmed(100, 0)).toBe(false);
+  });
+
+  it("uses the publisher as lock screen artist before falling back to TubeCast", () => {
+    expect(getLockScreenArtist(makeTrack({ channelName: "Mediastorm 影视飓风" }))).toBe("Mediastorm 影视飓风");
+    expect(getLockScreenArtist(makeTrack({ channelName: "  " }))).toBe("TubeCast");
+    expect(getLockScreenArtist(makeTrack({ channelName: null }))).toBe("TubeCast");
   });
 });
