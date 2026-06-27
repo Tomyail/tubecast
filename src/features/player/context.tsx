@@ -43,6 +43,9 @@ const PlayerContext = createContext<PlayerContextValue | null>(null);
 const PlaybackProgressContext = createContext<number>(0);
 const PROGRESS_KEY = "player_progress_";
 const SAVE_INTERVAL = 5000;
+// 乐观 resume 后容忍 status 短暂 !playing 的宽限期(player.play() 生效前的陈旧 status
+// 否则会把 playing→paused→playing 抖动)。
+const RESUME_GRACE_MS = 800;
 
 export function resolveCachedLocalUri(track: Track): string | null {
   const filename =
@@ -85,6 +88,12 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const status = useAudioPlayerStatus(player);
   const lastSaveRef = useRef(0);
   const requestIdRef = useRef(0);
+  // didJustFinish 边沿标记:确保每个播放完成事件只触发一次 playNext。
+  // playTrack 切换下一首是异步的(player.replace 之前 status.didJustFinish 仍为 true),
+  // 无边沿保护时 effect 会因 activeTrack 变化反复重跑并再次 playNext,形成渲染循环。
+  const prevFinishedRef = useRef(false);
+  // 最近一次乐观 resume(resume-issued)的时间戳,用于 status-phase 的宽限期判断。
+  const optimisticResumeAtRef = useRef(0);
 
   const { activeTrack, queue, playbackSource, playbackError, phase } = state;
   const playbackLoading = isPlaybackLoadingPhase(phase);
@@ -108,8 +117,19 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       return;
     }
     const nextPhase = phaseFromAudioStatus(state, status, currentTime);
-    if (nextPhase) {
-      dispatch({ type: "status-phase", phase: nextPhase });
+    // 仅在目标 phase 与当前不同时 dispatch。否则基于陈旧闭包的无变化 dispatch
+    // (playing→playing)会在用户 pause 后把 phase=paused 覆盖回 playing。
+    if (nextPhase && nextPhase !== phase) {
+      // 乐观 resume 宽限期:resume-issued 后 player.play() 生效前 status 可能短暂 !playing,
+      // 此时把 playing→paused 会造成按钮抖动(playing→paused→playing)。宽限期内容忍。
+      const inResumeGrace =
+        phase === "playing" &&
+        nextPhase === "paused" &&
+        optimisticResumeAtRef.current > 0 &&
+        Date.now() - optimisticResumeAtRef.current < RESUME_GRACE_MS;
+      if (!inResumeGrace) {
+        dispatch({ type: "status-phase", phase: nextPhase });
+      }
     }
   }, [activeTrack, currentTime, phase, state, status, status?.error, t]);
 
@@ -200,7 +220,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, [ensureCacheForTrack, nextRequestId, player, t]);
 
   const togglePlayback = useCallback(async () => {
-    if (!activeTrack || playbackLoading) return;
+    if (!activeTrack || playbackLoading) {
+      return;
+    }
 
     if (phase === "playing" || phase === "buffering") {
       player.pause();
@@ -230,7 +252,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
     try {
       player.play();
-      dispatch({ type: "play-issued", requestId: state.requestId, startPosition: currentTime });
+      optimisticResumeAtRef.current = Date.now();
+      dispatch({ type: "resume-issued", requestId: state.requestId, startPosition: currentTime });
     } catch (err) {
       dispatch({ type: "error", message: playbackErrorMessage(err, t) });
     }
@@ -258,9 +281,17 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     }
   }, [currentIndex, queue, playTrack]);
 
-  // Auto-advance on completion
+  // Auto-advance on completion —— 仅在 didJustFinish 的 false→true 边沿触发一次。
   useEffect(() => {
-    if (!activeTrack || !status?.didJustFinish) return;
+    const finished = !!status?.didJustFinish;
+    if (!finished) {
+      prevFinishedRef.current = false;
+      return;
+    }
+    if (prevFinishedRef.current || !activeTrack) {
+      return;
+    }
+    prevFinishedRef.current = true;
     incrementPlayCount(activeTrack.id);
     // 播放完毕后清除保存的进度，否则再次点击该曲目会 seek 到接近结尾的位置
     AsyncStorage.removeItem(`${PROGRESS_KEY}${activeTrack.id}`);

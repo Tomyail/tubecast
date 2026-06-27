@@ -126,4 +126,20 @@ describe("player state machine", () => {
       isBuffering: false,
     }), 0)).toBe("paused");
   });
+
+  it("resume-issued optimistically marks a loaded track as playing without loading", () => {
+    const state = playerReducer(initialPlayerState, {
+      type: "play-request",
+      requestId: 1,
+      track: makeTrack(),
+    });
+    const resumed = playerReducer(state, { type: "resume-issued", requestId: 1, startPosition: 5 });
+
+    expect(resumed.phase).toBe("playing");
+    expect(resumed.playIssued).toBe(true);
+    expect(resumed.startPosition).toBe(5);
+
+    // stale requestId is ignored
+    expect(playerReducer(resumed, { type: "resume-issued", requestId: 0, startPosition: 0 })).toBe(resumed);
+  });
 });

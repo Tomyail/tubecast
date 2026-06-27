@@ -19,6 +19,7 @@ export type PlayerAction =
   | { type: "play-request"; requestId: number; track: Track; queue?: Track[] }
   | { type: "source-ready"; requestId: number; source: PlaybackSource }
   | { type: "play-issued"; requestId: number; startPosition: number }
+  | { type: "resume-issued"; requestId: number; startPosition: number }
   | { type: "status-phase"; phase: PlayerPhase }
   | { type: "pause" }
   | { type: "error"; requestId?: number; message: string }
@@ -66,6 +67,17 @@ export function playerReducer(state: PlayerState, action: PlayerAction): PlayerS
       return {
         ...state,
         phase: "loading",
+        playbackError: null,
+        startPosition: action.startPosition,
+        playIssued: true,
+      };
+    case "resume-issued":
+      // 恢复已加载曲目:乐观置 playing,跳过 loading 闪现。
+      // 若 player 实际未出声,status-phase 会据 status 纠正为 buffering/paused。
+      if (action.requestId !== state.requestId) return state;
+      return {
+        ...state,
+        phase: "playing",
         playbackError: null,
         startPosition: action.startPosition,
         playIssued: true,
