@@ -1,9 +1,12 @@
+import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getSubscribedChannels, addChannel, removeChannel, isChannelSubscribed } from "./storage";
 import { fetchFeedItems, resolveFeedSource } from "./api";
 import type { FeedItemWithStatus, FeedSource } from "./types";
+import { getCachedYoutubeFeed, saveCachedYoutubeFeed } from "./cache";
 
 const MAX_FEED_ITEMS = 100;
+const YOUTUBE_FEED_QUERY_KEY = ["youtubeFeed"] as const;
 
 export function useSubscribedChannels() {
   return useQuery({
@@ -13,22 +16,58 @@ export function useSubscribedChannels() {
 }
 
 export function useFeedVideos() {
-  return useQuery({
-    queryKey: ["youtubeFeed"],
+  const queryClient = useQueryClient();
+  const [isRestoring, setIsRestoring] = useState(() => queryClient.getQueryData(YOUTUBE_FEED_QUERY_KEY) === undefined);
+
+  useEffect(() => {
+    if (!isRestoring) return;
+    let cancelled = false;
+
+    getSubscribedChannels()
+      .then((channels) => getCachedYoutubeFeed(channels))
+      .then((cached) => {
+        if (cancelled) return;
+        if (cached && queryClient.getQueryData(YOUTUBE_FEED_QUERY_KEY) === undefined) {
+          queryClient.setQueryData(YOUTUBE_FEED_QUERY_KEY, cached.data, { updatedAt: cached.savedAtMs });
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setIsRestoring(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isRestoring, queryClient]);
+
+  const query = useQuery({
+    queryKey: YOUTUBE_FEED_QUERY_KEY,
     queryFn: async (): Promise<FeedItemWithStatus[]> => {
       const channels = await getSubscribedChannels();
-      if (channels.length === 0) return [];
+      if (channels.length === 0) {
+        void saveCachedYoutubeFeed(channels, []).catch((error) => {
+          console.warn("Failed to persist youtube feed cache", error);
+        });
+        return [];
+      }
 
       const items = await fetchFeedItems(channels);
 
       // For v1, all videos start as "new". Job matching can be enhanced later.
-      return items.slice(0, MAX_FEED_ITEMS).map((v) => ({
+      const videos = items.slice(0, MAX_FEED_ITEMS).map((v) => ({
         ...v,
         status: "new" as const,
       }));
+      void saveCachedYoutubeFeed(channels, videos).catch((error) => {
+        console.warn("Failed to persist youtube feed cache", error);
+      });
+      return videos;
     },
     staleTime: 0,
+    enabled: !isRestoring,
   });
+
+  return { ...query, isRestoring };
 }
 
 export function useAddChannel() {

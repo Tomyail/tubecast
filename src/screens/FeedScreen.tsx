@@ -36,7 +36,7 @@ export default function FeedScreen() {
   const { colors } = useAppTheme();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { data: channels = [] } = useSubscribedChannels();
-  const { data: videos = [], isLoading, error, refetch } = useFeedVideos();
+  const { data: videos = [], isLoading, isRefetching, isRestoring, error, refetch } = useFeedVideos();
   const [selectedChannel, setSelectedChannel] = useState<string | null>(null);
   const [submittedJobs, setSubmittedJobs] = useState<Record<string, SubmittedFeedJob>>({});
   const [submittingIds, setSubmittingIds] = useState<Set<string>>(new Set());
@@ -150,20 +150,20 @@ export default function FeedScreen() {
         </View>
       )}
 
-      {isLoading && (
+      {(isRestoring || isLoading) && videos.length === 0 && (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" />
           <Text style={[styles.loadingText, { color: colors.secondaryText }]}>{t("feed.loading")}</Text>
         </View>
       )}
 
-      {error && (
+      {error && videos.length === 0 && (
         <View style={styles.loadingContainer}>
           <Text style={[styles.errorText, { color: colors.destructive }]}>{t("feed.loadFailed")}</Text>
         </View>
       )}
 
-      {!isLoading && !error && (
+      {!isRestoring && !isLoading && (videos.length > 0 || !error) && (
         <FlatList
           data={filteredVideos}
           removeClippedSubviews
@@ -179,7 +179,7 @@ export default function FeedScreen() {
               onTerminal={handleTerminal}
             />
           )}
-          refreshing={isLoading}
+          refreshing={isRefetching}
           onRefresh={refetch}
           ListEmptyComponent={<Text style={[styles.emptyFeed, { color: colors.secondaryText }]}>{t("feed.noVideos")}</Text>}
           contentContainerStyle={[styles.listContent, { paddingBottom: activeTrack ? MINI_PLAYER_HEIGHT : BOTTOM_BASE }]}

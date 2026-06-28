@@ -22,7 +22,7 @@ export default function HomeScreen() {
   const { t } = useTranslation();
   const { colors } = useAppTheme();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { data, isLoading, isError, isRefetching, refetch } = useDiscover();
+  const { data, isLoading, isError, isRefetching, isRestoring, refetch } = useDiscover();
   const { tracks } = usePlaylist();
   const { playTrack } = usePlayer();
 
@@ -61,7 +61,8 @@ export default function HomeScreen() {
   };
 
   const bothEmpty = !!data && data.recent.length === 0 && data.popular.length === 0;
-  const showInitialLoading = isLoading && !data;
+  const showInitialLoading = (isRestoring || isLoading) && !data;
+  const showError = isError && !data;
   const refreshControl = (
     <RefreshControl
       refreshing={isRefetching}
@@ -83,11 +84,11 @@ export default function HomeScreen() {
           <ScrollView
             contentContainerStyle={[
               styles.scrollContent,
-              (isError || bothEmpty) && styles.centerScrollContent,
+              (showError || bothEmpty) && styles.centerScrollContent,
             ]}
             refreshControl={refreshControl}
           >
-            {isError ? (
+            {showError ? (
               <View style={styles.center}>
                 <Text style={[styles.errorText, { color: colors.destructive }]}>{t("discover.loadFailed")}</Text>
                 <Touchable
