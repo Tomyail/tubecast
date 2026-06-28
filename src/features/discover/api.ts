@@ -3,7 +3,7 @@ import type { DiscoverResponse } from "./types";
 
 export async function fetchDiscover(): Promise<DiscoverResponse> {
   const res = await fetch(`${SERVER_URL}/api/discover`, {
-    headers: { Accept: "application/json" },
+    headers: { Accept: "application/json", "Cache-Control": "no-cache", Pragma: "no-cache" },
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({ message: res.statusText }));
