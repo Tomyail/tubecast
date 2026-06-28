@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Alert, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 import type { RootStackParamList } from "../app/navigation/types";
 import Screen from "../components/Screen";
 import DiscoverShelf from "../components/DiscoverShelf";
@@ -22,13 +22,17 @@ export default function HomeScreen() {
   const { t } = useTranslation();
   const { colors } = useAppTheme();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { data, isLoading, isError, refetch } = useDiscover();
+  const { data, isLoading, isError, isRefetching, refetch } = useDiscover();
   const { tracks } = usePlaylist();
   const { playTrack } = usePlayer();
 
   // 点击卡片兜底（决策 8）：实时查 job，未过期直接播；否则用 sourceId 重建 URL 重新转换。
   // pendingJobId 给点击后到跳转前的即时反馈（getJob() 期间无其他视觉变化）。
   const [pendingJobId, setPendingJobId] = useState<string | null>(null);
+  const handleRefresh = useCallback(() => {
+    void refetch();
+  }, [refetch]);
+
   const handlePressItem = async (item: DiscoverItem) => {
     setPendingJobId(item.jobId);
     try {
@@ -57,37 +61,56 @@ export default function HomeScreen() {
   };
 
   const bothEmpty = !!data && data.recent.length === 0 && data.popular.length === 0;
+  const showInitialLoading = isLoading && !data;
+  const refreshControl = (
+    <RefreshControl
+      refreshing={isRefetching}
+      onRefresh={handleRefresh}
+      tintColor={colors.tint}
+      colors={[colors.tint]}
+    />
+  );
 
   return (
     <Screen scroll={false}>
       <View style={styles.root}>
-        {isLoading ? (
+        {showInitialLoading ? (
           <View style={styles.center}>
             <ActivityIndicator color={colors.tint} />
             <Text style={[styles.muted, { color: colors.secondaryText }]}>{t("discover.loading")}</Text>
           </View>
-        ) : isError ? (
-          <View style={styles.center}>
-            <Text style={[styles.errorText, { color: colors.destructive }]}>{t("discover.loadFailed")}</Text>
-            <Touchable
-              accessibilityRole="button"
-              style={[styles.retryButton, { backgroundColor: colors.tint }]}
-              onPress={() => refetch()}
-            >
-              <Text style={[styles.retryText, { color: colors.tintText }]}>{t("common.retry")}</Text>
-            </Touchable>
-          </View>
-        ) : bothEmpty ? (
-          <EmptyState
-            icon="compass-outline"
-            title={t("discover.empty")}
-            actionLabel={t("home.pasteUrl")}
-            onAction={() => navigation.navigate("Convert", {})}
-          />
         ) : (
-          <ScrollView contentContainerStyle={styles.scrollContent}>
-            <DiscoverShelf title={t("discover.recent")} items={data?.recent ?? []} onPressItem={handlePressItem} pendingJobId={pendingJobId} />
-            <DiscoverShelf title={t("discover.popular")} items={data?.popular ?? []} onPressItem={handlePressItem} pendingJobId={pendingJobId} />
+          <ScrollView
+            contentContainerStyle={[
+              styles.scrollContent,
+              (isError || bothEmpty) && styles.centerScrollContent,
+            ]}
+            refreshControl={refreshControl}
+          >
+            {isError ? (
+              <View style={styles.center}>
+                <Text style={[styles.errorText, { color: colors.destructive }]}>{t("discover.loadFailed")}</Text>
+                <Touchable
+                  accessibilityRole="button"
+                  style={[styles.retryButton, { backgroundColor: colors.tint }]}
+                  onPress={handleRefresh}
+                >
+                  <Text style={[styles.retryText, { color: colors.tintText }]}>{t("common.retry")}</Text>
+                </Touchable>
+              </View>
+            ) : bothEmpty ? (
+              <EmptyState
+                icon="compass-outline"
+                title={t("discover.empty")}
+                actionLabel={t("home.pasteUrl")}
+                onAction={() => navigation.navigate("Convert", {})}
+              />
+            ) : (
+              <>
+                <DiscoverShelf title={t("discover.recent")} items={data?.recent ?? []} onPressItem={handlePressItem} pendingJobId={pendingJobId} />
+                <DiscoverShelf title={t("discover.popular")} items={data?.popular ?? []} onPressItem={handlePressItem} pendingJobId={pendingJobId} />
+              </>
+            )}
           </ScrollView>
         )}
 
@@ -108,7 +131,8 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, position: "relative" },
-  scrollContent: { gap: 20, paddingTop: 12 },
+  scrollContent: { flexGrow: 1, gap: 20, paddingTop: 12 },
+  centerScrollContent: { justifyContent: "center" },
   center: { flex: 1, alignItems: "center", justifyContent: "center", gap: 12, padding: 24 },
   muted: { fontSize: 15, textAlign: "center" },
   errorText: { fontSize: 15, textAlign: "center" },
