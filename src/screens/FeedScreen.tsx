@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import type { ComponentProps } from "react";
-import { Alert, ActivityIndicator, FlatList, Modal, StyleSheet, Text, View } from "react-native";
+import { Alert, ActivityIndicator, Animated, Easing, FlatList, Modal, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -17,7 +17,7 @@ import { usePlayer } from "../features/player/context";
 import type { Track } from "../features/playlist/storage";
 import type { FeedItemWithStatus } from "../features/youtubeFeed/types";
 import type { RootStackParamList } from "../app/navigation/types";
-import { useState, useEffect, useCallback, memo } from "react";
+import { useState, useEffect, useCallback, memo, useRef } from "react";
 import {
   getSubmittedFeedJobs,
   saveSubmittedFeedJob,
@@ -30,6 +30,7 @@ import { useAppTheme } from "../app/theme";
 
 const MINI_PLAYER_HEIGHT = 64;
 const BOTTOM_BASE = 24;
+const CHANNEL_SHEET_HIDDEN_OFFSET = 360;
 type IoniconName = NonNullable<ComponentProps<typeof Ionicons>["name"]>;
 
 export default function FeedScreen() {
@@ -41,6 +42,7 @@ export default function FeedScreen() {
   const { data: videos = [], isLoading, isRefetching, isRestoring, error, refetch } = useFeedVideos();
   const [selectedChannel, setSelectedChannel] = useState<string | null>(null);
   const [isChannelPickerOpen, setIsChannelPickerOpen] = useState(false);
+  const channelPickerProgress = useRef(new Animated.Value(0)).current;
   const [submittedJobs, setSubmittedJobs] = useState<Record<string, SubmittedFeedJob>>({});
   const [submittingIds, setSubmittingIds] = useState<Set<string>>(new Set());
   useEffect(() => {
@@ -63,11 +65,41 @@ export default function FeedScreen() {
     ? videos.filter((v) => v.platformSourceId === selectedChannel)
     : videos;
   const selectedChannelTitle = channels.find((ch) => ch.platformSourceId === selectedChannel)?.title ?? t("feed.all");
+  const channelPickerBackdropOpacity = channelPickerProgress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 1],
+  });
+  const channelSheetTranslateY = channelPickerProgress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [CHANNEL_SHEET_HIDDEN_OFFSET, 0],
+  });
+
+  const openChannelPicker = useCallback(() => {
+    setIsChannelPickerOpen(true);
+    channelPickerProgress.setValue(0);
+    Animated.timing(channelPickerProgress, {
+      toValue: 1,
+      duration: 220,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+  }, [channelPickerProgress]);
+
+  const closeChannelPicker = useCallback(() => {
+    Animated.timing(channelPickerProgress, {
+      toValue: 0,
+      duration: 180,
+      easing: Easing.in(Easing.cubic),
+      useNativeDriver: true,
+    }).start(({ finished }) => {
+      if (finished) setIsChannelPickerOpen(false);
+    });
+  }, [channelPickerProgress]);
 
   const handleSelectChannel = useCallback((channelId: string | null) => {
     setSelectedChannel(channelId);
-    setIsChannelPickerOpen(false);
-  }, []);
+    closeChannelPicker();
+  }, [closeChannelPicker]);
 
   const handleConvert = useCallback(async (video: FeedItemWithStatus) => {
     setSubmittingIds((prev) => new Set(prev).add(video.platformItemId));
@@ -127,7 +159,7 @@ export default function FeedScreen() {
             accessibilityLabel={selectedChannelTitle}
             accessibilityRole="button"
             style={[styles.filterButton, { backgroundColor: colors.elevatedSurface }]}
-            onPress={() => setIsChannelPickerOpen(true)}
+            onPress={openChannelPicker}
           >
             <Text style={[styles.filterButtonText, { color: colors.primaryText }]} numberOfLines={1}>{selectedChannelTitle}</Text>
             <Ionicons name="chevron-down" size={18} color={colors.secondaryText} />
@@ -151,19 +183,21 @@ export default function FeedScreen() {
             </Touchable>
           </View>
           <Modal
-            animationType="slide"
-            onRequestClose={() => setIsChannelPickerOpen(false)}
+            animationType="none"
+            onRequestClose={closeChannelPicker}
             transparent
             visible={isChannelPickerOpen}
           >
             <View style={styles.modalRoot}>
-              <Touchable
-                accessibilityLabel={t("channel.close")}
-                accessibilityRole="button"
-                style={styles.modalBackdrop}
-                onPress={() => setIsChannelPickerOpen(false)}
-              />
-              <View style={[styles.channelSheet, { backgroundColor: colors.surface, paddingBottom: Math.max(insets.bottom, 18) }]}>
+              <Animated.View style={[styles.modalBackdrop, { opacity: channelPickerBackdropOpacity }]}>
+                <Touchable
+                  accessibilityLabel={t("channel.close")}
+                  accessibilityRole="button"
+                  style={styles.modalBackdropTouchable}
+                  onPress={closeChannelPicker}
+                />
+              </Animated.View>
+              <Animated.View style={[styles.channelSheet, { backgroundColor: colors.surface, paddingBottom: Math.max(insets.bottom, 18), transform: [{ translateY: channelSheetTranslateY }] }]}>
                 <View style={[styles.sheetHandle, { backgroundColor: colors.border }]} />
                 <View style={[styles.sheetHeader, { borderBottomColor: colors.border }]}>
                   <Text style={[styles.sheetTitle, { color: colors.primaryText }]}>{t("nav.feed")}</Text>
@@ -171,7 +205,7 @@ export default function FeedScreen() {
                     accessibilityLabel={t("channel.close")}
                     accessibilityRole="button"
                     style={[styles.sheetCloseButton, { backgroundColor: colors.elevatedSurface }]}
-                    onPress={() => setIsChannelPickerOpen(false)}
+                    onPress={closeChannelPicker}
                   >
                     <Ionicons name="close" size={18} color={colors.secondaryText} />
                   </Touchable>
@@ -196,7 +230,7 @@ export default function FeedScreen() {
                     );
                   }}
                 />
-              </View>
+              </Animated.View>
             </View>
           </Modal>
         </View>
@@ -391,6 +425,7 @@ const styles = StyleSheet.create({
   manageButton: { alignItems: "center", backgroundColor: "#eee6dc", borderRadius: 22, height: 44, justifyContent: "center", width: 44 },
   modalRoot: { flex: 1, justifyContent: "flex-end" },
   modalBackdrop: { backgroundColor: "rgba(0,0,0,0.28)", bottom: 0, left: 0, position: "absolute", right: 0, top: 0 },
+  modalBackdropTouchable: { bottom: 0, left: 0, position: "absolute", right: 0, top: 0 },
   channelSheet: { borderTopLeftRadius: 18, borderTopRightRadius: 18, maxHeight: "72%", paddingBottom: 18 },
   sheetHandle: { alignSelf: "center", borderRadius: 2, height: 4, marginTop: 8, width: 36 },
   sheetHeader: { alignItems: "center", borderBottomWidth: StyleSheet.hairlineWidth, flexDirection: "row", justifyContent: "space-between", minHeight: 56, paddingHorizontal: 18 },
