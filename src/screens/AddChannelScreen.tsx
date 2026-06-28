@@ -1,12 +1,13 @@
 import { useState } from "react";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute, type RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
-import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { Image } from "expo-image";
 import type { RootStackParamList } from "../app/navigation/types";
 import Screen from "../components/Screen";
 import { useAddChannel } from "../features/youtubeFeed/hooks";
+import { isSupportedYouTubeVideoUrl } from "../features/youtubeFeed/input";
 import type { FeedSource } from "../features/youtubeFeed/types";
 import { useTranslation } from "../i18n";
 import { useAppTheme } from "../app/theme";
@@ -15,7 +16,8 @@ export default function AddChannelScreen() {
   const { t } = useTranslation();
   const { colors } = useAppTheme();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const [input, setInput] = useState("");
+  const route = useRoute<RouteProp<RootStackParamList, "AddChannel">>();
+  const [input, setInput] = useState(route.params?.input ?? "");
   const [preview, setPreview] = useState<FeedSource | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
   const addChannel = useAddChannel();
@@ -23,9 +25,21 @@ export default function AddChannelScreen() {
   const handleResolve = async () => {
     setParseError(null);
     setPreview(null);
+    const trimmedInput = input.trim();
+
+    if (isSupportedYouTubeVideoUrl(trimmedInput)) {
+      Alert.alert(t("channel.videoLinkTitle"), t("channel.videoLinkMessage"), [
+        { text: t("common.cancel"), style: "cancel" },
+        {
+          text: t("channel.convertVideo"),
+          onPress: () => navigation.replace("Convert", { sourceUrl: trimmedInput }),
+        },
+      ]);
+      return;
+    }
 
     try {
-      const result = await addChannel.mutateAsync({ input: input.trim() });
+      const result = await addChannel.mutateAsync({ input: trimmedInput });
       setPreview(result);
     } catch {
       setParseError(t("errors.generic"));

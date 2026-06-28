@@ -16,6 +16,7 @@ import { usePlayer } from "../features/player/context";
 import { usePlaylist } from "../features/playlist/context";
 import { useTranslation } from "../i18n";
 import { useAppTheme } from "../app/theme";
+import { isSupportedYouTubeChannelInput } from "../features/youtubeFeed/input";
 
 const PENDING_JOB_KEY = "pending_job_id";
 
@@ -66,9 +67,22 @@ export default function ConvertScreen() {
   }, [job?.status]);
 
   const handleSubmitUrl = async (rawUrl: string) => {
-    if (!rawUrl.trim()) return;
+    const trimmedUrl = rawUrl.trim();
+    if (!trimmedUrl) return;
+
+    if (isSupportedYouTubeChannelInput(trimmedUrl)) {
+      Alert.alert(t("home.channelLinkTitle"), t("home.channelLinkMessage"), [
+        { text: t("common.cancel"), style: "cancel" },
+        {
+          text: t("feed.addChannel"),
+          onPress: () => navigation.replace("AddChannel", { input: trimmedUrl }),
+        },
+      ]);
+      return;
+    }
+
     try {
-      const result = await submit.mutateAsync(rawUrl.trim());
+      const result = await submit.mutateAsync(trimmedUrl);
       await AsyncStorage.setItem(PENDING_JOB_KEY, result.id);
       setJobId(result.id);
     } catch {

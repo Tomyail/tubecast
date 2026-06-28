@@ -1,7 +1,7 @@
 export type RootStackParamList = {
   Tabs: undefined;
   Player: { jobId: string };
-  AddChannel: undefined;
+  AddChannel: { input?: string } | undefined;
   ManageChannels: undefined;
   Convert: { jobId?: string; sourceUrl?: string };
   PublisherPreview: { channelId: string; channelName: string | null };
