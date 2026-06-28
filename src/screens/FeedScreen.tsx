@@ -1,9 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import type { ComponentProps } from "react";
-import { Alert, ActivityIndicator, FlatList, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, ActivityIndicator, FlatList, Modal, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Screen from "../components/Screen";
 import EmptyState from "../components/EmptyState";
 import Touchable from "../components/Touchable";
@@ -34,10 +35,12 @@ type IoniconName = NonNullable<ComponentProps<typeof Ionicons>["name"]>;
 export default function FeedScreen() {
   const { t } = useTranslation();
   const { colors } = useAppTheme();
+  const insets = useSafeAreaInsets();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { data: channels = [] } = useSubscribedChannels();
   const { data: videos = [], isLoading, isRefetching, isRestoring, error, refetch } = useFeedVideos();
   const [selectedChannel, setSelectedChannel] = useState<string | null>(null);
+  const [isChannelPickerOpen, setIsChannelPickerOpen] = useState(false);
   const [submittedJobs, setSubmittedJobs] = useState<Record<string, SubmittedFeedJob>>({});
   const [submittingIds, setSubmittingIds] = useState<Set<string>>(new Set());
   useEffect(() => {
@@ -46,6 +49,12 @@ export default function FeedScreen() {
     });
   }, []);
 
+  useEffect(() => {
+    if (selectedChannel && !channels.some((channel) => channel.platformSourceId === selectedChannel)) {
+      setSelectedChannel(null);
+    }
+  }, [channels, selectedChannel]);
+
   const submitJob = useSubmitJob();
   const { tracks } = usePlaylist();
   const { playTrack, activeTrack } = usePlayer();
@@ -53,6 +62,12 @@ export default function FeedScreen() {
   const filteredVideos = selectedChannel
     ? videos.filter((v) => v.platformSourceId === selectedChannel)
     : videos;
+  const selectedChannelTitle = channels.find((ch) => ch.platformSourceId === selectedChannel)?.title ?? t("feed.all");
+
+  const handleSelectChannel = useCallback((channelId: string | null) => {
+    setSelectedChannel(channelId);
+    setIsChannelPickerOpen(false);
+  }, []);
 
   const handleConvert = useCallback(async (video: FeedItemWithStatus) => {
     setSubmittingIds((prev) => new Set(prev).add(video.platformItemId));
@@ -107,28 +122,16 @@ export default function FeedScreen() {
   return (
     <Screen reserveMiniPlayerSpace={false} scroll={false}>
       {channels.length > 0 && (
-        <View style={[styles.pillsRow, { borderBottomColor: colors.border }]}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.channelScroll}>
-            <Touchable
-              accessibilityRole="button"
-              style={[styles.pill, { backgroundColor: colors.elevatedSurface }, !selectedChannel && { backgroundColor: colors.tint }]}
-              onPress={() => setSelectedChannel(null)}
-            >
-              <Text style={[styles.pillText, { color: colors.secondaryText }, !selectedChannel && { color: colors.tintText }]}>{t("feed.all")}</Text>
-            </Touchable>
-            {channels.map((ch) => (
-              <Touchable
-                accessibilityRole="button"
-                key={ch.platformSourceId}
-                style={[styles.pill, { backgroundColor: colors.elevatedSurface }, selectedChannel === ch.platformSourceId && { backgroundColor: colors.tint }]}
-                onPress={() => setSelectedChannel(selectedChannel === ch.platformSourceId ? null : ch.platformSourceId)}
-              >
-                  <Text style={[styles.pillText, { color: colors.secondaryText }, selectedChannel === ch.platformSourceId && { color: colors.tintText }]} numberOfLines={1}>
-                  {ch.title}
-                </Text>
-              </Touchable>
-            ))}
-          </ScrollView>
+        <View style={[styles.filtersRow, { borderBottomColor: colors.border }]}>
+          <Touchable
+            accessibilityLabel={selectedChannelTitle}
+            accessibilityRole="button"
+            style={[styles.filterButton, { backgroundColor: colors.elevatedSurface }]}
+            onPress={() => setIsChannelPickerOpen(true)}
+          >
+            <Text style={[styles.filterButtonText, { color: colors.primaryText }]} numberOfLines={1}>{selectedChannelTitle}</Text>
+            <Ionicons name="chevron-down" size={18} color={colors.secondaryText} />
+          </Touchable>
           <View style={styles.channelActions}>
             <Touchable
               accessibilityLabel={t("feed.manageChannels")}
@@ -147,6 +150,55 @@ export default function FeedScreen() {
               <Ionicons name="add" size={24} color={colors.tintText} />
             </Touchable>
           </View>
+          <Modal
+            animationType="slide"
+            onRequestClose={() => setIsChannelPickerOpen(false)}
+            transparent
+            visible={isChannelPickerOpen}
+          >
+            <View style={styles.modalRoot}>
+              <Touchable
+                accessibilityLabel={t("channel.close")}
+                accessibilityRole="button"
+                style={styles.modalBackdrop}
+                onPress={() => setIsChannelPickerOpen(false)}
+              />
+              <View style={[styles.channelSheet, { backgroundColor: colors.surface, paddingBottom: Math.max(insets.bottom, 18) }]}>
+                <View style={[styles.sheetHandle, { backgroundColor: colors.border }]} />
+                <View style={[styles.sheetHeader, { borderBottomColor: colors.border }]}>
+                  <Text style={[styles.sheetTitle, { color: colors.primaryText }]}>{t("nav.feed")}</Text>
+                  <Touchable
+                    accessibilityLabel={t("channel.close")}
+                    accessibilityRole="button"
+                    style={[styles.sheetCloseButton, { backgroundColor: colors.elevatedSurface }]}
+                    onPress={() => setIsChannelPickerOpen(false)}
+                  >
+                    <Ionicons name="close" size={18} color={colors.secondaryText} />
+                  </Touchable>
+                </View>
+                <FlatList
+                  data={[null, ...channels]}
+                  keyExtractor={(item) => item?.platformSourceId ?? "all"}
+                  renderItem={({ item }) => {
+                    const channelId = item?.platformSourceId ?? null;
+                    const selected = selectedChannel === channelId;
+                    return (
+                      <Touchable
+                        accessibilityRole="button"
+                        style={styles.channelOption}
+                        onPress={() => handleSelectChannel(channelId)}
+                      >
+                        <Text style={[styles.channelOptionText, { color: colors.primaryText }]} numberOfLines={1}>
+                          {item?.title ?? t("feed.all")}
+                        </Text>
+                        {selected && <Ionicons name="checkmark" size={22} color={colors.tint} />}
+                      </Touchable>
+                    );
+                  }}
+                />
+              </View>
+            </View>
+          </Modal>
         </View>
       )}
 
@@ -331,13 +383,21 @@ function formatRelativeTime(isoDate: string, t: (key: string, options?: { count:
 }
 
 const styles = StyleSheet.create({
-  pillsRow: { alignItems: "center", borderBottomColor: "#dbcbb9", borderBottomWidth: StyleSheet.hairlineWidth, flexDirection: "row", paddingHorizontal: 18, paddingVertical: 8 },
-  channelScroll: { flex: 1 },
+  filtersRow: { alignItems: "center", borderBottomColor: "#dbcbb9", borderBottomWidth: StyleSheet.hairlineWidth, flexDirection: "row", paddingHorizontal: 18, paddingVertical: 8 },
+  filterButton: { alignItems: "center", borderRadius: 22, flex: 1, flexDirection: "row", gap: 8, height: 44, justifyContent: "space-between", minWidth: 0, paddingHorizontal: 14 },
+  filterButtonText: { flex: 1, fontSize: 15, fontWeight: "600" },
   channelActions: { flexDirection: "row", gap: 4, marginLeft: 4 },
-  pill: { alignItems: "center", backgroundColor: "#eee6dc", borderRadius: 18, justifyContent: "center", marginRight: 8, minHeight: 36, paddingHorizontal: 14 },
-  pillText: { color: "#6f6256", fontSize: 13 },
   addButton: { alignItems: "center", backgroundColor: "#b65a36", borderRadius: 22, height: 44, justifyContent: "center", marginLeft: 4, width: 44 },
   manageButton: { alignItems: "center", backgroundColor: "#eee6dc", borderRadius: 22, height: 44, justifyContent: "center", width: 44 },
+  modalRoot: { flex: 1, justifyContent: "flex-end" },
+  modalBackdrop: { backgroundColor: "rgba(0,0,0,0.28)", bottom: 0, left: 0, position: "absolute", right: 0, top: 0 },
+  channelSheet: { borderTopLeftRadius: 18, borderTopRightRadius: 18, maxHeight: "72%", paddingBottom: 18 },
+  sheetHandle: { alignSelf: "center", borderRadius: 2, height: 4, marginTop: 8, width: 36 },
+  sheetHeader: { alignItems: "center", borderBottomWidth: StyleSheet.hairlineWidth, flexDirection: "row", justifyContent: "space-between", minHeight: 56, paddingHorizontal: 18 },
+  sheetTitle: { fontSize: 17, fontWeight: "700" },
+  sheetCloseButton: { alignItems: "center", borderRadius: 16, height: 32, justifyContent: "center", width: 32 },
+  channelOption: { alignItems: "center", flexDirection: "row", minHeight: 52, paddingHorizontal: 20 },
+  channelOptionText: { flex: 1, fontSize: 16 },
   loadingContainer: { alignItems: "center", flex: 1, justifyContent: "center" },
   loadingText: { color: "#6f6256", fontSize: 15, marginTop: 8 },
   errorText: { color: "#b42318", fontSize: 15 },
