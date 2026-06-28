@@ -56,7 +56,7 @@ vi.mock("expo-file-system", () => ({
   },
 }));
 
-const { getLockScreenArtist, isAudioMetadataReady, isPlaybackLoadingPhase, isPlaybackStartConfirmed, playbackErrorMessage, resolveCachedLocalUri, resolveTrackSource } = await import(
+const { configureLockScreenPlayer, getLockScreenArtist, isAudioMetadataReady, isPlaybackLoadingPhase, isPlaybackStartConfirmed, playbackErrorMessage, resolveCachedLocalUri, resolveTrackSource } = await import(
   "../../src/features/player/context"
 );
 
@@ -144,5 +144,29 @@ describe("player source resolution", () => {
     expect(getLockScreenArtist(makeTrack({ channelName: "Mediastorm 影视飓风" }))).toBe("Mediastorm 影视飓风");
     expect(getLockScreenArtist(makeTrack({ channelName: "  " }))).toBe("TubeCast");
     expect(getLockScreenArtist(makeTrack({ channelName: null }))).toBe("TubeCast");
+  });
+
+  it("activates lock screen controls once, then updates metadata without re-registering controls", () => {
+    const player = {
+      setActiveForLockScreen: vi.fn(),
+      updateLockScreenMetadata: vi.fn(),
+    };
+    const t = (key: string) => key;
+
+    configureLockScreenPlayer(player, makeTrack({ title: "First", channelName: "Channel A" }), t, true);
+    configureLockScreenPlayer(player, makeTrack({ title: "Second", channelName: "Channel B" }), t, false);
+
+    expect(player.setActiveForLockScreen).toHaveBeenCalledTimes(1);
+    expect(player.setActiveForLockScreen).toHaveBeenCalledWith(
+      true,
+      { title: "First", artist: "Channel A", artworkUrl: undefined },
+      { showSeekForward: true, showSeekBackward: true }
+    );
+    expect(player.updateLockScreenMetadata).toHaveBeenCalledTimes(1);
+    expect(player.updateLockScreenMetadata).toHaveBeenCalledWith({
+      title: "Second",
+      artist: "Channel B",
+      artworkUrl: undefined,
+    });
   });
 });

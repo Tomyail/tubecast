@@ -43,6 +43,7 @@ const PlayerContext = createContext<PlayerContextValue | null>(null);
 const PlaybackProgressContext = createContext<number>(0);
 const PROGRESS_KEY = "player_progress_";
 const SAVE_INTERVAL = 5000;
+const PLAYBACK_STATUS_UPDATE_INTERVAL_MS = 500;
 // 乐观 resume 后容忍 status 短暂 !playing 的宽限期(player.play() 生效前的陈旧 status
 // 否则会把 playing→paused→playing 抖动)。
 const RESUME_GRACE_MS = 800;
@@ -75,6 +76,38 @@ export function getLockScreenArtist(track: Pick<Track, "channelName">): string {
   return channelName || "TubeCast";
 }
 
+type LockScreenPlayer = {
+  setActiveForLockScreen(
+    active: boolean,
+    metadata?: { title?: string; artist?: string; artworkUrl?: string },
+    options?: { showSeekForward?: boolean; showSeekBackward?: boolean }
+  ): void;
+  updateLockScreenMetadata?(metadata: { title?: string; artist?: string; artworkUrl?: string }): void;
+};
+
+export function configureLockScreenPlayer(
+  player: LockScreenPlayer,
+  track: Track,
+  t: (key: string) => string,
+  needsActivation: boolean,
+): void {
+  const metadata = {
+    title: track.title || t("common.untitled"),
+    artist: getLockScreenArtist(track),
+    artworkUrl: track.thumbnailUrl || undefined,
+  };
+
+  if (needsActivation || !player.updateLockScreenMetadata) {
+    player.setActiveForLockScreen(true, metadata, {
+      showSeekForward: true,
+      showSeekBackward: true,
+    });
+    return;
+  }
+
+  player.updateLockScreenMetadata(metadata);
+}
+
 export { isAudioMetadataReady, isPlaybackLoadingPhase, isPlaybackStartConfirmed } from "./state";
 
 function waitForNextTick(): Promise<void> {
@@ -88,7 +121,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const player = useAudioPlayer(null, {
     keepAudioSessionActive: true,
     preferredForwardBufferDuration: 15,
-    updateInterval: 100,
+    updateInterval: PLAYBACK_STATUS_UPDATE_INTERVAL_MS,
   });
   const status = useAudioPlayerStatus(player);
   const lastSaveRef = useRef(0);
@@ -99,6 +132,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const prevFinishedRef = useRef(false);
   // 最近一次乐观 resume(resume-issued)的时间戳,用于 status-phase 的宽限期判断。
   const optimisticResumeAtRef = useRef(0);
+  const lockScreenControlsActiveRef = useRef(false);
 
   const { activeTrack, queue, playbackSource, playbackError, phase } = state;
   const playbackLoading = isPlaybackLoadingPhase(phase);
@@ -112,7 +146,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       playsInSilentMode: true,
       shouldPlayInBackground: true,
       interruptionMode: "doNotMix",
-    });
+    }).catch((err) => console.warn("player audio mode setup failed", err));
   }, []);
 
   useEffect(() => {
@@ -144,7 +178,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     const now = Date.now();
     if (now - lastSaveRef.current < SAVE_INTERVAL) return;
     lastSaveRef.current = now;
-    AsyncStorage.setItem(`${PROGRESS_KEY}${activeTrack.id}`, JSON.stringify({ position: currentTime }));
+    void AsyncStorage.setItem(`${PROGRESS_KEY}${activeTrack.id}`, JSON.stringify({ position: currentTime }))
+      .catch((err) => console.warn("player progress save failed", err));
   }, [activeTrack, currentTime, phase]);
 
   useEffect(() => {
@@ -191,7 +226,6 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     } catch {}
     if (requestId !== requestIdRef.current) return;
 
-    try { player.clearLockScreenControls(); } catch {}
     await waitForNextTick();
     if (requestId !== requestIdRef.current) return;
 
@@ -207,14 +241,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     try {
       player.replace(source.uri);
       dispatch({ type: "source-ready", requestId, source: source.source });
-      player.setActiveForLockScreen(true, {
-        title: track.title || t("common.untitled"),
-        artist: getLockScreenArtist(track),
-        artworkUrl: track.thumbnailUrl || undefined,
-      }, {
-        showSeekForward: true,
-        showSeekBackward: true,
-      });
+      configureLockScreenPlayer(player, track, t, !lockScreenControlsActiveRef.current);
+      lockScreenControlsActiveRef.current = true;
       if (position > 0) await player.seekTo(position);
       if (requestId !== requestIdRef.current) return;
       player.play();
@@ -272,6 +300,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     const requestId = nextRequestId();
     try { player.pause(); } catch {}
     try { player.clearLockScreenControls(); } catch {}
+    lockScreenControlsActiveRef.current = false;
     dispatch({ type: "stop", requestId });
   }, [nextRequestId, player]);
 
@@ -299,7 +328,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     prevFinishedRef.current = true;
     incrementPlayCount(activeTrack.id);
     // 播放完毕后清除保存的进度，否则再次点击该曲目会 seek 到接近结尾的位置
-    AsyncStorage.removeItem(`${PROGRESS_KEY}${activeTrack.id}`);
+    void AsyncStorage.removeItem(`${PROGRESS_KEY}${activeTrack.id}`)
+      .catch((err) => console.warn("player progress cleanup failed", err));
     playNext();
   }, [activeTrack, incrementPlayCount, playNext, status?.didJustFinish]);
 
