@@ -6,20 +6,11 @@ TubeCast is an independent Expo / React Native client for iOS and Android. It is
 
 ## Screenshots
 
-<p align="center">
-  <picture>
-    <img alt="Subscriptions feed" src="docs/screenshots/feed.jpg" width="23%">
-  </picture>
-  <picture>
-    <img alt="Settings" src="docs/screenshots/home.jpg" width="23%">
-  </picture>
-  <picture>
-    <img alt="Now playing" src="docs/screenshots/player.jpg" width="23%">
-  </picture>
-  <picture>
-    <img alt="Publisher preview" src="docs/screenshots/playlist.jpg" width="23%">
-  </picture>
-</p>
+| Feed | Home | Convert |
+| --- | --- | --- |
+| <img alt="Subscriptions feed" src="docs/screenshots/feed.jpg" width="240"> | <img alt="Home" src="docs/screenshots/home.jpg" width="240"> | <img alt="Convert audio" src="docs/screenshots/convert.jpg" width="240"> |
+| Player | Playlist | Settings |
+| <img alt="Now playing" src="docs/screenshots/player.jpg" width="240"> | <img alt="Playlist" src="docs/screenshots/playlist.jpg" width="240"> | <img alt="Settings" src="docs/screenshots/settings.jpg" width="240"> |
 
 ## Features
 
