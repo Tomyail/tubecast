@@ -11,7 +11,7 @@ import Touchable from "../components/Touchable";
 import { useDiscover } from "../features/discover";
 import type { DiscoverItem } from "../features/discover/types";
 import { getJob, submitJob } from "../features/jobs/api";
-import { trackFromReadyJob } from "../features/jobs/track";
+import { playableTrackFromReadyJob } from "../features/jobs/track";
 import { usePlayer } from "../features/player/context";
 import { usePlaylist } from "../features/playlist/context";
 import { useTranslation } from "../i18n";
@@ -44,7 +44,7 @@ export default function HomeScreen() {
         : NaN;
       const playable = job.status === "ready" && !Number.isNaN(expiresAtMs) && expiresAtMs > Date.now();
       if (playable) {
-        await playTrack(trackFromReadyJob(job), tracks);
+        await playTrack(playableTrackFromReadyJob(job, tracks), tracks);
         navigation.navigate("Player", { jobId: item.jobId });
         return;
       }

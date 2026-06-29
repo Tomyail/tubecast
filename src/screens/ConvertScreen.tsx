@@ -11,7 +11,7 @@ import Touchable from "../components/Touchable";
 import { useSubmitJob, useCacheReadyJob, useJobStatus } from "../features/jobs/hooks";
 import { getConversionFailureMessage } from "../features/jobs/errors";
 import { getHomeProgressInfo, PROGRESS_STEPS } from "../features/jobs/progress";
-import { trackFromReadyJob } from "../features/jobs/track";
+import { playableTrackFromReadyJob } from "../features/jobs/track";
 import { usePlayer } from "../features/player/context";
 import { usePlaylist } from "../features/playlist/context";
 import { useTranslation } from "../i18n";
@@ -34,9 +34,7 @@ export default function ConvertScreen() {
   const { cacheState, retryCache } = useCacheReadyJob(jobId);
   const { tracks } = usePlaylist();
   const { playTrack } = usePlayer();
-  const playableTrack =
-    (jobId ? tracks.find((track) => track.jobId === jobId) : null) ??
-    (job?.status === "ready" ? trackFromReadyJob(job) : null);
+  const playableTrack = job?.status === "ready" ? playableTrackFromReadyJob(job, tracks) : null;
 
   // 合并成一个 mount effect，按优先级 setJobId 一次，防竞态：
   // route.params.jobId > route.params.sourceUrl(自动提交) > AsyncStorage pending > 空表单。
