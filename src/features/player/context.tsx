@@ -30,7 +30,7 @@ type PlayerContextValue = {
   playbackSource: PlaybackSource | null;
   playbackError: string | null;
   playerPhase: PlayerPhase;
-  playTrack: (track: Track, queue?: Track[]) => Promise<void>;
+  playTrack: (track: Track, queue?: Track[], options?: { startAtSeconds?: number }) => Promise<void>;
   togglePlayback: () => Promise<void>;
   seekTo: (seconds: number) => void;
   playNext: () => void;
@@ -208,22 +208,24 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     return requestIdRef.current;
   }, []);
 
-  const playTrack = useCallback(async (track: Track, newQueue?: Track[]) => {
+  const playTrack = useCallback(async (track: Track, newQueue?: Track[], options?: { startAtSeconds?: number }) => {
     const requestId = nextRequestId();
     dispatch({ type: "play-request", requestId, track, queue: newQueue });
     ensureCacheForTrack(track);
 
     // Resume from saved position
-    let position = 0;
-    try {
-      const raw = await AsyncStorage.getItem(`${PROGRESS_KEY}${track.id}`);
-      if (raw) {
-        const saved = JSON.parse(raw).position || 0;
-        // 保存的进度若已接近曲目结尾（历史脏数据 / didJustFinish 清除前的残留），
-        // 视为已播完，从头开始而非 seek 到末尾导致"点击不播放"
-        position = saved >= track.durationSeconds - 1 ? 0 : saved;
-      }
-    } catch {}
+    let position = options?.startAtSeconds != null ? Math.max(0, Math.floor(options.startAtSeconds)) : 0;
+    if (options?.startAtSeconds == null) {
+      try {
+        const raw = await AsyncStorage.getItem(`${PROGRESS_KEY}${track.id}`);
+        if (raw) {
+          const saved = JSON.parse(raw).position || 0;
+          // 保存的进度若已接近曲目结尾（历史脏数据 / didJustFinish 清除前的残留），
+          // 视为已播完，从头开始而非 seek 到末尾导致"点击不播放"
+          position = saved >= track.durationSeconds - 1 ? 0 : saved;
+        }
+      } catch {}
+    }
     if (requestId !== requestIdRef.current) return;
 
     await waitForNextTick();

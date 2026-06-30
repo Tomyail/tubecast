@@ -5,8 +5,12 @@ import type { ComponentProps, ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
+  ActionSheetIOS,
   Linking,
   PanResponder,
+  Platform,
+  Share,
   StyleSheet,
   Text,
   View,
@@ -17,6 +21,7 @@ import Touchable from "../components/Touchable";
 import { useTrackAudioExport } from "../features/audioExport/hooks";
 import { useCacheReadyJob } from "../features/jobs/hooks";
 import { usePlayer, usePlaybackProgress } from "../features/player/context";
+import { buildShareMessage, buildTrackShareLandingUrl, buildYouTubeTimestampUrl } from "../features/shareLinks/links";
 import { useTranslation } from "../i18n";
 import { formatDuration } from "../i18n/formatters";
 import { useAppTheme } from "../app/theme";
@@ -164,6 +169,45 @@ export default function PlayerScreen() {
     void Linking.openURL(`${activeTrack.sourceUrl}${separator}t=${timestamp}`);
   };
 
+  const shareTimestamp = async () => {
+    const timestamp = Math.floor(currentTime);
+    const landingUrl = buildTrackShareLandingUrl(activeTrack, timestamp);
+    const fallbackUrl = buildYouTubeTimestampUrl(activeTrack.sourceUrl, timestamp);
+    const message = buildShareMessage(activeTrack, landingUrl, fallbackUrl);
+
+    try {
+      await Share.share({ message, url: landingUrl, title: activeTrack.title || t("common.untitled") });
+    } catch {
+      Alert.alert(t("share.failedTitle"), t("share.failedMessage"));
+    }
+  };
+
+  const showActions = () => {
+    const shareAction = () => void shareTimestamp();
+    const exportAction = () => void exportTrack(activeTrack);
+
+    if (Platform.OS === "ios") {
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          options: [t("share.moment"), t("audioExport.action"), t("common.cancel")],
+          cancelButtonIndex: 2,
+          title: activeTrack.title || t("common.untitled"),
+        },
+        (buttonIndex) => {
+          if (buttonIndex === 0) shareAction();
+          if (buttonIndex === 1) exportAction();
+        },
+      );
+      return;
+    }
+
+    Alert.alert(t("player.actions"), undefined, [
+      { text: t("share.moment"), onPress: shareAction },
+      { text: t("audioExport.action"), onPress: exportAction },
+      { text: t("common.cancel"), style: "cancel" },
+    ]);
+  };
+
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
       <PlayerHeader
@@ -172,17 +216,17 @@ export default function PlayerScreen() {
         onBack={() => navigation.goBack()}
         rightAction={
           <Touchable
-            accessibilityLabel={t("audioExport.action")}
+            accessibilityLabel={t("player.actions")}
             accessibilityRole="button"
             disabled={exportingTrackId === activeTrack.id}
             hitSlop={8}
-            onPress={() => void exportTrack(activeTrack)}
+            onPress={showActions}
             style={[styles.headerIconButton, { backgroundColor: colors.elevatedSurface }, exportingTrackId === activeTrack.id && styles.headerIconButtonDisabled]}
           >
             {exportingTrackId === activeTrack.id ? (
               <ActivityIndicator color={colors.primaryText} />
             ) : (
-              <Ionicons name="share-outline" size={24} color={colors.primaryText} />
+              <Ionicons name="ellipsis-horizontal" size={24} color={colors.primaryText} />
             )}
           </Touchable>
         }

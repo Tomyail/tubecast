@@ -1,8 +1,9 @@
-import { NavigationContainer, DefaultTheme, useNavigation } from "@react-navigation/native";
+import { NavigationContainer, DefaultTheme, useNavigation, useNavigationContainerRef } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator, type NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
 import type { ComponentProps } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { RootStackParamList, RootTabParamList } from "./types";
@@ -17,9 +18,13 @@ import ManageChannelsScreen from "../../screens/ManageChannelsScreen";
 import PublisherPreviewSheet from "../../screens/PublisherPreviewSheet";
 import MiniPlayer from "../../components/MiniPlayer";
 import Touchable from "../../components/Touchable";
-import { Text, View } from "react-native";
+import { Linking, Text, View } from "react-native";
 import { useTranslation } from "../../i18n";
 import { useAppTheme } from "../theme";
+import { usePlayer } from "../../features/player/context";
+import { getAllTracks } from "../../features/playlist/storage";
+import { parseTubeCastListenUrl } from "../../features/shareLinks/links";
+import { findTrackForSourceUrl } from "../../features/shareLinks/matching";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<RootTabParamList>();
@@ -143,8 +148,48 @@ function Tabs() {
 export default function RootNavigator() {
   const { t } = useTranslation();
   const { colors, isDark } = useAppTheme();
+  const navigationRef = useNavigationContainerRef<RootStackParamList>();
+  const { playTrack } = usePlayer();
+  const [navigationReady, setNavigationReady] = useState(false);
+  const initialUrlHandledRef = useRef(false);
+
+  const handleDeepLink = useCallback(async (rawUrl: string | null) => {
+    if (!rawUrl || !navigationRef.isReady()) return;
+    const listenLink = parseTubeCastListenUrl(rawUrl);
+    if (!listenLink) return;
+
+    const tracks = await getAllTracks();
+    const existingTrack = findTrackForSourceUrl(tracks, listenLink.sourceUrl);
+    if (existingTrack) {
+      await playTrack(existingTrack, tracks, { startAtSeconds: listenLink.startAtSeconds });
+      navigationRef.navigate("Player", { jobId: existingTrack.jobId });
+      return;
+    }
+
+    navigationRef.navigate("Convert", {
+      sourceUrl: listenLink.sourceUrl,
+      startAtSeconds: listenLink.startAtSeconds,
+    });
+  }, [navigationRef, playTrack]);
+
+  useEffect(() => {
+    if (!navigationReady) return;
+
+    if (!initialUrlHandledRef.current) {
+      initialUrlHandledRef.current = true;
+      void Linking.getInitialURL().then(handleDeepLink);
+    }
+    const subscription = Linking.addEventListener("url", (event) => {
+      void handleDeepLink(event.url);
+    });
+
+    return () => subscription.remove();
+  }, [handleDeepLink, navigationReady]);
+
   return (
     <NavigationContainer
+      ref={navigationRef}
+      onReady={() => setNavigationReady(true)}
       theme={{
         ...(isDark ? { ...DefaultTheme, dark: true } : DefaultTheme),
         colors: {

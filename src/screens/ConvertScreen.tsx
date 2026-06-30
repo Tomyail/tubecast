@@ -3,7 +3,7 @@ import { useNavigation, useRoute, type RouteProp } from "@react-navigation/nativ
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Alert, StyleSheet, Text, TextInput, View } from "react-native";
 import type { RootStackParamList } from "../app/navigation/types";
 import Screen from "../components/Screen";
@@ -35,6 +35,7 @@ export default function ConvertScreen() {
   const { tracks } = usePlaylist();
   const { playTrack } = usePlayer();
   const playableTrack = job?.status === "ready" ? playableTrackFromReadyJob(job, tracks) : null;
+  const autoPlayJobRef = useRef<string | null>(null);
 
   // 合并成一个 mount effect，按优先级 setJobId 一次，防竞态：
   // route.params.jobId > route.params.sourceUrl(自动提交) > AsyncStorage pending > 空表单。
@@ -63,6 +64,16 @@ export default function ConvertScreen() {
       AsyncStorage.removeItem(PENDING_JOB_KEY);
     }
   }, [job?.status]);
+
+  useEffect(() => {
+    const startAtSeconds = route.params?.startAtSeconds;
+    if (startAtSeconds == null || !playableTrack || autoPlayJobRef.current === playableTrack.jobId) return;
+
+    autoPlayJobRef.current = playableTrack.jobId;
+    void playTrack(playableTrack, tracks, { startAtSeconds }).then(() => {
+      navigation.navigate("Player", { jobId: playableTrack.jobId });
+    });
+  }, [navigation, playTrack, playableTrack, route.params?.startAtSeconds, tracks]);
 
   const handleSubmitUrl = async (rawUrl: string) => {
     const trimmedUrl = rawUrl.trim();

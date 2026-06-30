@@ -2,6 +2,7 @@
   "expo": {
     "name": "TubeCast",
     "slug": "tubecast",
+    "scheme": "tubecast",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

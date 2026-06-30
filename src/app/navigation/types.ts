@@ -3,7 +3,7 @@ export type RootStackParamList = {
   Player: { jobId: string };
   AddChannel: { input?: string } | undefined;
   ManageChannels: undefined;
-  Convert: { jobId?: string; sourceUrl?: string };
+  Convert: { jobId?: string; sourceUrl?: string; startAtSeconds?: number };
   PublisherPreview: { channelId: string; channelName: string | null };
 };
 
