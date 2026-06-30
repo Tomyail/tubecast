@@ -40,6 +40,7 @@
     "expo-localization": "~56.0.6",
     "expo-modules-core": "56.0.17",
     "expo-secure-store": "^56.0.4",
+    "expo-sharing": "^56.0.18",
     "expo-status-bar": "~56.0.4",
     "i18next": "^25.8.0",
     "react": "19.2.3",

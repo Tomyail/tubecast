@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import type { ComponentProps } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -14,6 +14,7 @@ import {
 import { Image } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Touchable from "../components/Touchable";
+import { useTrackAudioExport } from "../features/audioExport/hooks";
 import { useCacheReadyJob } from "../features/jobs/hooks";
 import { usePlayer, usePlaybackProgress } from "../features/player/context";
 import { useTranslation } from "../i18n";
@@ -42,6 +43,7 @@ export default function PlayerScreen() {
   } = usePlayer();
   const currentTime = usePlaybackProgress();
   const { cacheState, retryCache } = useCacheReadyJob(activeTrack?.jobId ?? null);
+  const { exportingTrackId, exportTrack } = useTrackAudioExport();
   const [progressWidth, setProgressWidth] = useState(1);
   const [scrubTime, setScrubTime] = useState<number | null>(null);
   const [optimisticSeekTime, setOptimisticSeekTime] = useState<number | null>(null);
@@ -168,6 +170,22 @@ export default function PlayerScreen() {
         canGoBack={navigation.canGoBack()}
         colors={colors}
         onBack={() => navigation.goBack()}
+        rightAction={
+          <Touchable
+            accessibilityLabel={t("audioExport.action")}
+            accessibilityRole="button"
+            disabled={exportingTrackId === activeTrack.id}
+            hitSlop={8}
+            onPress={() => void exportTrack(activeTrack)}
+            style={[styles.headerIconButton, { backgroundColor: colors.elevatedSurface }, exportingTrackId === activeTrack.id && styles.headerIconButtonDisabled]}
+          >
+            {exportingTrackId === activeTrack.id ? (
+              <ActivityIndicator color={colors.primaryText} />
+            ) : (
+              <Ionicons name="share-outline" size={24} color={colors.primaryText} />
+            )}
+          </Touchable>
+        }
         title={t("nav.player")}
         backLabel={t("common.back")}
       />
@@ -301,12 +319,14 @@ function PlayerHeader({
   canGoBack,
   colors,
   onBack,
+  rightAction,
   title,
 }: {
   backLabel: string;
   canGoBack: boolean;
   colors: ReturnType<typeof useAppTheme>["colors"];
   onBack: () => void;
+  rightAction?: ReactNode;
   title: string;
 }) {
   const insets = useSafeAreaInsets();
@@ -329,7 +349,7 @@ function PlayerHeader({
         <Text numberOfLines={1} style={[styles.headerTitle, { color: colors.primaryText }]}>
           {title}
         </Text>
-        <View style={styles.backButtonPlaceholder} />
+        {rightAction ?? <View style={styles.backButtonPlaceholder} />}
       </View>
     </View>
   );
@@ -373,6 +393,14 @@ const styles = StyleSheet.create({
     height: 56,
     width: 56,
   },
+  headerIconButton: {
+    alignItems: "center",
+    borderRadius: 28,
+    height: 56,
+    justifyContent: "center",
+    width: 56,
+  },
+  headerIconButtonDisabled: { opacity: 0.65 },
   headerTitle: {
     color: "#241a12",
     flex: 1,

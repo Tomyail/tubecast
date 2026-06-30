@@ -2,13 +2,14 @@ import { useRef, useState, useCallback, useEffect, useLayoutEffect, useMemo } fr
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
-import { Alert, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Alert, StyleSheet, Text, View } from "react-native";
 import DraggableFlatList, { ScaleDecorator, RenderItemParams } from "react-native-draggable-flatlist";
 import { Swipeable } from "react-native-gesture-handler";
 import { Directory, File, Paths } from "expo-file-system";
 import Screen from "../components/Screen";
 import EmptyState from "../components/EmptyState";
 import Touchable from "../components/Touchable";
+import { useTrackAudioExport } from "../features/audioExport/hooks";
 import { usePlaylist } from "../features/playlist/context";
 import { usePlayer } from "../features/player/context";
 import type { Track } from "../features/playlist/storage";
@@ -27,6 +28,7 @@ export default function PlaylistScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<PlaylistStackParamList>>();
   const { tracks, deleteTrack, deleteTracks, reorderTracks } = usePlaylist();
   const { playTrack, togglePlayback, activeTrack, isPlaying, playbackLoading, stopPlayback } = usePlayer();
+  const { exportingTrackId, exportTrack } = useTrackAudioExport();
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [filter, setFilter] = useState<PlaylistFilter>("all");
@@ -183,9 +185,11 @@ export default function PlaylistScreen() {
           isEditMode={isEditMode}
           isSelected={selectedIds.has(item.id)}
           onPlay={handlePlay}
+          onExport={exportTrack}
           onDelete={handleDelete}
           onDrag={canReorder ? drag : undefined}
           onToggleSelect={toggleSelect}
+          isExporting={exportingTrackId === item.id}
           t={t}
           locale={i18n.language}
           colors={colors}
@@ -272,8 +276,10 @@ function SwipeableTrackItem({
   isPlaying,
   isDragging,
   isEditMode,
+  isExporting,
   isSelected,
   onPlay,
+  onExport,
   onDelete,
   onDrag,
   onToggleSelect,
@@ -287,8 +293,10 @@ function SwipeableTrackItem({
   isPlaying: boolean;
   isDragging: boolean;
   isEditMode: boolean;
+  isExporting: boolean;
   isSelected: boolean;
   onPlay: (t: Track) => void;
+  onExport: (t: Track) => Promise<void>;
   onDelete: (t: Track) => void;
   onDrag?: () => void;
   onToggleSelect: (id: string) => void;
@@ -360,15 +368,36 @@ function SwipeableTrackItem({
     <Swipeable
       ref={swipeRef}
       renderRightActions={() => (
-        <Touchable
-          style={[styles.deleteAction, { backgroundColor: colors.destructive }]}
-          onPress={() => {
-            swipeRef.current?.close();
-            onDelete(track);
-          }}
-        >
-          <Text style={[styles.deleteActionText, { color: colors.tintText }]}>{t("common.delete")}</Text>
-        </Touchable>
+        <View style={styles.swipeActions}>
+          <Touchable
+            accessibilityLabel={t("audioExport.action")}
+            accessibilityRole="button"
+            disabled={isExporting}
+            style={[styles.exportAction, { backgroundColor: colors.tint }, isExporting && styles.exportActionDisabled]}
+            onPress={() => {
+              swipeRef.current?.close();
+              void onExport(track);
+            }}
+          >
+            {isExporting ? (
+              <ActivityIndicator color={colors.tintText} />
+            ) : (
+              <Ionicons name="share-outline" size={19} color={colors.tintText} />
+            )}
+            <Text numberOfLines={1} style={[styles.swipeActionText, { color: colors.tintText }]}>
+              {isExporting ? t("audioExport.exporting") : t("audioExport.action")}
+            </Text>
+          </Touchable>
+          <Touchable
+            style={[styles.deleteAction, { backgroundColor: colors.destructive }]}
+            onPress={() => {
+              swipeRef.current?.close();
+              onDelete(track);
+            }}
+          >
+            <Text style={[styles.swipeActionText, { color: colors.tintText }]}>{t("common.delete")}</Text>
+          </Touchable>
+        </View>
       )}
       overshootRight={false}
     >
@@ -437,12 +466,23 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   separator: { height: StyleSheet.hairlineWidth },
+  swipeActions: {
+    flexDirection: "row",
+    width: 176,
+  },
+  exportAction: {
+    alignItems: "center",
+    gap: 4,
+    justifyContent: "center",
+    width: 96,
+  },
+  exportActionDisabled: { opacity: 0.7 },
   deleteAction: {
     justifyContent: "center",
     alignItems: "center",
     width: 80,
   },
-  deleteActionText: { color: "#fff", fontWeight: "600", fontSize: 15 },
+  swipeActionText: { color: "#fff", fontWeight: "600", fontSize: 13 },
   actionBar: {
     position: "absolute",
     bottom: 0,
