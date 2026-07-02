@@ -7,6 +7,7 @@ describe("isSupportedYouTubeVideoUrl", () => {
     expect(isSupportedYouTubeVideoUrl("https://youtu.be/abc123DEF_4")).toBe(true);
     expect(isSupportedYouTubeVideoUrl("https://m.youtube.com/watch?v=abc123DEF_4")).toBe(true);
     expect(isSupportedYouTubeVideoUrl("https://www.youtube.com/embed/abc123DEF_4")).toBe(true);
+    expect(isSupportedYouTubeVideoUrl("https://www.youtube.com/shorts/abc123DEF_4")).toBe(true);
   });
 
   it("rejects channel inputs and unsupported URLs", () => {

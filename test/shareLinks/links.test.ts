@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildTubeCastOpenUrl,
   buildShareLandingUrl,
   buildTrackShareLandingUrl,
   buildTubeCastListenUrl,
   buildYouTubeTimestampUrl,
+  parseTubeCastOpenUrl,
   parseTubeCastListenUrl,
 } from "../../src/features/shareLinks/links";
 
@@ -18,6 +20,18 @@ describe("share links", () => {
     expect(parseTubeCastListenUrl("tubecast://listen?url=https%3A%2F%2Fyoutu.be%2Fabc&t=33")).toEqual({
       sourceUrl: "https://youtu.be/abc",
       startAtSeconds: 33,
+    });
+  });
+
+  it("builds TubeCast open deep links", () => {
+    const link = buildTubeCastOpenUrl("https://youtube.com/@some-channel");
+
+    expect(link).toBe("tubecast://open?url=https%3A%2F%2Fyoutube.com%2F%40some-channel");
+  });
+
+  it("parses TubeCast open deep links", () => {
+    expect(parseTubeCastOpenUrl("tubecast://open?url=https%3A%2F%2Fyoutube.com%2Fwatch%3Fv%3Dabc")).toEqual({
+      sourceUrl: "https://youtube.com/watch?v=abc",
     });
   });
 

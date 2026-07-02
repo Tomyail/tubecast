@@ -24,7 +24,10 @@ export function isSupportedYouTubeVideoUrl(input: string): boolean {
   }
 
   const embedMatch = url.pathname.match(/^\/embed\/([a-zA-Z0-9_-]{11})\/?$/);
-  return Boolean(embedMatch);
+  if (embedMatch) return true;
+
+  const shortsMatch = url.pathname.match(/^\/shorts\/([a-zA-Z0-9_-]{11})\/?$/);
+  return Boolean(shortsMatch);
 }
 
 export function isSupportedYouTubeChannelInput(input: string): boolean {

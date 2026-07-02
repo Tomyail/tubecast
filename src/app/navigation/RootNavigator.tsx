@@ -23,8 +23,9 @@ import { useTranslation } from "../../i18n";
 import { useAppTheme } from "../theme";
 import { usePlayer } from "../../features/player/context";
 import { getAllTracks } from "../../features/playlist/storage";
-import { parseTubeCastListenUrl } from "../../features/shareLinks/links";
+import { parseTubeCastListenUrl, parseTubeCastOpenUrl } from "../../features/shareLinks/links";
 import { findTrackForSourceUrl } from "../../features/shareLinks/matching";
+import { isSupportedYouTubeChannelInput } from "../../features/youtubeFeed/input";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<RootTabParamList>();
@@ -35,6 +36,10 @@ const SettingsStack = createNativeStackNavigator<{ SettingsRoot: undefined }>();
 
 const TAB_BAR_CONTENT_HEIGHT = 49;
 type IoniconName = NonNullable<ComponentProps<typeof Ionicons>["name"]>;
+
+function logDeepLink(message: string, details?: unknown) {
+  console.log("[TubeCastDeepLink]", message, details ?? "");
+}
 
 const tabIcons: Record<keyof RootTabParamList, { active: IoniconName; inactive: IoniconName }> = {
   Home: { active: "home", inactive: "home-outline" },
@@ -154,18 +159,57 @@ export default function RootNavigator() {
   const initialUrlHandledRef = useRef(false);
 
   const handleDeepLink = useCallback(async (rawUrl: string | null) => {
+    logDeepLink("handleDeepLink called", { rawUrl, navigationReady: navigationRef.isReady() });
     if (!rawUrl || !navigationRef.isReady()) return;
-    const listenLink = parseTubeCastListenUrl(rawUrl);
-    if (!listenLink) return;
+    const openLink = parseTubeCastOpenUrl(rawUrl);
+    if (openLink) {
+      logDeepLink("parsed open link", openLink);
+      if (isSupportedYouTubeChannelInput(openLink.sourceUrl)) {
+        logDeepLink("navigating to AddChannel", { sourceUrl: openLink.sourceUrl });
+        navigationRef.navigate("AddChannel", { input: openLink.sourceUrl });
+        return;
+      }
 
+      const tracks = await getAllTracks();
+      const existingTrack = findTrackForSourceUrl(tracks, openLink.sourceUrl);
+      if (existingTrack) {
+        logDeepLink("playing existing track", { sourceUrl: openLink.sourceUrl, jobId: existingTrack.jobId });
+        await playTrack(existingTrack, tracks);
+        navigationRef.navigate("Player", { jobId: existingTrack.jobId });
+        return;
+      }
+
+      logDeepLink("navigating to Convert", { sourceUrl: openLink.sourceUrl });
+      navigationRef.navigate("Convert", {
+        sourceUrl: openLink.sourceUrl,
+      });
+      return;
+    }
+
+    const listenLink = parseTubeCastListenUrl(rawUrl);
+    if (!listenLink) {
+      logDeepLink("URL did not match TubeCast deep-link formats", { rawUrl });
+      return;
+    }
+
+    logDeepLink("parsed listen link", listenLink);
     const tracks = await getAllTracks();
     const existingTrack = findTrackForSourceUrl(tracks, listenLink.sourceUrl);
     if (existingTrack) {
+      logDeepLink("playing existing track with timestamp", {
+        sourceUrl: listenLink.sourceUrl,
+        jobId: existingTrack.jobId,
+        startAtSeconds: listenLink.startAtSeconds,
+      });
       await playTrack(existingTrack, tracks, { startAtSeconds: listenLink.startAtSeconds });
       navigationRef.navigate("Player", { jobId: existingTrack.jobId });
       return;
     }
 
+    logDeepLink("navigating to Convert with timestamp", {
+      sourceUrl: listenLink.sourceUrl,
+      startAtSeconds: listenLink.startAtSeconds,
+    });
     navigationRef.navigate("Convert", {
       sourceUrl: listenLink.sourceUrl,
       startAtSeconds: listenLink.startAtSeconds,
@@ -177,9 +221,11 @@ export default function RootNavigator() {
 
     if (!initialUrlHandledRef.current) {
       initialUrlHandledRef.current = true;
+      logDeepLink("checking initial URL");
       void Linking.getInitialURL().then(handleDeepLink);
     }
     const subscription = Linking.addEventListener("url", (event) => {
+      logDeepLink("received runtime URL event", { url: event.url });
       void handleDeepLink(event.url);
     });
 

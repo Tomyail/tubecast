@@ -48,7 +48,8 @@
         }
       ],
       "expo-localization",
-      "expo-secure-store"
+      "expo-secure-store",
+      "./plugins/withShareExtension.cjs"
     ],
     "extra": {}
   }
