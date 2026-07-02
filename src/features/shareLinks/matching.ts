@@ -10,7 +10,9 @@ export function youtubeVideoIdFromUrl(sourceUrl: string): string | null {
     if (host === "youtube.com" || host === "www.youtube.com" || host === "m.youtube.com") {
       if (url.pathname === "/watch") return url.searchParams.get("v");
       const embedMatch = url.pathname.match(/^\/embed\/([^/]+)\/?$/);
-      return embedMatch?.[1] ?? null;
+      if (embedMatch) return embedMatch[1];
+      const shortsMatch = url.pathname.match(/^\/shorts\/([^/]+)\/?$/);
+      return shortsMatch?.[1] ?? null;
     }
   } catch {}
   return null;

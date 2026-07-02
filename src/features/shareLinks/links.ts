@@ -5,6 +5,10 @@ export type SharedListenLink = {
   startAtSeconds: number;
 };
 
+export type SharedOpenLink = {
+  sourceUrl: string;
+};
+
 const APP_SCHEME = "tubecast";
 const DEFAULT_WEB_URL = "https://yt-audio.tomyail.com";
 
@@ -25,6 +29,11 @@ export function buildTubeCastListenUrl(sourceUrl: string, startAtSeconds: number
     t: String(normalizeSeconds(startAtSeconds)),
   });
   return `${APP_SCHEME}://listen?${params.toString()}`;
+}
+
+export function buildTubeCastOpenUrl(sourceUrl: string): string {
+  const params = new URLSearchParams({ url: sourceUrl });
+  return `${APP_SCHEME}://open?${params.toString()}`;
 }
 
 export function buildShareLandingUrl(sourceUrl: string, startAtSeconds: number, webUrl = SHARE_WEB_URL): string {
@@ -74,6 +83,19 @@ export function parseTubeCastListenUrl(rawUrl: string): SharedListenLink | null 
       sourceUrl,
       startAtSeconds: normalizeSeconds(parsedSeconds),
     };
+  } catch {
+    return null;
+  }
+}
+
+export function parseTubeCastOpenUrl(rawUrl: string): SharedOpenLink | null {
+  try {
+    const url = new URL(rawUrl);
+    const isOpenUrl = url.protocol === `${APP_SCHEME}:` && url.hostname === "open";
+    if (!isOpenUrl) return null;
+    const sourceUrl = url.searchParams.get("url")?.trim();
+    if (!sourceUrl) return null;
+    return { sourceUrl };
   } catch {
     return null;
   }

@@ -29,6 +29,12 @@ describe("findTrackForSourceUrl", () => {
     expect(findTrackForSourceUrl([track], "https://youtu.be/abc?t=12")).toBe(track);
   });
 
+  it("matches YouTube Shorts URLs by video id", () => {
+    const track = makeTrack("https://www.youtube.com/watch?v=abc123DEF_4");
+
+    expect(findTrackForSourceUrl([track], "https://www.youtube.com/shorts/abc123DEF_4")).toBe(track);
+  });
+
   it("falls back to exact source URL matching", () => {
     const track = makeTrack("https://example.com/audio");
 
