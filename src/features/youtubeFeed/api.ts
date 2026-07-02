@@ -1,30 +1,9 @@
-import { SERVER_URL } from "../settings/storage";
+import { apiClient } from "../../shared/apiClient";
 import type { FeedItem, FeedSource } from "./types";
 
-type FeedErrorResponse = {
-  error?: {
-    code?: string;
-    message?: string;
-  };
-};
-
-async function request<T>(path: string, body: unknown): Promise<T> {
-  const res = await fetch(`${SERVER_URL}${path}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify(body),
-  });
-
-  const payload = await res.json().catch(() => null);
-  if (!res.ok) {
-    const errorPayload = payload as FeedErrorResponse | null;
-    throw new Error(errorPayload?.error?.message || `Request failed with status ${res.status}`);
-  }
-
-  return payload as T;
+async function request<T>(path: string, body: unknown, signal?: AbortSignal): Promise<T> {
+  const res = await apiClient.post<T>(path, body, { signal });
+  return res.data;
 }
 
 export async function resolveFeedSource(input: string): Promise<FeedSource> {
@@ -35,16 +14,20 @@ export async function resolveFeedSource(input: string): Promise<FeedSource> {
   return payload.source;
 }
 
-export async function fetchFeedItems(sources: FeedSource[]): Promise<FeedItem[]> {
+export async function fetchFeedItems(sources: FeedSource[], signal?: AbortSignal): Promise<FeedItem[]> {
   if (sources.length === 0) {
     return [];
   }
 
-  const payload = await request<{ items: FeedItem[]; errors: Array<{ message: string }> }>("/api/feed/recent-items", {
-    sources: sources.map((source) => ({
-      platform: source.platform,
-      platformSourceId: source.platformSourceId,
-    })),
-  });
+  const payload = await request<{ items: FeedItem[]; errors: Array<{ message: string }> }>(
+    "/api/feed/recent-items",
+    {
+      sources: sources.map((source) => ({
+        platform: source.platform,
+        platformSourceId: source.platformSourceId,
+      })),
+    },
+    signal
+  );
   return payload.items;
 }

@@ -1,4 +1,9 @@
-import { SERVER_URL } from "../settings/storage";
+import { apiClient } from "../../shared/apiClient";
+import { ApiError, AudioExpiredError, RateLimitError } from "../../shared/errors";
+
+// Re-exported so existing imports (e.g. player/context.tsx uses
+// `instanceof AudioExpiredError`) keep working without churn.
+export { ApiError, AudioExpiredError, RateLimitError };
 
 export type JobProgressPhase =
   | "queued"
@@ -32,46 +37,19 @@ export interface JobResponse {
   progressUpdatedAt?: string | null;
 }
 
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const res = await fetch(`${SERVER_URL}${path}`, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
+async function request<T>(path: string, options: { method?: string; data?: unknown } = {}): Promise<T> {
+  const res = await apiClient.request<T>({
+    url: path,
+    method: options.method ?? "GET",
+    data: options.data,
   });
-
-  if (res.status === 410) {
-    const body = await res.json();
-    throw new AudioExpiredError(body.message || "Audio has expired");
-  }
-  if (res.status === 429) {
-    const retryAfter = res.headers.get("Retry-After");
-    throw new RateLimitError(parseInt(retryAfter || "60"));
-  }
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({ message: res.statusText }));
-    throw new ApiError(res.status, body.message || body.error || "Request failed");
-  }
-  return res.json();
-}
-
-export class ApiError extends Error {
-  constructor(public status: number, message: string) { super(message); }
-}
-
-export class AudioExpiredError extends Error {
-  constructor(message: string) { super(message); }
-}
-
-export class RateLimitError extends Error {
-  constructor(public retryAfter: number) { super("Rate limited"); }
+  return res.data;
 }
 
 export async function submitJob(sourceUrl: string): Promise<{ id: string; status: string; sourceUrl: string }> {
   return request("/api/jobs", {
     method: "POST",
-    body: JSON.stringify({ sourceUrl }),
+    data: { sourceUrl },
   });
 }
 

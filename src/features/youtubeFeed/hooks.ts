@@ -42,7 +42,7 @@ export function useFeedVideos() {
 
   const query = useQuery({
     queryKey: YOUTUBE_FEED_QUERY_KEY,
-    queryFn: async (): Promise<FeedItemWithStatus[]> => {
+    queryFn: async ({ signal }): Promise<FeedItemWithStatus[]> => {
       const channels = await getSubscribedChannels();
       if (channels.length === 0) {
         void saveCachedYoutubeFeed(channels, []).catch((error) => {
@@ -51,7 +51,7 @@ export function useFeedVideos() {
         return [];
       }
 
-      const items = await fetchFeedItems(channels);
+      const items = await fetchFeedItems(channels, signal);
 
       // For v1, all videos start as "new". Job matching can be enhanced later.
       const videos = items.slice(0, MAX_FEED_ITEMS).map((v) => ({

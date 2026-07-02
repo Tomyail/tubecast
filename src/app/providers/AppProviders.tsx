@@ -10,7 +10,16 @@ import { I18nProvider } from "../../i18n";
 import { AppThemeProvider } from "../theme";
 
 export default function AppProviders({ children }: { children: ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient());
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          // Keep retry budget low: with a 15s request timeout, the default 3
+          // retries could keep a hung request's spinner up for ~45s+.
+          queries: { retry: 1 },
+        },
+      })
+  );
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

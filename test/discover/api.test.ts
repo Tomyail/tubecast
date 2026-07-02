@@ -1,31 +1,31 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
+
+// Mock the shared axios client so the discover API is tested in isolation.
+const { get } = vi.hoisted(() => ({ get: vi.fn() }));
+vi.mock("../../src/shared/apiClient", () => ({
+  apiClient: { get },
+}));
+
 import { fetchDiscover } from "../../src/features/discover/api";
 
 describe("discover backend API client", () => {
   beforeEach(() => {
-    vi.restoreAllMocks();
+    get.mockReset();
   });
 
   it("requests discover with no-cache headers to avoid stale iOS HTTP cache", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({ recent: [], popular: [] }),
-      }),
-    );
+    get.mockResolvedValue({ data: { recent: [], popular: [] } });
 
     await fetchDiscover();
 
-    expect(fetch).toHaveBeenCalledWith(
-      "https://yt-audio.tomyail.com/api/discover",
+    expect(get).toHaveBeenCalledWith(
+      "/api/discover",
       expect.objectContaining({
         headers: expect.objectContaining({
-          Accept: "application/json",
           "Cache-Control": "no-cache",
           Pragma: "no-cache",
         }),
-      }),
+      })
     );
   });
 });
