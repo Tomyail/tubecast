@@ -12,6 +12,7 @@ import Touchable from "../components/Touchable";
 import { useTrackAudioExport } from "../features/audioExport/hooks";
 import { usePlaylist } from "../features/playlist/context";
 import { usePlayer } from "../features/player/context";
+import { useRemoteConfig } from "../features/remoteConfig/context";
 import type { Track } from "../features/playlist/storage";
 import { useTranslation } from "../i18n";
 import { formatDuration, formatFileSize } from "../i18n/formatters";
@@ -28,6 +29,7 @@ export default function PlaylistScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<PlaylistStackParamList>>();
   const { tracks, deleteTrack, deleteTracks, reorderTracks } = usePlaylist();
   const { playTrack, togglePlayback, activeTrack, isPlaying, playbackLoading, stopPlayback } = usePlayer();
+  const { audioExportEnabled } = useRemoteConfig();
   const { exportingTrackId, exportTrack } = useTrackAudioExport();
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -184,6 +186,7 @@ export default function PlaylistScreen() {
           isDragging={isActive}
           isEditMode={isEditMode}
           isSelected={selectedIds.has(item.id)}
+          audioExportEnabled={audioExportEnabled}
           onPlay={handlePlay}
           onExport={exportTrack}
           onDelete={handleDelete}
@@ -278,6 +281,7 @@ function SwipeableTrackItem({
   isEditMode,
   isExporting,
   isSelected,
+  audioExportEnabled,
   onPlay,
   onExport,
   onDelete,
@@ -295,6 +299,7 @@ function SwipeableTrackItem({
   isEditMode: boolean;
   isExporting: boolean;
   isSelected: boolean;
+  audioExportEnabled: boolean;
   onPlay: (t: Track) => void;
   onExport: (t: Track) => Promise<void>;
   onDelete: (t: Track) => void;
@@ -368,26 +373,28 @@ function SwipeableTrackItem({
     <Swipeable
       ref={swipeRef}
       renderRightActions={() => (
-        <View style={styles.swipeActions}>
-          <Touchable
-            accessibilityLabel={t("audioExport.action")}
-            accessibilityRole="button"
-            disabled={isExporting}
-            style={[styles.exportAction, { backgroundColor: colors.tint }, isExporting && styles.exportActionDisabled]}
-            onPress={() => {
-              swipeRef.current?.close();
-              void onExport(track);
-            }}
-          >
-            {isExporting ? (
-              <ActivityIndicator color={colors.tintText} />
-            ) : (
-              <Ionicons name="share-outline" size={19} color={colors.tintText} />
-            )}
-            <Text numberOfLines={1} style={[styles.swipeActionText, { color: colors.tintText }]}>
-              {isExporting ? t("audioExport.exporting") : t("audioExport.action")}
-            </Text>
-          </Touchable>
+        <View style={[styles.swipeActions, !audioExportEnabled && styles.swipeActionsCompact]}>
+          {audioExportEnabled ? (
+            <Touchable
+              accessibilityLabel={t("audioExport.action")}
+              accessibilityRole="button"
+              disabled={isExporting}
+              style={[styles.exportAction, { backgroundColor: colors.tint }, isExporting && styles.exportActionDisabled]}
+              onPress={() => {
+                swipeRef.current?.close();
+                void onExport(track);
+              }}
+            >
+              {isExporting ? (
+                <ActivityIndicator color={colors.tintText} />
+              ) : (
+                <Ionicons name="share-outline" size={19} color={colors.tintText} />
+              )}
+              <Text numberOfLines={1} style={[styles.swipeActionText, { color: colors.tintText }]}>
+                {isExporting ? t("audioExport.exporting") : t("audioExport.action")}
+              </Text>
+            </Touchable>
+          ) : null}
           <Touchable
             style={[styles.deleteAction, { backgroundColor: colors.destructive }]}
             onPress={() => {
@@ -470,6 +477,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     width: 176,
   },
+  swipeActionsCompact: { width: 80 },
   exportAction: {
     alignItems: "center",
     gap: 4,

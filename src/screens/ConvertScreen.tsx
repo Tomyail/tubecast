@@ -14,6 +14,7 @@ import { getHomeProgressInfo, PROGRESS_STEPS } from "../features/jobs/progress";
 import { playableTrackFromReadyJob } from "../features/jobs/track";
 import { usePlayer } from "../features/player/context";
 import { usePlaylist } from "../features/playlist/context";
+import { useRemoteConfig } from "../features/remoteConfig/context";
 import { useTranslation } from "../i18n";
 import { useAppTheme } from "../app/theme";
 import { isSupportedYouTubeChannelInput } from "../features/youtubeFeed/input";
@@ -34,11 +35,12 @@ export default function ConvertScreen() {
   const { cacheState, retryCache } = useCacheReadyJob(jobId);
   const { tracks } = usePlaylist();
   const { playTrack } = usePlayer();
+  const { linkProcessingEnabled } = useRemoteConfig();
   const playableTrack = job?.status === "ready" ? playableTrackFromReadyJob(job, tracks) : null;
   const autoPlayJobRef = useRef<string | null>(null);
 
   // 合并成一个 mount effect，按优先级 setJobId 一次，防竞态：
-  // route.params.jobId > route.params.sourceUrl(自动提交) > AsyncStorage pending > 空表单。
+  // route.params.jobId > route.params.sourceUrl(预填待确认) > AsyncStorage pending > 空表单。
   // 不能照搬旧 HomeScreen 的无条件 AsyncStorage 恢复，否则旧 pending 的异步 resolve
   // 会后于 route effect 返回并覆盖 route 传入的 jobId。
   useEffect(() => {
@@ -50,7 +52,6 @@ export default function ConvertScreen() {
     }
     if (params?.sourceUrl) {
       setUrl(params.sourceUrl);
-      void handleSubmitUrl(params.sourceUrl);
       return;
     }
     AsyncStorage.getItem(PENDING_JOB_KEY).then((id) => {
@@ -78,6 +79,10 @@ export default function ConvertScreen() {
   const handleSubmitUrl = async (rawUrl: string) => {
     const trimmedUrl = rawUrl.trim();
     if (!trimmedUrl) return;
+    if (!linkProcessingEnabled) {
+      Alert.alert(t("common.error"), t("errors.featureUnavailable"));
+      return;
+    }
 
     if (isSupportedYouTubeChannelInput(trimmedUrl)) {
       Alert.alert(t("home.channelLinkTitle"), t("home.channelLinkMessage"), [
@@ -137,7 +142,7 @@ export default function ConvertScreen() {
           </Touchable>
         </View>
       </View>
-      <Touchable accessibilityRole="button" style={[styles.submitButton, { backgroundColor: colors.tint }, (!url.trim() || submit.isPending) && styles.disabled]} onPress={handleSubmit} disabled={!url.trim() || submit.isPending}>
+      <Touchable accessibilityRole="button" style={[styles.submitButton, { backgroundColor: colors.tint }, (!url.trim() || submit.isPending || !linkProcessingEnabled) && styles.disabled]} onPress={handleSubmit} disabled={!url.trim() || submit.isPending || !linkProcessingEnabled}>
         {submit.isPending ? <ActivityIndicator color={colors.tintText} /> : <><Ionicons name="arrow-down" size={20} color={colors.tintText} /><Text style={[styles.submitText, { color: colors.tintText }]}>{t("home.convert")}</Text></>}
       </Touchable>
 

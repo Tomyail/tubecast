@@ -67,27 +67,27 @@ describe("getHomeProgressInfo — known phases", () => {
     expect(info.activeStep).toBe(0);
   });
 
-  it("starting → title 准备转换, activeStep 0", () => {
+  it("starting → title 准备中, activeStep 0", () => {
     const info = getHomeProgressInfo(makeJob({ progressPhase: "starting" }), "idle");
-    expect(info.title).toBe("准备转换");
+    expect(info.title).toBe("准备中");
     expect(info.activeStep).toBe(0);
   });
 
-  it("downloading → title 下载中, activeStep 1", () => {
+  it("downloading → title 准备中, activeStep 1", () => {
     const info = getHomeProgressInfo(makeJob({ progressPhase: "downloading" }), "idle");
-    expect(info.title).toBe("下载中");
+    expect(info.title).toBe("准备中");
     expect(info.activeStep).toBe(1);
   });
 
-  it("transcoding → title 转码中, activeStep 2", () => {
+  it("transcoding → title 准备中, activeStep 2", () => {
     const info = getHomeProgressInfo(makeJob({ progressPhase: "transcoding" }), "idle");
-    expect(info.title).toBe("转码中");
+    expect(info.title).toBe("准备中");
     expect(info.activeStep).toBe(2);
   });
 
-  it("uploading → title 保存中, activeStep 3", () => {
+  it("uploading → title 收尾中, activeStep 3", () => {
     const info = getHomeProgressInfo(makeJob({ progressPhase: "uploading" }), "idle");
-    expect(info.title).toBe("保存中");
+    expect(info.title).toBe("收尾中");
     expect(info.activeStep).toBe(3);
   });
 });
@@ -114,17 +114,17 @@ describe("getHomeProgressInfo — retry", () => {
 });
 
 describe("getHomeProgressInfo — cacheState overrides", () => {
-  it("cacheState=caching overrides any phase → 可播放, activeStep 4", () => {
+  it("cacheState=caching overrides any phase → 就绪, activeStep 4", () => {
     const job = makeJob({ progressPhase: "uploading" });
     const info = getHomeProgressInfo(job, "caching");
-    expect(info.title).toBe("可播放");
+    expect(info.title).toBe("就绪");
     expect(info.activeStep).toBe(4);
   });
 
-  it("cacheState=cached → 已缓存, activeStep 4", () => {
+  it("cacheState=cached → 已保存, activeStep 4", () => {
     const job = makeJob({ progressPhase: "uploading" });
     const info = getHomeProgressInfo(job, "cached");
-    expect(info.title).toBe("已缓存");
+    expect(info.title).toBe("已保存");
     expect(info.activeStep).toBe(4);
   });
 });
@@ -138,16 +138,16 @@ describe("getFeedProgressLabel", () => {
     expect(getFeedProgressLabel(makeJob({ progressPhase: "starting" })).label).toBe("准备中");
   });
 
-  it("downloading → 下载中", () => {
-    expect(getFeedProgressLabel(makeJob({ progressPhase: "downloading" })).label).toBe("下载中");
+  it("downloading → 准备中", () => {
+    expect(getFeedProgressLabel(makeJob({ progressPhase: "downloading" })).label).toBe("准备中");
   });
 
-  it("transcoding → 转码中", () => {
-    expect(getFeedProgressLabel(makeJob({ progressPhase: "transcoding" })).label).toBe("转码中");
+  it("transcoding → 准备中", () => {
+    expect(getFeedProgressLabel(makeJob({ progressPhase: "transcoding" })).label).toBe("准备中");
   });
 
-  it("uploading → 保存中", () => {
-    expect(getFeedProgressLabel(makeJob({ progressPhase: "uploading" })).label).toBe("保存中");
+  it("uploading → 收尾中", () => {
+    expect(getFeedProgressLabel(makeJob({ progressPhase: "uploading" })).label).toBe("收尾中");
   });
 
   it("retry queued (attemptCount>0 + lastErrorMessage) → 重试中", () => {

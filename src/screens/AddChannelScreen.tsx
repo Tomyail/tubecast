@@ -11,10 +11,12 @@ import { isSupportedYouTubeVideoUrl } from "../features/youtubeFeed/input";
 import type { FeedSource } from "../features/youtubeFeed/types";
 import { useTranslation } from "../i18n";
 import { useAppTheme } from "../app/theme";
+import { useRemoteConfig } from "../features/remoteConfig/context";
 
 export default function AddChannelScreen() {
   const { t } = useTranslation();
   const { colors } = useAppTheme();
+  const { linkProcessingEnabled } = useRemoteConfig();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<RouteProp<RootStackParamList, "AddChannel">>();
   const [input, setInput] = useState(route.params?.input ?? "");
@@ -28,6 +30,10 @@ export default function AddChannelScreen() {
     const trimmedInput = input.trim();
 
     if (isSupportedYouTubeVideoUrl(trimmedInput)) {
+      if (!linkProcessingEnabled) {
+        setParseError(t("errors.featureUnavailable"));
+        return;
+      }
       Alert.alert(t("channel.videoLinkTitle"), t("channel.videoLinkMessage"), [
         { text: t("common.cancel"), style: "cancel" },
         {

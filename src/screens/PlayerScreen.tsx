@@ -21,6 +21,7 @@ import Touchable from "../components/Touchable";
 import { useTrackAudioExport } from "../features/audioExport/hooks";
 import { useCacheReadyJob } from "../features/jobs/hooks";
 import { usePlayer, usePlaybackProgress } from "../features/player/context";
+import { useRemoteConfig } from "../features/remoteConfig/context";
 import { buildShareMessage, buildTrackShareLandingUrl, buildYouTubeTimestampUrl } from "../features/shareLinks/links";
 import { useTranslation } from "../i18n";
 import { formatDuration } from "../i18n/formatters";
@@ -48,6 +49,7 @@ export default function PlayerScreen() {
   } = usePlayer();
   const currentTime = usePlaybackProgress();
   const { cacheState, retryCache } = useCacheReadyJob(activeTrack?.jobId ?? null);
+  const { audioExportEnabled } = useRemoteConfig();
   const { exportingTrackId, exportTrack } = useTrackAudioExport();
   const [progressWidth, setProgressWidth] = useState(1);
   const [scrubTime, setScrubTime] = useState<number | null>(null);
@@ -183,6 +185,11 @@ export default function PlayerScreen() {
   };
 
   const showActions = () => {
+    if (!audioExportEnabled) {
+      void shareTimestamp();
+      return;
+    }
+
     const shareAction = () => void shareTimestamp();
     const exportAction = () => void exportTrack(activeTrack);
 
@@ -216,7 +223,7 @@ export default function PlayerScreen() {
         onBack={() => navigation.goBack()}
         rightAction={
           <Touchable
-            accessibilityLabel={t("player.actions")}
+            accessibilityLabel={audioExportEnabled ? t("player.actions") : t("share.moment")}
             accessibilityRole="button"
             disabled={exportingTrackId === activeTrack.id}
             hitSlop={8}
@@ -226,7 +233,7 @@ export default function PlayerScreen() {
             {exportingTrackId === activeTrack.id ? (
               <ActivityIndicator color={colors.primaryText} />
             ) : (
-              <Ionicons name="ellipsis-horizontal" size={24} color={colors.primaryText} />
+              <Ionicons name={audioExportEnabled ? "ellipsis-horizontal" : "share-outline"} size={audioExportEnabled ? 24 : 23} color={colors.primaryText} />
             )}
           </Touchable>
         }
@@ -253,7 +260,7 @@ export default function PlayerScreen() {
             <Text numberOfLines={3} style={[styles.title, { color: colors.primaryText }]}>{activeTrack.title || t("common.untitled")}</Text>
             <View style={styles.sourceLink}>
               <Ionicons name="link-outline" size={14} color={colors.tint} />
-              <Text numberOfLines={1} style={[styles.sourceUrl, { color: colors.tint }]}>YouTube</Text>
+              <Text numberOfLines={1} style={[styles.sourceUrl, { color: colors.tint }]}>{t("player.source")}</Text>
             </View>
           </Touchable>
 

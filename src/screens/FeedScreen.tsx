@@ -27,6 +27,7 @@ import {
 import { getFeedProgressLabel } from "../features/jobs/progress";
 import { useTranslation } from "../i18n";
 import { useAppTheme } from "../app/theme";
+import { useRemoteConfig } from "../features/remoteConfig/context";
 
 const MINI_PLAYER_HEIGHT = 64;
 const BOTTOM_BASE = 24;
@@ -36,6 +37,7 @@ type IoniconName = NonNullable<ComponentProps<typeof Ionicons>["name"]>;
 export default function FeedScreen() {
   const { t } = useTranslation();
   const { colors } = useAppTheme();
+  const { linkProcessingEnabled } = useRemoteConfig();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { data: channels = [] } = useSubscribedChannels();
@@ -262,6 +264,7 @@ export default function FeedScreen() {
               onConvert={handleConvert}
               onPlay={handlePlay}
               isSubmitting={submittingIds.has(item.platformItemId)}
+              linkProcessingEnabled={linkProcessingEnabled}
               onTerminal={handleTerminal}
             />
           )}
@@ -282,6 +285,7 @@ const VideoCard = memo(function VideoCard({
   onConvert,
   onPlay,
   isSubmitting,
+  linkProcessingEnabled,
   onTerminal,
 }: {
   video: FeedItemWithStatus;
@@ -290,6 +294,7 @@ const VideoCard = memo(function VideoCard({
   onConvert: (v: FeedItemWithStatus) => void;
   onPlay: (track: Track) => void;
   isSubmitting: boolean;
+  linkProcessingEnabled: boolean;
   onTerminal: (platformItemId: string) => void;
 }) {
   const { t } = useTranslation();
@@ -326,7 +331,7 @@ const VideoCard = memo(function VideoCard({
       <View style={styles.cardContent}>
         <Text style={[styles.cardTitle, { color: colors.primaryText }]} numberOfLines={2}>{video.title}</Text>
         <Text style={[styles.cardMeta, { color: colors.secondaryText }]}>{video.sourceTitle} · {formatRelativeTime(video.publishedAt, t)}</Text>
-        {/* 状态行区域预留固定高度：点击下载后 converting/ready/failed 的状态行在此出现，
+        {/* 状态行区域预留固定高度：点击添加后 converting/ready/failed 的状态行在此出现，
             无论是否渲染内容都占位，避免 cardContent 高度随状态切换跳动。 */}
         <View style={styles.statusRow}>
           {status === "converting" && (
@@ -347,6 +352,7 @@ const VideoCard = memo(function VideoCard({
       <VideoAction
         disabled={liveUnsupported}
         isSubmitting={isSubmitting}
+        linkProcessingEnabled={linkProcessingEnabled}
         onConvert={() => onConvert(video)}
         onPlay={playableTrack ? () => onPlay(playableTrack) : undefined}
         status={status}
@@ -376,6 +382,7 @@ function VideoAction({
   onPlay,
   t,
   disabled = false,
+  linkProcessingEnabled,
 }: {
   status: "new" | "converting" | "ready" | "failed";
   isSubmitting: boolean;
@@ -383,6 +390,7 @@ function VideoAction({
   onPlay?: () => void;
   t: (key: string) => string;
   disabled?: boolean;
+  linkProcessingEnabled: boolean;
 }) {
   const { colors } = useAppTheme();
   if (status === "converting" || isSubmitting) {
@@ -390,7 +398,10 @@ function VideoAction({
   }
 
   const isReady = status === "ready" && onPlay;
-  const icon: IoniconName = isReady ? "play" : status === "failed" ? "refresh" : "arrow-down";
+  if (!isReady && !linkProcessingEnabled) {
+    return <View style={styles.actionPlaceholder} />;
+  }
+  const icon: IoniconName = isReady ? "play" : status === "failed" ? "refresh" : "add";
   const label = isReady ? t("common.play") : status === "failed" ? t("common.retry") : t("feed.convert");
 
   return (

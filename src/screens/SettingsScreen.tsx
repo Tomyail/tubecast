@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import Constants from "expo-constants";
+import type { ComponentProps } from "react";
 import { useEffect, useState } from "react";
 import { Linking, StyleSheet, Text, View } from "react-native";
 import appConfig from "../../app.json";
@@ -13,6 +14,7 @@ import { useAppTheme } from "../app/theme";
 type BuildExtra = {
   buildCommit?: string;
 };
+type IoniconName = NonNullable<ComponentProps<typeof Ionicons>["name"]>;
 
 const expoConfig = Constants.expoConfig;
 const buildExtra = expoConfig?.extra as BuildExtra | undefined;
@@ -25,6 +27,9 @@ const sourceUrl =
   buildCommit === "unknown"
     ? "https://github.com/Tomyail/tubecast"
     : `https://github.com/Tomyail/tubecast/commit/${buildCommit}`;
+const privacyPolicyUrl = "https://yt-audio.tomyail.com/privacy";
+const termsUrl = "https://yt-audio.tomyail.com/terms";
+const supportUrl = "https://yt-audio.tomyail.com/support";
 
 export default function SettingsScreen() {
   const [storageInfo, setStorageInfo] = useState<string>("");
@@ -112,8 +117,28 @@ export default function SettingsScreen() {
           </View>
           <Ionicons name="arrow-up-right-box" size={18} color={colors.tint} />
         </Touchable>
+        <View style={[styles.separator, { backgroundColor: colors.border }]} />
+        <LinkRow icon="shield-checkmark-outline" label={t("settings.privacyPolicy")} url={privacyPolicyUrl} colors={colors} />
+        <View style={[styles.separator, { backgroundColor: colors.border }]} />
+        <LinkRow icon="document-text-outline" label={t("settings.terms")} url={termsUrl} colors={colors} />
+        <View style={[styles.separator, { backgroundColor: colors.border }]} />
+        <LinkRow icon="help-circle-outline" label={t("settings.support")} url={supportUrl} colors={colors} />
       </Section>
     </Screen>
+  );
+}
+
+function LinkRow({ icon, label, url, colors }: { icon: IoniconName; label: string; url: string; colors: ReturnType<typeof useAppTheme>["colors"] }) {
+  return (
+    <Touchable accessibilityRole="link" onPress={() => void Linking.openURL(url)} style={styles.settingRow}>
+      <View style={[styles.rowIcon, { backgroundColor: colors.elevatedSurface }]}>
+        <Ionicons name={icon} size={20} color={colors.tint} />
+      </View>
+      <View style={styles.rowContent}>
+        <Text style={[styles.rowTitle, { color: colors.primaryText }]}>{label}</Text>
+      </View>
+      <Ionicons name="arrow-up-right-box" size={18} color={colors.tint} />
+    </Touchable>
   );
 }
 

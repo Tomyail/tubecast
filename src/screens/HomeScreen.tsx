@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
-import { ActivityIndicator, Alert, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Alert, Linking, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 import type { RootStackParamList } from "../app/navigation/types";
 import Screen from "../components/Screen";
 import DiscoverShelf from "../components/DiscoverShelf";
@@ -10,10 +10,11 @@ import EmptyState from "../components/EmptyState";
 import Touchable from "../components/Touchable";
 import { useDiscover } from "../features/discover";
 import type { DiscoverItem } from "../features/discover/types";
-import { getJob, submitJob } from "../features/jobs/api";
+import { getJob } from "../features/jobs/api";
 import { playableTrackFromReadyJob } from "../features/jobs/track";
 import { usePlayer } from "../features/player/context";
 import { usePlaylist } from "../features/playlist/context";
+import { useRemoteConfig } from "../features/remoteConfig/context";
 import { useTranslation } from "../i18n";
 import { useAppTheme } from "../app/theme";
 
@@ -25,8 +26,9 @@ export default function HomeScreen() {
   const { data, isLoading, isError, isRefetching, isRestoring, refetch } = useDiscover();
   const { tracks } = usePlaylist();
   const { playTrack } = usePlayer();
+  const { linkProcessingEnabled } = useRemoteConfig();
 
-  // 点击卡片兜底（决策 8）：实时查 job，未过期直接播；否则用 sourceId 重建 URL 重新转换。
+  // 点击卡片兜底：实时查 job，未过期直接播；否则预填 Add Link 让用户确认。
   // pendingJobId 给点击后到跳转前的即时反馈（getJob() 期间无其他视觉变化）。
   const [pendingJobId, setPendingJobId] = useState<string | null>(null);
   const handleRefresh = useCallback(() => {
@@ -42,17 +44,18 @@ export default function HomeScreen() {
       const expiresAtMs = job.audioExpiresAt
         ? Date.parse(job.audioExpiresAt.replace(" ", "T") + "Z")
         : NaN;
-      const playable = job.status === "ready" && !Number.isNaN(expiresAtMs) && expiresAtMs > Date.now();
+      const playable = job.status === "ready" && (!job.audioExpiresAt || (!Number.isNaN(expiresAtMs) && expiresAtMs > Date.now()));
       if (playable) {
         await playTrack(playableTrackFromReadyJob(job, tracks), tracks);
         navigation.navigate("Player", { jobId: item.jobId });
         return;
       }
-      // 过期/非 ready → 重建规范 URL 触发新转换。依赖服务端 findActiveJobBySourceId 已把
-      // ready 但音频过期的 job 视为非 active，故 submitJob 会真正创建新 job。
       const url = `https://www.youtube.com/watch?v=${item.sourceId}`;
-      const result = await submitJob(url);
-      navigation.navigate("Convert", { jobId: result.id });
+      if (!linkProcessingEnabled) {
+        void Linking.openURL(url);
+        return;
+      }
+      navigation.navigate("Convert", { sourceUrl: url });
     } catch {
       Alert.alert(t("common.error"), t("errors.generic"));
     } finally {
@@ -103,8 +106,8 @@ export default function HomeScreen() {
               <EmptyState
                 icon="compass-outline"
                 title={t("discover.empty")}
-                actionLabel={t("home.pasteUrl")}
-                onAction={() => navigation.navigate("Convert", {})}
+                actionLabel={linkProcessingEnabled ? t("home.pasteUrl") : undefined}
+                onAction={linkProcessingEnabled ? () => navigation.navigate("Convert", {}) : undefined}
               />
             ) : (
               <>
@@ -117,14 +120,16 @@ export default function HomeScreen() {
 
         {/* FAB：相对 root 的 absolute 子元素。Screen 在 MiniPlayer 显示时自动增大
             paddingBottom，root（flex:1）随之收缩，FAB 自动上抬避让，无需额外分支。 */}
-        <Touchable
-          accessibilityRole="button"
-          accessibilityLabel={t("home.pasteUrl")}
-          style={[styles.fab, { backgroundColor: colors.tint }]}
-          onPress={() => navigation.navigate("Convert", {})}
-        >
-          <Ionicons name="add" size={30} color={colors.tintText} />
-        </Touchable>
+        {linkProcessingEnabled ? (
+          <Touchable
+            accessibilityRole="button"
+            accessibilityLabel={t("home.pasteUrl")}
+            style={[styles.fab, { backgroundColor: colors.tint }]}
+            onPress={() => navigation.navigate("Convert", {})}
+          >
+            <Ionicons name="add" size={30} color={colors.tintText} />
+          </Touchable>
+        ) : null}
       </View>
     </Screen>
   );

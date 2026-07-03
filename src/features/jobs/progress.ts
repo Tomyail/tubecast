@@ -15,7 +15,7 @@ export interface FeedProgressLabel {
 }
 
 const legacyHomeCopy: Record<string, string> = {
-  "progress.playable": "可播放", "progress.cachingToDevice": "正在后台缓存到手机", "progress.cached": "已缓存", "progress.availableOffline": "可离线播放", "progress.cacheFailedStreaming": "缓存失败，仍可在线播放", "progress.retrying": "重试中", "progress.retryingDetail": "上次尝试失败，正在自动重试", "progress.queued": "排队中", "progress.queuedDetail": "等待转换服务接收任务", "progress.preparing": "准备转换", "progress.preparingDetail": "正在准备音频转换", "progress.downloading": "下载中", "progress.downloadingDetail": "正在从 YouTube 获取音频", "progress.transcoding": "转码中", "progress.transcodingDetail": "正在转换为可播放格式", "progress.saving": "保存中", "progress.savingDetail": "正在保存音频文件", "progress.processing": "处理中",
+  "progress.playable": "就绪", "progress.cachingToDevice": "正在准备播放", "progress.cached": "已保存", "progress.availableOffline": "可播放", "progress.cacheFailedStreaming": "保存失败，仍可播放", "progress.retrying": "重试中", "progress.retryingDetail": "上次尝试失败，正在自动重试", "progress.queued": "排队中", "progress.queuedDetail": "等待服务接收任务", "progress.preparing": "准备中", "progress.preparingDetail": "正在准备此链接", "progress.downloading": "准备中", "progress.downloadingDetail": "正在准备来源", "progress.transcoding": "准备中", "progress.transcodingDetail": "正在准备播放", "progress.saving": "收尾中", "progress.savingDetail": "正在完成此项目", "progress.processing": "处理中",
 };
 
 export const PROGRESS_STEPS = ["queued", "download", "transcode", "save", "playable"] as const;

@@ -23,6 +23,7 @@ import { useTranslation } from "../../i18n";
 import { useAppTheme } from "../theme";
 import { usePlayer } from "../../features/player/context";
 import { getAllTracks } from "../../features/playlist/storage";
+import { useRemoteConfig } from "../../features/remoteConfig/context";
 import { parseTubeCastListenUrl, parseTubeCastOpenUrl } from "../../features/shareLinks/links";
 import { findTrackForSourceUrl } from "../../features/shareLinks/matching";
 import { isSupportedYouTubeChannelInput } from "../../features/youtubeFeed/input";
@@ -155,6 +156,7 @@ export default function RootNavigator() {
   const { colors, isDark } = useAppTheme();
   const navigationRef = useNavigationContainerRef<RootStackParamList>();
   const { playTrack } = usePlayer();
+  const { linkProcessingEnabled } = useRemoteConfig();
   const [navigationReady, setNavigationReady] = useState(false);
   const initialUrlHandledRef = useRef(false);
 
@@ -179,6 +181,10 @@ export default function RootNavigator() {
         return;
       }
 
+      if (!linkProcessingEnabled) {
+        void Linking.openURL(openLink.sourceUrl);
+        return;
+      }
       logDeepLink("navigating to Convert", { sourceUrl: openLink.sourceUrl });
       navigationRef.navigate("Convert", {
         sourceUrl: openLink.sourceUrl,
@@ -206,6 +212,10 @@ export default function RootNavigator() {
       return;
     }
 
+    if (!linkProcessingEnabled) {
+      void Linking.openURL(listenLink.sourceUrl);
+      return;
+    }
     logDeepLink("navigating to Convert with timestamp", {
       sourceUrl: listenLink.sourceUrl,
       startAtSeconds: listenLink.startAtSeconds,
@@ -214,7 +224,7 @@ export default function RootNavigator() {
       sourceUrl: listenLink.sourceUrl,
       startAtSeconds: listenLink.startAtSeconds,
     });
-  }, [navigationRef, playTrack]);
+  }, [linkProcessingEnabled, navigationRef, playTrack]);
 
   useEffect(() => {
     if (!navigationReady) return;

@@ -21,6 +21,7 @@ import { usePlayer } from "../features/player/context";
 import { useAppTheme } from "../app/theme";
 import { useTranslation } from "../i18n";
 import type { RootStackParamList } from "../app/navigation/types";
+import { useRemoteConfig } from "../features/remoteConfig/context";
 import {
   useChannelSubscription,
   useRemoveChannel,
@@ -84,6 +85,7 @@ function formatRelativeTime(isoDate: string, t: (key: string, options?: { count:
 export default function PublisherPreviewSheet() {
   const { t } = useTranslation();
   const { colors } = useAppTheme();
+  const { linkProcessingEnabled } = useRemoteConfig();
   const navigation = useNavigation<Navigation>();
   const route = useRoute<PublisherRoute>();
   const { channelId, channelName } = route.params;
@@ -359,7 +361,7 @@ export default function PublisherPreviewSheet() {
                         {t("publisher.converting")}
                       </Text>
                     </Pressable>
-                  ) : (
+                  ) : linkProcessingEnabled ? (
                     <Pressable
                       accessibilityRole="button"
                       disabled={isSubmitting}
@@ -374,6 +376,8 @@ export default function PublisherPreviewSheet() {
                         </Text>
                       )}
                     </Pressable>
+                  ) : (
+                    <View style={styles.convertButtonPlaceholder} />
                   )}
                 </View>
               );
@@ -409,6 +413,7 @@ const styles = StyleSheet.create({
   statusPill: { paddingHorizontal: 6, paddingVertical: 4 },
   statusPillText: { fontSize: 13, fontWeight: "600" },
   convertButton: { borderRadius: 12, paddingHorizontal: 12, paddingVertical: 6 },
+  convertButtonPlaceholder: { width: 52 },
   convertText: { fontSize: 13, fontWeight: "600" },
   unsupportedText: { flexShrink: 0, fontSize: 12, fontWeight: "600", maxWidth: 110, textAlign: "right" },
 });
