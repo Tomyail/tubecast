@@ -60,6 +60,10 @@ export function buildTrackShareLandingUrl(
   return `${webUrl.replace(/\/+$/, "")}/share?${params.toString()}`;
 }
 
+export function buildShareShortUrl(id: string, webUrl = SHARE_WEB_URL): string {
+  return `${webUrl.replace(/\/+$/, "")}/s/${id}`;
+}
+
 export function buildYouTubeTimestampUrl(sourceUrl: string, startAtSeconds: number): string {
   try {
     const url = new URL(sourceUrl);

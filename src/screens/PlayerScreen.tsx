@@ -22,7 +22,8 @@ import { useTrackAudioExport } from "../features/audioExport/hooks";
 import { useCacheReadyJob } from "../features/jobs/hooks";
 import { usePlayer, usePlaybackProgress } from "../features/player/context";
 import { useRemoteConfig } from "../features/remoteConfig/context";
-import { buildShareMessage, buildTrackShareLandingUrl, buildYouTubeTimestampUrl } from "../features/shareLinks/links";
+import { buildShareMessage, buildShareShortUrl, buildTrackShareLandingUrl, buildYouTubeTimestampUrl } from "../features/shareLinks/links";
+import { createShareMoment } from "../features/shareLinks/momentsApi";
 import { useTranslation } from "../i18n";
 import { formatDuration } from "../i18n/formatters";
 import { useAppTheme } from "../app/theme";
@@ -54,6 +55,7 @@ export default function PlayerScreen() {
   const [progressWidth, setProgressWidth] = useState(1);
   const [scrubTime, setScrubTime] = useState<number | null>(null);
   const [optimisticSeekTime, setOptimisticSeekTime] = useState<number | null>(null);
+  const [isPreparingShare, setIsPreparingShare] = useState(false);
   const progressRef = useRef<View>(null);
   const progressLeftRef = useRef(0);
   const progressMeasuredRef = useRef(false);
@@ -173,7 +175,25 @@ export default function PlayerScreen() {
 
   const shareTimestamp = async () => {
     const timestamp = Math.floor(currentTime);
-    const landingUrl = buildTrackShareLandingUrl(activeTrack, timestamp);
+    // Mint a short link first (createShareMoment enforces a 3s timeout). On any
+    // failure — network, 429, timeout — fall back to the long /share?... URL so
+    // sharing never blocks. Show a loader while we wait so the tap feels
+    // responsive instead of silently hanging before the share sheet opens.
+    setIsPreparingShare(true);
+    let landingUrl: string;
+    try {
+      const { id } = await createShareMoment({
+        sourceUrl: activeTrack.sourceUrl,
+        t: timestamp,
+        title: activeTrack.title ?? undefined,
+        channel: activeTrack.channelName ?? undefined,
+      });
+      landingUrl = buildShareShortUrl(id);
+    } catch {
+      landingUrl = buildTrackShareLandingUrl(activeTrack, timestamp);
+    } finally {
+      setIsPreparingShare(false);
+    }
     const fallbackUrl = buildYouTubeTimestampUrl(activeTrack.sourceUrl, timestamp);
     const message = buildShareMessage(activeTrack, landingUrl, fallbackUrl);
 
@@ -215,6 +235,8 @@ export default function PlayerScreen() {
     ]);
   };
 
+  const isHeaderActionBusy = isPreparingShare || exportingTrackId === activeTrack.id;
+
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
       <PlayerHeader
@@ -223,14 +245,14 @@ export default function PlayerScreen() {
         onBack={() => navigation.goBack()}
         rightAction={
           <Touchable
-            accessibilityLabel={audioExportEnabled ? t("player.actions") : t("share.moment")}
+            accessibilityLabel={isPreparingShare ? t("share.preparing") : audioExportEnabled ? t("player.actions") : t("share.moment")}
             accessibilityRole="button"
-            disabled={exportingTrackId === activeTrack.id}
+            disabled={isHeaderActionBusy}
             hitSlop={8}
             onPress={showActions}
-            style={[styles.headerIconButton, { backgroundColor: colors.elevatedSurface }, exportingTrackId === activeTrack.id && styles.headerIconButtonDisabled]}
+            style={[styles.headerIconButton, { backgroundColor: colors.elevatedSurface }, isHeaderActionBusy && styles.headerIconButtonDisabled]}
           >
-            {exportingTrackId === activeTrack.id ? (
+            {isHeaderActionBusy ? (
               <ActivityIndicator color={colors.primaryText} />
             ) : (
               <Ionicons name={audioExportEnabled ? "ellipsis-horizontal" : "share-outline"} size={audioExportEnabled ? 24 : 23} color={colors.primaryText} />

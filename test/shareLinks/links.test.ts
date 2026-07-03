@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildTubeCastOpenUrl,
   buildShareLandingUrl,
+  buildShareShortUrl,
   buildTrackShareLandingUrl,
   buildTubeCastListenUrl,
   buildYouTubeTimestampUrl,
@@ -49,6 +50,10 @@ describe("share links", () => {
     }, 7, "https://example.com/")).toBe(
       "https://example.com/share?url=https%3A%2F%2Fyoutu.be%2Fabc&t=7&title=A+title&channel=A+channel",
     );
+  });
+
+  it("builds short share links", () => {
+    expect(buildShareShortUrl("moment_123", "https://example.com/")).toBe("https://example.com/s/moment_123");
   });
 
   it("adds a YouTube timestamp fallback", () => {
