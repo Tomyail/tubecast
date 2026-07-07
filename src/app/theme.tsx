@@ -18,15 +18,15 @@ export type AppColors = {
 };
 
 const light: AppColors = {
-  background: "#f4ede2", surface: "#fff9f3", elevatedSurface: "#eee6dc",
-  primaryText: "#241a12", secondaryText: "#6f6256", border: "#d8c9b8",
-  tint: "#b65a36", tintText: "#fff9f3", success: "#4f8a61", destructive: "#b42318", destructiveSurface: "#fde8e7",
+  background: "#f7f1e8", surface: "#fffaf3", elevatedSurface: "#eee7dd",
+  primaryText: "#201913", secondaryText: "#766b60", border: "#e2d7ca",
+  tint: "#b85f3b", tintText: "#fffaf3", success: "#4f8a61", destructive: "#b42318", destructiveSurface: "#fde8e7",
 };
 
 const dark: AppColors = {
-  background: "#171411", surface: "#231e1a", elevatedSurface: "#342c26",
-  primaryText: "#f7eee6", secondaryText: "#c4b5a7", border: "#4a3e35",
-  tint: "#e68a64", tintText: "#24140f", success: "#8fd49e", destructive: "#ffb4ab", destructiveSurface: "#3a2422",
+  background: "#15120f", surface: "#201c18", elevatedSurface: "#302922",
+  primaryText: "#f8efe6", secondaryText: "#c5b7a9", border: "#44392f",
+  tint: "#dc815d", tintText: "#24140f", success: "#8fd49e", destructive: "#ffb4ab", destructiveSurface: "#3a2422",
 };
 
 // 设计 token：字号 / 间距 / 圆角 scale。从既有 magic number 归纳而来，

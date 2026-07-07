@@ -20,7 +20,7 @@ export default function DiscoverShelf({
 
   return (
     <View style={styles.shelf}>
-      <Text style={[styles.title, { color: colors.primaryText }]}>{title}</Text>
+      {title ? <Text style={[styles.title, { color: colors.primaryText }]}>{title}</Text> : null}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {items.map((item) => (
           <DiscoverCard
@@ -36,7 +36,7 @@ export default function DiscoverShelf({
 }
 
 const styles = StyleSheet.create({
-  shelf: { gap: 10 },
-  title: { fontSize: 18, fontWeight: "700" },
-  scrollContent: { gap: 12, paddingHorizontal: 2 },
+  shelf: { gap: 12 },
+  title: { fontSize: 20, fontWeight: "700" },
+  scrollContent: { gap: 14, paddingBottom: 4, paddingHorizontal: 2 },
 });

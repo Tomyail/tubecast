@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { ActivityIndicator, Alert, Linking, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 import type { RootStackParamList } from "../app/navigation/types";
 import Screen from "../components/Screen";
+import DiscoverCard from "../components/DiscoverCard";
 import DiscoverShelf from "../components/DiscoverShelf";
 import EmptyState from "../components/EmptyState";
 import Touchable from "../components/Touchable";
@@ -74,6 +75,11 @@ export default function HomeScreen() {
       colors={[colors.tint]}
     />
   );
+  const recentItems = data?.recent ?? [];
+  const popularItems = data?.popular ?? [];
+  const featuredItem = recentItems[0] ?? popularItems[0] ?? null;
+  const secondaryRecentItems = featuredItem === recentItems[0] ? recentItems.slice(1) : recentItems;
+  const secondaryPopularItems = featuredItem === popularItems[0] ? popularItems.slice(1) : popularItems;
 
   return (
     <Screen scroll={false}>
@@ -111,8 +117,21 @@ export default function HomeScreen() {
               />
             ) : (
               <>
-                <DiscoverShelf title={t("discover.recent")} items={data?.recent ?? []} onPressItem={handlePressItem} pendingJobId={pendingJobId} />
-                <DiscoverShelf title={t("discover.popular")} items={data?.popular ?? []} onPressItem={handlePressItem} pendingJobId={pendingJobId} />
+                {featuredItem ? (
+                  <View style={styles.featuredSection}>
+                    <Text style={[styles.sectionTitle, { color: colors.primaryText }]}>{t("discover.recent")}</Text>
+                    <DiscoverCard
+                      item={featuredItem}
+                      onPress={() => handlePressItem(featuredItem)}
+                      pending={pendingJobId === featuredItem.jobId}
+                      variant="hero"
+                    />
+                  </View>
+                ) : null}
+                {secondaryRecentItems.length > 0 ? (
+                  <DiscoverShelf title="" items={secondaryRecentItems} onPressItem={handlePressItem} pendingJobId={pendingJobId} />
+                ) : null}
+                <DiscoverShelf title={t("discover.popular")} items={secondaryPopularItems} onPressItem={handlePressItem} pendingJobId={pendingJobId} />
               </>
             )}
           </ScrollView>
@@ -124,10 +143,10 @@ export default function HomeScreen() {
           <Touchable
             accessibilityRole="button"
             accessibilityLabel={t("home.pasteUrl")}
-            style={[styles.fab, { backgroundColor: colors.tint }]}
+            style={[styles.fab, { backgroundColor: colors.surface, borderColor: colors.border }]}
             onPress={() => navigation.navigate("Convert", {})}
           >
-            <Ionicons name="add" size={30} color={colors.tintText} />
+            <Ionicons name="add" size={30} color={colors.tint} />
           </Touchable>
         ) : null}
       </View>
@@ -137,9 +156,11 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, position: "relative" },
-  scrollContent: { flexGrow: 1, gap: 20, paddingTop: 12 },
+  scrollContent: { flexGrow: 1, gap: 22, paddingTop: 12 },
   centerScrollContent: { justifyContent: "center" },
   center: { flex: 1, alignItems: "center", justifyContent: "center", gap: 12, padding: 24 },
+  featuredSection: { gap: 12 },
+  sectionTitle: { fontSize: 20, fontWeight: "700" },
   muted: { fontSize: 15, textAlign: "center" },
   errorText: { fontSize: 15, textAlign: "center" },
   retryButton: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8 },
@@ -148,15 +169,16 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 20,
     bottom: 16,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    borderWidth: StyleSheet.hairlineWidth,
     alignItems: "center",
     justifyContent: "center",
     elevation: 4,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
+    shadowColor: "#6b4a33",
+    shadowOpacity: 0.16,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
   },
 });

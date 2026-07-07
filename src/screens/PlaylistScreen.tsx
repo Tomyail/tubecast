@@ -2,6 +2,7 @@ import { useRef, useState, useCallback, useEffect, useLayoutEffect, useMemo } fr
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { ActivityIndicator, Alert, StyleSheet, Text, View } from "react-native";
 import DraggableFlatList, { ScaleDecorator, RenderItemParams } from "react-native-draggable-flatlist";
 import { Swipeable } from "react-native-gesture-handler";
@@ -336,6 +337,14 @@ function SwipeableTrackItem({
         )
       )}
 
+      <View style={[styles.trackThumbnail, { backgroundColor: colors.elevatedSurface }]}>
+        {track.thumbnailUrl ? (
+          <Image source={{ uri: track.thumbnailUrl }} style={styles.trackThumbnailImage} contentFit="cover" transition={250} />
+        ) : (
+          <Ionicons name="musical-note" size={18} color={colors.tint} />
+        )}
+      </View>
+
       <View style={styles.trackContent}>
         <Text
           style={[
@@ -433,11 +442,11 @@ const styles = StyleSheet.create({
     minHeight: 36,
     paddingHorizontal: 10,
   },
-  filterText: { fontSize: 15, fontWeight: "700" },
+  filterText: { fontSize: 15, fontWeight: "600" },
   trackItem: {
     flexDirection: "row",
     alignItems: "center",
-    minHeight: 68,
+    minHeight: 76,
     paddingVertical: 10,
     paddingHorizontal: 8,
     backgroundColor: "#f4ede2",
@@ -462,6 +471,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  trackThumbnail: { alignItems: "center", borderRadius: 10, height: 52, justifyContent: "center", marginRight: 12, overflow: "hidden", width: 52 },
+  trackThumbnailImage: { height: "100%", width: "100%" },
   trackContent: { flex: 1 },
   trackTitle: { color: "#241a12", fontSize: 16, fontWeight: "600" },
   trackMeta: { color: "#85776a", fontSize: 13, marginTop: 3 },

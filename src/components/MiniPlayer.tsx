@@ -26,7 +26,7 @@ export default function MiniPlayer({ tabBarHeight }: { tabBarHeight: number }) {
 
   return (
     <View pointerEvents="box-none" style={[styles.shell, { bottom: tabBarHeight }]}>
-      <View style={[styles.card, { backgroundColor: isDark ? colors.elevatedSurface : "#211c18", borderTopColor: colors.border }]}>
+      <View style={[styles.card, { backgroundColor: isDark ? colors.elevatedSurface : "#201a15", borderTopColor: isDark ? colors.border : "rgba(255, 250, 243, 0.12)" }]}>
         <Touchable
           accessibilityLabel={activeTrack.title || activeTrack.sourceUrl}
           accessibilityRole="button"
@@ -34,11 +34,11 @@ export default function MiniPlayer({ tabBarHeight }: { tabBarHeight: number }) {
           onPress={() => navigation.navigate("Player", { jobId: activeTrack.jobId })}
         >
         <View style={styles.thumbRow}>
-          <View style={[styles.thumbnail, { backgroundColor: colors.elevatedSurface }]}>
+          <View style={[styles.thumbnail, { backgroundColor: isDark ? colors.surface : "#3a3129" }]}>
             {activeTrack.thumbnailUrl ? (
               <Image source={{ uri: activeTrack.thumbnailUrl }} style={styles.thumbnailImage} contentFit="cover" transition={300} />
             ) : (
-              <Ionicons name="musical-note" size={20} color={colors.tint} />
+              <Ionicons name="musical-note" size={20} color={isDark ? colors.tint : "#d8c8b8"} />
             )}
           </View>
           <View style={styles.textWrap}>
@@ -66,7 +66,7 @@ export default function MiniPlayer({ tabBarHeight }: { tabBarHeight: number }) {
             <Ionicons name={isPlaying ? "pause" : "play"} size={19} color={colors.tintText} />
           )}
         </Touchable>
-        <View style={[styles.progressTrack, { backgroundColor: colors.border }]}>
+        <View style={[styles.progressTrack, { backgroundColor: isDark ? colors.border : "rgba(255, 250, 243, 0.18)" }]}>
           <View style={[styles.progressFill, { backgroundColor: colors.tint, width: `${progress * 100}%` }]} />
         </View>
       </View>
@@ -82,13 +82,13 @@ const styles = StyleSheet.create({
   },
   card: {
     alignItems: "center",
-    backgroundColor: "#211c18",
+    backgroundColor: "#201a15",
     borderTopColor: "rgba(255, 255, 255, 0.12)",
     borderTopWidth: StyleSheet.hairlineWidth,
     flexDirection: "row",
     gap: 12,
     minHeight: 64,
-    paddingHorizontal: 18,
+    paddingHorizontal: 16,
     paddingVertical: 10,
   },
   tapArea: {
@@ -115,14 +115,14 @@ const styles = StyleSheet.create({
   title: {
     color: "#fff8f0",
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
   },
   meta: {
     color: "#d8c6b4",
     fontSize: 12,
   },
   button: {
-    backgroundColor: "#b65a36",
+    backgroundColor: "#b85f3b",
     borderRadius: 22,
     height: 44,
     justifyContent: "center",

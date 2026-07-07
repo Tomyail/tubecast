@@ -178,10 +178,10 @@ export default function FeedScreen() {
             <Touchable
               accessibilityLabel={t("feed.addChannel")}
               accessibilityRole="button"
-              style={[styles.addButton, { backgroundColor: colors.tint }]}
+              style={[styles.addButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
               onPress={() => navigation.navigate("AddChannel")}
             >
-              <Ionicons name="add" size={24} color={colors.tintText} />
+              <Ionicons name="add" size={24} color={colors.tint} />
             </Touchable>
           </View>
           <Modal
@@ -403,6 +403,8 @@ function VideoAction({
   }
   const icon: IoniconName = isReady ? "play" : status === "failed" ? "refresh" : "add";
   const label = isReady ? t("common.play") : status === "failed" ? t("common.retry") : t("feed.convert");
+  const actionBackground = isReady ? colors.tint : status === "failed" ? colors.destructiveSurface : colors.surface;
+  const actionIconColor = isReady ? colors.tintText : status === "failed" ? colors.destructive : colors.tint;
 
   return (
     <Touchable
@@ -410,9 +412,9 @@ function VideoAction({
       accessibilityRole="button"
       disabled={disabled}
       onPress={isReady ? onPlay : onConvert}
-      style={[styles.actionButton, { backgroundColor: status === "failed" ? colors.destructive : colors.tint }, disabled && styles.actionButtonDisabled]}
+      style={[styles.actionButton, { backgroundColor: actionBackground, borderColor: colors.border }, disabled && styles.actionButtonDisabled]}
     >
-      <Ionicons name={icon} size={22} color={colors.tintText} />
+      <Ionicons name={icon} size={22} color={actionIconColor} />
     </Touchable>
   );
 }
@@ -432,7 +434,7 @@ const styles = StyleSheet.create({
   filterButton: { alignItems: "center", borderRadius: 22, flex: 1, flexDirection: "row", gap: 8, height: 44, justifyContent: "space-between", minWidth: 0, paddingHorizontal: 14 },
   filterButtonText: { flex: 1, fontSize: 15, fontWeight: "600" },
   channelActions: { flexDirection: "row", gap: 4, marginLeft: 4 },
-  addButton: { alignItems: "center", backgroundColor: "#b65a36", borderRadius: 22, height: 44, justifyContent: "center", marginLeft: 4, width: 44 },
+  addButton: { alignItems: "center", backgroundColor: "#fffaf3", borderRadius: 22, borderWidth: StyleSheet.hairlineWidth, height: 44, justifyContent: "center", marginLeft: 4, width: 44 },
   manageButton: { alignItems: "center", backgroundColor: "#eee6dc", borderRadius: 22, height: 44, justifyContent: "center", width: 44 },
   modalRoot: { flex: 1, justifyContent: "flex-end" },
   modalBackdrop: { backgroundColor: "rgba(0,0,0,0.28)", bottom: 0, left: 0, position: "absolute", right: 0, top: 0 },
@@ -459,7 +461,7 @@ const styles = StyleSheet.create({
   inlineStatus: { alignItems: "center", flexDirection: "row", gap: 5 },
   phaseLabel: { color: "#8b5c48", flex: 1, fontSize: 12, fontWeight: "600" },
   cacheLabel: { color: "#85776a", fontSize: 12 },
-  actionButton: { alignItems: "center", backgroundColor: "#b65a36", borderRadius: 22, height: 44, justifyContent: "center", width: 44 },
+  actionButton: { alignItems: "center", backgroundColor: "#fffaf3", borderRadius: 22, borderWidth: StyleSheet.hairlineWidth, height: 44, justifyContent: "center", width: 44 },
   actionButtonDisabled: { opacity: 0.45 },
   actionPlaceholder: { height: 44, width: 44 },
 });

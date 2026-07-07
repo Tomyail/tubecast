@@ -61,10 +61,10 @@ export default function SettingsScreen() {
                 accessibilityRole="button"
                 accessibilityState={{ selected }}
                 key={option}
-                style={[styles.choiceButton, selected && { backgroundColor: colors.tint }]}
+                style={[styles.choiceButton, { borderColor: colors.border }, selected && { backgroundColor: colors.elevatedSurface, borderColor: colors.tint }]}
                 onPress={() => void setLanguage(option)}
               >
-                <Text numberOfLines={1} style={[styles.choiceText, { color: selected ? colors.tintText : colors.secondaryText }]}>{label}</Text>
+                <Text numberOfLines={1} style={[styles.choiceText, { color: selected ? colors.tint : colors.secondaryText }, selected && styles.choiceTextSelected]}>{label}</Text>
               </Touchable>
             );
           })}
@@ -80,10 +80,10 @@ export default function SettingsScreen() {
                 accessibilityRole="button"
                 accessibilityState={{ selected }}
                 key={option}
-                style={[styles.choiceButton, selected && { backgroundColor: colors.tint }]}
+                style={[styles.choiceButton, { borderColor: colors.border }, selected && { backgroundColor: colors.elevatedSurface, borderColor: colors.tint }]}
                 onPress={() => void setTheme(option)}
               >
-                <Text numberOfLines={1} style={[styles.choiceText, { color: selected ? colors.tintText : colors.secondaryText }]}>{t(`settings.${option}`)}</Text>
+                <Text numberOfLines={1} style={[styles.choiceText, { color: selected ? colors.tint : colors.secondaryText }, selected && styles.choiceTextSelected]}>{t(`settings.${option}`)}</Text>
               </Touchable>
             );
           })}
@@ -149,10 +149,11 @@ function Section({ title, colors, children }: { title: string; colors: ReturnTyp
 const styles = StyleSheet.create({
   section: { gap: 8 },
   sectionTitle: { color: "#6f6256", fontSize: 13, fontWeight: "600", paddingHorizontal: 4, textTransform: "uppercase" },
-  group: { borderRadius: 16, borderWidth: 1, overflow: "hidden" },
+  group: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, overflow: "hidden" },
   choices: { flexDirection: "row", gap: 8, padding: 10 },
-  choiceButton: { alignItems: "center", borderRadius: 10, flex: 1, justifyContent: "center", minHeight: 40, paddingHorizontal: 8 },
+  choiceButton: { alignItems: "center", borderRadius: 10, borderWidth: StyleSheet.hairlineWidth, flex: 1, justifyContent: "center", minHeight: 40, paddingHorizontal: 8 },
   choiceText: { color: "#6f6256", fontSize: 14 },
+  choiceTextSelected: { fontWeight: "600" },
   settingRow: { alignItems: "center", flexDirection: "row", gap: 12, minHeight: 64, paddingHorizontal: 14, paddingVertical: 10 },
   aboutHeader: { alignItems: "center", flexDirection: "row", gap: 12, minHeight: 72, paddingHorizontal: 14, paddingVertical: 12 },
   rowIcon: { alignItems: "center", borderRadius: 10, height: 36, justifyContent: "center", width: 36 },

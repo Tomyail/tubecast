@@ -126,18 +126,18 @@ function Tabs() {
           tabBarActiveTintColor: colors.tint,
           tabBarInactiveTintColor: colors.secondaryText,
           tabBarHideOnKeyboard: true,
-          tabBarLabelStyle: { fontSize: 10, fontWeight: "600" },
+          tabBarLabelStyle: { fontSize: 10, fontWeight: "500", marginTop: 2 },
           tabBarIcon: ({ color, focused, size }) => {
             const iconName = focused ? tabIcons[route.name].active : tabIcons[route.name].inactive;
 
-            return <Ionicons name={iconName} size={size} color={color} />;
+            return <Ionicons name={iconName} size={focused ? size + 1 : size} color={color} />;
           },
           tabBarStyle: {
             backgroundColor: colors.surface,
             borderTopColor: colors.border,
             height: tabBarHeight,
             paddingBottom: insets.bottom,
-            paddingTop: 4,
+            paddingTop: 6,
           },
         })}
       >
