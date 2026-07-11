@@ -54,6 +54,27 @@ pnpm android
 pnpm ios
 ```
 
+### Screenshot demo mode
+
+Use screenshot demo mode when preparing App Store screenshots. It keeps the real
+UI but replaces network/storage data with fixed, English demo content and local
+illustration covers:
+
+```bash
+pnpm start:screenshots
+pnpm ios:screenshots
+pnpm ios:screenshots:release
+pnpm ios:screenshots:ipad
+```
+
+The mode is enabled only when `EXPO_PUBLIC_SCREENSHOT_DEMO_MODE=1` is present.
+Normal development, TestFlight, and App Store builds keep using real user data.
+Use `ios:screenshots:release` for 6.5-inch App Store screenshots. It targets
+the `iPhone 13 Pro Max` simulator and avoids development-only overlays such as
+the floating Tools button.
+Use `ios:screenshots:ipad` for the 13-inch iPad App Store screenshots. It
+targets the `iPad Pro 13-inch (M5)` simulator.
+
 ## Local builds
 
 TubeCast builds locally; it does not require EAS.
