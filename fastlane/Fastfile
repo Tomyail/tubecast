@@ -1,11 +1,92 @@
+require "json"
+
 default_platform(:ios)
 opt_out_usage
 
 APP_IDENTIFIER = "com.tomyail.tubecast"
 METADATA_PATH = "./fastlane/metadata"
 SCREENSHOTS_PATH = "./fastlane/screenshots"
+WORKSPACE_PATH = "./ios/TubeCast.xcworkspace"
+SCHEME_NAME = "TubeCast"
+BUILD_OUTPUT_DIRECTORY = "./build/ios"
+IPA_OUTPUT_NAME = "TubeCast.ipa"
+EXPORT_OPTIONS_PATH = "./fastlane/ExportOptions.plist"
+DEFAULT_TESTFLIGHT_GROUPS = ["Public Beta Testers"]
+
+def expo_config
+  JSON.parse(File.read(File.expand_path("../app.json", __dir__))).fetch("expo")
+end
+
+def app_version
+  expo_config.fetch("version")
+end
+
+def build_number
+  expo_config.fetch("ios").fetch("buildNumber").to_s
+end
+
+def truthy_env?(name, default: false)
+  value = ENV[name]
+  return default if value.nil? || value.empty?
+
+  %w[1 true yes y].include?(value.downcase)
+end
+
+def testflight_groups(value)
+  return value if value.is_a?(Array) && !value.empty?
+
+  raw = value || ENV["TESTFLIGHT_GROUPS"]
+  groups = raw.to_s.split(",").map(&:strip).reject(&:empty?)
+  groups.empty? ? DEFAULT_TESTFLIGHT_GROUPS : groups
+end
 
 platform :ios do
+  desc "Build an App Store IPA for TestFlight. Does not upload."
+  lane :testflight_build do |options|
+    build_app(
+      workspace: WORKSPACE_PATH,
+      scheme: SCHEME_NAME,
+      configuration: "Release",
+      clean: true,
+      output_directory: options[:output_directory] || ENV["IPA_OUTPUT_DIR"] || BUILD_OUTPUT_DIRECTORY,
+      output_name: options[:output_name] || ENV["IPA_OUTPUT_NAME"] || IPA_OUTPUT_NAME,
+      export_method: "app-store",
+      export_options: EXPORT_OPTIONS_PATH
+    )
+  end
+
+  desc "Upload an existing IPA to TestFlight without distributing it to testers."
+  lane :testflight_upload do |options|
+    ipa = options[:ipa] || ENV["IPA_PATH"] || File.join(BUILD_OUTPUT_DIRECTORY, IPA_OUTPUT_NAME)
+    UI.user_error!("IPA not found: #{ipa}. Run release:testflight-build first or set IPA_PATH.") unless File.exist?(ipa)
+
+    upload_to_testflight(
+      ipa: ipa,
+      app_identifier: APP_IDENTIFIER,
+      skip_submission: true,
+      skip_waiting_for_build_processing: false,
+      uses_non_exempt_encryption: truthy_env?("TESTFLIGHT_USES_NON_EXEMPT_ENCRYPTION", default: false)
+    )
+  end
+
+  desc "Distribute an already-uploaded TestFlight build to tester groups."
+  lane :testflight_distribute do |options|
+    changelog = options[:changelog] || ENV["TESTFLIGHT_CHANGELOG"]
+    UI.user_error!("Set TESTFLIGHT_CHANGELOG before distributing to testers.") if changelog.to_s.strip.empty?
+
+    upload_to_testflight(
+      app_identifier: APP_IDENTIFIER,
+      distribute_only: true,
+      app_version: options[:app_version] || ENV["TESTFLIGHT_VERSION"] || app_version,
+      build_number: options[:build_number] || ENV["TESTFLIGHT_BUILD_NUMBER"] || build_number,
+      changelog: changelog,
+      distribute_external: truthy_env?("TESTFLIGHT_EXTERNAL", default: true),
+      groups: testflight_groups(options[:groups]),
+      notify_external_testers: truthy_env?("TESTFLIGHT_NOTIFY", default: false),
+      uses_non_exempt_encryption: truthy_env?("TESTFLIGHT_USES_NON_EXEMPT_ENCRYPTION", default: false)
+    )
+  end
+
   desc "Upload localized App Store metadata only. Does not upload a binary or screenshots."
   lane :metadata_push do
     deliver(

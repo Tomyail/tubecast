@@ -88,14 +88,32 @@ Releases are cut locally — no CI builds the binary. The flow:
 2. `pnpm release:archive` → Archive in Xcode (`Product → Archive`) → upload to App Store Connect via Transporter → wait for processing → add the build to the TestFlight group by hand.
 3. `pnpm release:publish` — flips the GitHub Release from draft to published and bumps the root repo's submodule pointer.
 
-For same-version TestFlight rebuilds, run `pnpm release:rebuild` and then `pnpm release:testflight`. This bumps only `ios.buildNumber`, tags `testflight/<version>-<build>`, and creates a GitHub prerelease with generated release notes for that build.
+For same-version TestFlight rebuilds, use the split TestFlight flow:
+
+```bash
+pnpm release:testflight-bump
+pnpm release:testflight-prepare
+pnpm release:testflight-build
+pnpm release:testflight-upload
+pnpm release:testflight-changelog
+pnpm release:testflight-tag
+```
+
+`release:testflight-upload` uploads the IPA only; it does not distribute to tester groups. To distribute an already-uploaded build to the default `Public Beta Testers` external group, pass a tester-facing changelog explicitly:
+
+```bash
+TESTFLIGHT_CHANGELOG="Test discovery, playlist playback, sharing, and settings." pnpm release:testflight-distribute
+```
+
+External tester notifications are off by default. Add `TESTFLIGHT_NOTIFY=1` when you intentionally want TestFlight to notify testers.
 
 Versioning follows [conventional commits](https://www.conventionalcommits.org/) via `commit-and-tag-version` (`feat:` → minor, `fix:` → patch, `BREAKING CHANGE` → major). TestFlight "What's New" is bilingual: English from `CHANGELOG.md`, Chinese written by hand. The first release bootstraps a baseline `v1.0.0` tag from existing history; see `plans/007-mobile-release-flow.md` for the full design.
 
 ### App Store metadata automation
 
-App Store Connect metadata and screenshots are managed with fastlane. This does
-not replace the local Xcode Archive / Transporter binary flow.
+App Store Connect metadata, screenshots, and TestFlight helper lanes are managed
+with fastlane. The local Xcode Archive / Transporter flow remains available as a
+fallback.
 
 First-time setup:
 

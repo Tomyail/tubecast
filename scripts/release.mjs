@@ -7,7 +7,13 @@
 //   pnpm --filter mobile release:archive   B 前: expo prebuild（把 buildNumber 写进 native 工程）
 //   pnpm --filter mobile release:publish   C: 草稿 release 转正 + 根仓库子模块指针 bump
 //   pnpm --filter mobile release:rebuild   热修: 只 buildNumber+1（不动 marketing 版本）后重打包重传
-//   pnpm --filter mobile release:testflight TestFlight: prebuild + 同步 Xcode 版本 + 打 testflight/<version>-<build> tag + GitHub changelog
+//   pnpm --filter mobile release:testflight-bump       TestFlight: buildNumber+1 → commit → push
+//   pnpm --filter mobile release:testflight-prepare    TestFlight: prebuild + 同步 Xcode 版本
+//   pnpm --filter mobile release:testflight-build      TestFlight: fastlane build_app 生成 IPA
+//   pnpm --filter mobile release:testflight-upload     TestFlight: 上传 IPA，不分发给测试组
+//   pnpm --filter mobile release:testflight-changelog  TestFlight: 从 git commit 生成工程版变更记录
+//   pnpm --filter mobile release:testflight-distribute TestFlight: 分发已上传 build 到测试组
+//   pnpm --filter mobile release:testflight-tag        TestFlight: 打 testflight/<version>-<build> tag + GitHub changelog
 //
 // 跨两个仓库：mobile（公开 GitHub Tomyail/tubecast）+ 根（私有 Gitea yt-audio）。
 // 全程用 git -C / cwd，绝不 cd（避免权限提示与不可重入）。
@@ -25,9 +31,14 @@ const CHANGELOG = path.join(mobileRoot, "CHANGELOG.md");
 const IOS_INFO_PLIST = path.join(mobileRoot, "ios", "TubeCast", "Info.plist");
 const IOS_PROJECT = path.join(mobileRoot, "ios", "TubeCast.xcodeproj", "project.pbxproj");
 const GH_REPO = "Tomyail/tubecast";
+const TESTFLIGHT_CHANGELOG = path.join(mobileRoot, ".testflight-changelog.md");
+const DEFAULT_TESTFLIGHT_GROUPS = "Public Beta Testers";
 
 function run(cmd, opts = {}) {
   execSync(cmd, { stdio: "inherit", ...opts });
+}
+function runFastlane(lane, opts = {}) {
+  run(`mise exec -- bundle exec fastlane ${lane}`, { cwd: mobileRoot, ...opts });
 }
 function readJson(p) {
   return JSON.parse(readFileSync(p, "utf8"));
@@ -143,10 +154,21 @@ function previousTestflightTag(tag) {
   return tags[0]?.tag ?? null;
 }
 
-function testflightReleaseNotes(tag) {
+function testflightRange(tag, endRef = tag) {
   const previous = previousTestflightTag(tag);
-  const range = previous ? `${previous}..${tag}` : tag;
-  const commits = execSync(`git log --no-merges --pretty=format:%s ${shellQuote(range)}`, {
+  if (previous) {
+    return { previous, range: `${previous}..${endRef}`, compareBase: previous };
+  }
+
+  const root = execSync("git rev-list --max-parents=0 HEAD", {
+    cwd: mobileRoot,
+    encoding: "utf8",
+  }).trim().split(/\r?\n/)[0];
+  return { previous: null, range: `${root}..${endRef}`, compareBase: root };
+}
+
+function testflightCommitSubjects(range) {
+  return execSync(`git log --no-merges --pretty=format:%s ${shellQuote(range)}`, {
     cwd: mobileRoot,
     encoding: "utf8",
   })
@@ -154,6 +176,11 @@ function testflightReleaseNotes(tag) {
     .map((line) => line.trim())
     .filter(Boolean)
     .filter((line) => !/^chore\(mobile\): bump buildNumber to \d+$/.test(line));
+}
+
+function testflightReleaseNotes(tag) {
+  const { previous, range, compareBase } = testflightRange(tag);
+  const commits = testflightCommitSubjects(range);
 
   const lines = [`## TestFlight ${tag.replace(/^testflight\//, "")}`];
   if (previous) lines.push("", `Changes since ${previous}:`);
@@ -163,7 +190,7 @@ function testflightReleaseNotes(tag) {
   } else {
     lines.push(...commits.map((commit) => `- ${commit}`));
   }
-  lines.push("", `**Full Changelog**: https://github.com/${GH_REPO}/compare/${previous ?? ""}...${tag}`);
+  lines.push("", `**Full Changelog**: https://github.com/${GH_REPO}/compare/${compareBase}...${tag}`);
   return lines.join("\n");
 }
 
@@ -210,15 +237,82 @@ function cmdVersion() {
   console.log(`   TestFlight 上线后跑：pnpm --filter mobile release:publish`);
 }
 
-// ---- archive：prebuild，把 buildNumber 写进 native 工程 ----
-function cmdArchive() {
+function prebuildIos() {
   run("pnpm exec expo prebuild --platform ios --clean", { cwd: mobileRoot, stdio: "inherit" });
   syncNativeIosVersion();
+}
+
+// ---- archive：prebuild，把 buildNumber 写进 native 工程 ----
+function cmdArchive() {
+  prebuildIos();
   console.log("\n✅ prebuild 完成。现在在 Xcode 打开 mobile/ios/TubeCast.xcworkspace → Product → Archive → 导出 IPA → Transporter 上传。");
+}
+
+function cmdTestflightPrepare() {
+  prebuildIos();
+  console.log("\n✅ TestFlight prepare 完成。下一步：pnpm release:testflight-build");
 }
 
 function cmdSyncIos() {
   syncNativeIosVersion();
+}
+
+function commitBuildNumberBump() {
+  const bn = bumpBuildNumber();
+  run(`git add app.json`, { cwd: mobileRoot, stdio: "inherit" });
+  run(`git commit -m "chore(mobile): bump buildNumber to ${bn}"`, { cwd: mobileRoot, stdio: "inherit" });
+  run(`git push origin HEAD`, { cwd: mobileRoot, stdio: "inherit" });
+  return bn;
+}
+
+function cmdTestflightBump() {
+  const bn = commitBuildNumberBump();
+  console.log(`\n✅ TestFlight buildNumber → ${bn}。下一步：pnpm release:testflight-prepare`);
+}
+
+function cmdTestflightBuild() {
+  runFastlane("testflight_build");
+  console.log("\n✅ IPA 已生成。下一步：pnpm release:testflight-upload");
+}
+
+function cmdTestflightUpload() {
+  runFastlane("testflight_upload");
+  console.log("\n✅ IPA 已上传到 TestFlight，未自动分发。下一步：pnpm release:testflight-changelog 或在 App Store Connect 手动处理。");
+}
+
+function cmdTestflightChangelog() {
+  const tag = testflightTagName();
+  const { previous, range, compareBase } = testflightRange(tag, "HEAD");
+  const commits = testflightCommitSubjects(range);
+  const lines = [`# TestFlight ${tag.replace(/^testflight\//, "")}`, ""];
+  lines.push(`Source range: ${previous ? `${previous}..HEAD` : `${compareBase}..HEAD`}`, "");
+  lines.push("Raw commit log:", "");
+  if (commits.length === 0) {
+    lines.push("- Build number only; no app-facing changes.");
+  } else {
+    lines.push(...commits.map((commit) => `- ${commit}`));
+  }
+  lines.push("");
+  writeFileSync(TESTFLIGHT_CHANGELOG, lines.join("\n"));
+  console.log(`✅ 已生成工程版 TestFlight changelog：${path.relative(mobileRoot, TESTFLIGHT_CHANGELOG)}`);
+  console.log("   你可以把它交给 AI 改写成面向测试用户的 What to Test。");
+}
+
+function cmdTestflightDistribute() {
+  if (!process.env.TESTFLIGHT_CHANGELOG?.trim()) {
+    throw new Error("缺少 TESTFLIGHT_CHANGELOG。先写好面向测试用户的 What to Test，再运行 distribute。");
+  }
+
+  runFastlane("testflight_distribute", {
+    env: {
+      ...process.env,
+      TESTFLIGHT_VERSION: process.env.TESTFLIGHT_VERSION || currentVersion(),
+      TESTFLIGHT_BUILD_NUMBER: process.env.TESTFLIGHT_BUILD_NUMBER || currentBuildNumber(),
+      TESTFLIGHT_GROUPS: process.env.TESTFLIGHT_GROUPS || DEFAULT_TESTFLIGHT_GROUPS,
+      TESTFLIGHT_EXTERNAL: process.env.TESTFLIGHT_EXTERNAL || "1",
+    },
+  });
+  console.log("\n✅ TestFlight build 已分发。默认不通知外部测试用户；需要通知时使用 TESTFLIGHT_NOTIFY=1。");
 }
 
 function cmdTestflightTag() {
@@ -235,7 +329,7 @@ function cmdTestflightTag() {
 }
 
 function cmdTestflight() {
-  cmdArchive();
+  cmdTestflightPrepare();
   cmdTestflightTag();
 }
 
@@ -315,10 +409,7 @@ function cmdChangelog() {
 
 // ---- 热修重传：只 buildNumber+1，不 bump marketing 版本 ----
 function cmdRebuild() {
-  const bn = bumpBuildNumber();
-  run(`git add app.json`, { cwd: mobileRoot, stdio: "inherit" });
-  run(`git commit -m "chore(mobile): bump buildNumber to ${bn}"`, { cwd: mobileRoot, stdio: "inherit" });
-  run(`git push origin HEAD`, { cwd: mobileRoot, stdio: "inherit" });
+  const bn = commitBuildNumberBump();
   console.log(`\n✅ buildNumber → ${bn}（marketing 版本不变）。重跑 release:archive 重新打包上传。`);
 }
 
@@ -330,18 +421,30 @@ const COMMANDS = {
   changelog: cmdChangelog,
   "sync-ios": cmdSyncIos,
   testflight: cmdTestflight,
+  "testflight-bump": cmdTestflightBump,
+  "testflight-prepare": cmdTestflightPrepare,
+  "testflight-build": cmdTestflightBuild,
+  "testflight-upload": cmdTestflightUpload,
+  "testflight-changelog": cmdTestflightChangelog,
+  "testflight-distribute": cmdTestflightDistribute,
   "testflight-tag": cmdTestflightTag,
 };
 const cmd = process.argv[2];
 if (!cmd || !COMMANDS[cmd]) {
-  console.error("用法: release.mjs <version|publish|archive|rebuild|changelog|sync-ios|testflight|testflight-tag>");
+  console.error("用法: release.mjs <version|publish|archive|rebuild|changelog|sync-ios|testflight|testflight-bump|testflight-prepare|testflight-build|testflight-upload|testflight-changelog|testflight-distribute|testflight-tag>");
   console.error("  version   A 段：bump 版本/buildNumber + CHANGELOG + tag + 草稿 release");
   console.error("  archive   B 前：expo prebuild（写 buildNumber 进工程）");
   console.error("  publish   C 段：草稿转正 + 根仓库指针 bump");
   console.error("  rebuild   热修：只 buildNumber+1，重打包重传");
   console.error("  changelog 只更新 CHANGELOG（从 git log），不 bump 版本");
   console.error("  sync-ios  同步 app.json 版本到 Xcode 原生工程");
-  console.error("  testflight 生成 iOS 工程并打 testflight/<version>-<build> tag + GitHub changelog");
+  console.error("  testflight 旧入口：prepare + testflight-tag");
+  console.error("  testflight-bump buildNumber+1，提交并 push");
+  console.error("  testflight-prepare 生成 iOS 工程并同步 Xcode 版本");
+  console.error("  testflight-build 使用 fastlane build_app 生成 IPA");
+  console.error("  testflight-upload 上传 IPA，不分发给测试组");
+  console.error("  testflight-changelog 从 git commit 生成工程版 changelog");
+  console.error("  testflight-distribute 分发已上传 build 到 TestFlight 测试组");
   console.error("  testflight-tag 只打并推送 testflight/<version>-<build> tag + GitHub changelog");
   process.exit(1);
 }

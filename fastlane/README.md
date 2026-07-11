@@ -1,8 +1,8 @@
-# fastlane App Store metadata
+# fastlane App Store automation
 
-This fastlane setup manages App Store Connect metadata and screenshots only. It
-does not build, upload, or submit the iOS binary. Keep using the existing local
-Xcode Archive and Transporter flow for builds.
+This fastlane setup manages App Store Connect metadata, screenshots, and the
+split TestFlight build/upload/distribution flow. The existing local Xcode
+Archive and Transporter flow can still be used as a fallback.
 
 ## First-time setup
 
@@ -63,6 +63,53 @@ mise exec -- bundle exec fastlane store_assets_push
 
 These lanes use `skip_binary_upload: true` and `skip_app_version_update: true`,
 so they are safe to run without a new build.
+
+## TestFlight flow
+
+Build numbers are bumped separately so failed builds or upload retries do not
+burn additional build numbers.
+
+```bash
+pnpm release:testflight-bump
+pnpm release:testflight-prepare
+pnpm release:testflight-build
+pnpm release:testflight-upload
+pnpm release:testflight-changelog
+pnpm release:testflight-tag
+```
+
+The build lane writes the IPA to:
+
+```text
+build/ios/TubeCast.ipa
+```
+
+Override the IPA path for upload if needed:
+
+```bash
+IPA_PATH=/path/to/TubeCast.ipa pnpm release:testflight-upload
+```
+
+`release:testflight-upload` only uploads the IPA. It uses
+`skip_submission: true`, so it does not distribute the build to tester groups.
+
+To distribute an already-uploaded build, provide a tester-facing changelog:
+
+```bash
+TESTFLIGHT_CHANGELOG="Test discovery, playlist playback, sharing, and settings." \
+  pnpm release:testflight-distribute
+```
+
+Distribution defaults:
+
+```text
+TESTFLIGHT_GROUPS=Public Beta Testers
+TESTFLIGHT_EXTERNAL=1
+TESTFLIGHT_NOTIFY=0
+```
+
+Set `TESTFLIGHT_NOTIFY=1` only when you want TestFlight to notify external
+testers.
 
 ## Screenshot layout
 
