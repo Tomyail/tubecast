@@ -2,11 +2,25 @@ import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchDiscover } from "./api";
 import { getCachedDiscover, saveCachedDiscover } from "./cache";
+import { screenshotDemoMode } from "../demoMode/config";
+import { getDemoDiscover } from "../demoMode/data";
 
 const DISCOVER_QUERY_KEY = ["discover"] as const;
 
 // 内存缓存 5 分钟；冷启动用 AsyncStorage 恢复 24 小时内的上次首页数据。
 export function useDiscover() {
+  if (screenshotDemoMode) {
+    const data = getDemoDiscover();
+    return {
+      data,
+      isLoading: false,
+      isError: false,
+      isRefetching: false,
+      isRestoring: false,
+      refetch: async () => ({ data }),
+    };
+  }
+
   const queryClient = useQueryClient();
   const [isRestoring, setIsRestoring] = useState(() => queryClient.getQueryData(DISCOVER_QUERY_KEY) === undefined);
 

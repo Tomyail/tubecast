@@ -6,6 +6,7 @@ import { useRemoveChannel, useSubscribedChannels } from "../features/youtubeFeed
 import type { FeedSource } from "../features/youtubeFeed/types";
 import { useTranslation } from "../i18n";
 import { useAppTheme } from "../app/theme";
+import { toExpoImageSource } from "../shared/imageSource";
 
 export default function ManageChannelsScreen() {
   const { t } = useTranslation();
@@ -34,7 +35,7 @@ export default function ManageChannelsScreen() {
           <View style={[styles.row, { borderBottomColor: colors.border }]}>
             <View style={[styles.thumbnail, { backgroundColor: colors.elevatedSurface }]}>
               {item.thumbnailUrl ? (
-                <Image source={{ uri: item.thumbnailUrl }} style={styles.thumbnailImage} contentFit="cover" transition={300} />
+                <Image source={toExpoImageSource(item.thumbnailUrl)} style={styles.thumbnailImage} contentFit="cover" transition={300} />
               ) : (
                 <Ionicons name="play" size={20} color={colors.tint} />
               )}

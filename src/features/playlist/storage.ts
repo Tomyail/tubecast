@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Directory, File, Paths } from "expo-file-system";
+import type { AppImageSource } from "../../shared/imageSource";
 
 export type TrackCacheStatus = "none" | "caching" | "cached" | "failed";
 
@@ -8,7 +9,7 @@ export interface Track {
   jobId: string;
   title: string;
   durationSeconds: number;
-  thumbnailUrl: string;
+  thumbnailUrl: AppImageSource;
   localPath: string | null;
   localFilename?: string | null;
   sourceUrl: string;

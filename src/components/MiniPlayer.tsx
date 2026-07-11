@@ -8,6 +8,7 @@ import type { RootStackParamList } from "../app/navigation/types";
 import { usePlayer, usePlaybackProgress } from "../features/player/context";
 import { useTranslation } from "../i18n";
 import { useAppTheme } from "../app/theme";
+import { toExpoImageSource } from "../shared/imageSource";
 import Touchable from "./Touchable";
 import MarqueeText from "./MarqueeText";
 
@@ -36,7 +37,7 @@ export default function MiniPlayer({ tabBarHeight }: { tabBarHeight: number }) {
         <View style={styles.thumbRow}>
           <View style={[styles.thumbnail, { backgroundColor: isDark ? colors.surface : "#3a3129" }]}>
             {activeTrack.thumbnailUrl ? (
-              <Image source={{ uri: activeTrack.thumbnailUrl }} style={styles.thumbnailImage} contentFit="cover" transition={300} />
+              <Image source={toExpoImageSource(activeTrack.thumbnailUrl)} style={styles.thumbnailImage} contentFit="cover" transition={300} />
             ) : (
               <Ionicons name="musical-note" size={20} color={isDark ? colors.tint : "#d8c8b8"} />
             )}

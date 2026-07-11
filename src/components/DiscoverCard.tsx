@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import type { DiscoverItem } from "../features/discover/types";
 import { useAppTheme } from "../app/theme";
 import { formatDuration } from "../i18n/formatters";
+import { toExpoImageSource } from "../shared/imageSource";
 import Touchable from "./Touchable";
 
 const CARD_WIDTH = 164;
@@ -40,7 +41,7 @@ export default function DiscoverCard({
     >
       <View style={[isHero ? styles.heroThumbWrap : styles.thumbWrap, { backgroundColor: colors.elevatedSurface }]}>
         {item.thumbnailUrl ? (
-          <Image source={{ uri: item.thumbnailUrl }} style={styles.thumb} contentFit="cover" transition={300} />
+          <Image source={toExpoImageSource(item.thumbnailUrl)} style={styles.thumb} contentFit="cover" transition={300} />
         ) : (
           <View style={styles.thumbPlaceholder}>
             <Ionicons name="musical-note" size={28} color={colors.secondaryText} />

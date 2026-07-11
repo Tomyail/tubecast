@@ -1,7 +1,7 @@
 import { setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import { Directory, File, Paths } from "expo-file-system";
 import type { ReactNode } from "react";
-import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { Track } from "../playlist/storage";
 import { usePlaylist } from "../playlist/context";
@@ -9,6 +9,9 @@ import { AudioExpiredError, getDownloadUrl, getJob } from "../jobs/api";
 import { ensureTrackCached } from "../jobs/cache";
 import { trackFromReadyJob } from "../jobs/track";
 import { useTranslation } from "../../i18n";
+import { screenshotDemoMode } from "../demoMode/config";
+import { getDemoTracks } from "../demoMode/data";
+import { toRemoteImageUri } from "../../shared/imageSource";
 import {
   initialPlayerState,
   isPlaybackLoadingPhase,
@@ -94,7 +97,7 @@ export function configureLockScreenPlayer(
   const metadata = {
     title: track.title || t("common.untitled"),
     artist: getLockScreenArtist(track),
-    artworkUrl: track.thumbnailUrl || undefined,
+    artworkUrl: toRemoteImageUri(track.thumbnailUrl),
   };
 
   if (needsActivation || !player.updateLockScreenMetadata) {
@@ -115,6 +118,10 @@ function waitForNextTick(): Promise<void> {
 }
 
 export function PlayerProvider({ children }: { children: ReactNode }) {
+  if (screenshotDemoMode) {
+    return <DemoPlayerProvider>{children}</DemoPlayerProvider>;
+  }
+
   const { t } = useTranslation();
   const { tracks, addTrack, incrementPlayCount } = usePlaylist();
   const [state, dispatch] = useReducer(playerReducer, initialPlayerState);
@@ -348,6 +355,71 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     playerPhase: phase,
     playTrack, togglePlayback, seekTo, playNext, playPrevious, stopPlayback,
   }), [activeTrack, queue, isPlaying, isBuffering, playbackLoading, duration, playbackSource, playbackError, phase, playTrack, togglePlayback, seekTo, playNext, playPrevious, stopPlayback]);
+
+  return (
+    <PlayerContext.Provider value={value}>
+      <PlaybackProgressContext.Provider value={currentTime}>{children}</PlaybackProgressContext.Provider>
+    </PlayerContext.Provider>
+  );
+}
+
+function DemoPlayerProvider({ children }: { children: ReactNode }) {
+  const demoTracks = useMemo(() => getDemoTracks(), []);
+  const [activeTrack, setActiveTrack] = useState<Track | null>(demoTracks[0] ?? null);
+  const [queue, setQueue] = useState<Track[]>(demoTracks);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [currentTime, setCurrentTime] = useState(30);
+  const duration = activeTrack?.durationSeconds ?? 0;
+
+  const playTrack = useCallback(async (track: Track, nextQueue?: Track[], options?: { startAtSeconds?: number }) => {
+    setActiveTrack(track);
+    setQueue(nextQueue && nextQueue.length > 0 ? nextQueue : demoTracks);
+    setCurrentTime(options?.startAtSeconds ?? 30);
+    setIsPlaying(true);
+  }, []);
+
+  const togglePlayback = useCallback(async () => {
+    setIsPlaying((current) => !current);
+  }, []);
+
+  const seekTo = useCallback((seconds: number) => {
+    setCurrentTime(Math.max(0, Math.min(seconds, duration)));
+  }, [duration]);
+
+  const currentIndex = activeTrack ? queue.findIndex((track) => track.id === activeTrack.id) : -1;
+  const playNext = useCallback(() => {
+    if (currentIndex >= 0 && currentIndex < queue.length - 1) {
+      void playTrack(queue[currentIndex + 1], queue);
+    }
+  }, [currentIndex, playTrack, queue]);
+  const playPrevious = useCallback(() => {
+    if (currentIndex > 0) {
+      void playTrack(queue[currentIndex - 1], queue);
+      return;
+    }
+    setCurrentTime(0);
+  }, [currentIndex, playTrack, queue]);
+  const stopPlayback = useCallback(() => {
+    setIsPlaying(false);
+  }, []);
+
+  const value = useMemo<PlayerContextValue>(() => ({
+    activeTrack,
+    queue,
+    isPlaying,
+    isBuffering: false,
+    playbackLoading: false,
+    duration,
+    playbackSource: "local",
+    playbackError: null,
+    playerPhase: isPlaying ? "playing" : "paused",
+    playTrack,
+    togglePlayback,
+    seekTo,
+    playNext,
+    playPrevious,
+    stopPlayback,
+  }), [activeTrack, duration, isPlaying, playNext, playPrevious, playTrack, queue, seekTo, stopPlayback, togglePlayback]);
 
   return (
     <PlayerContext.Provider value={value}>

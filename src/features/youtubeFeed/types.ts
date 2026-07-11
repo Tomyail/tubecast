@@ -1,10 +1,12 @@
+import type { AppImageSource } from "../../shared/imageSource";
+
 export type FeedPlatform = "youtube";
 
 export type FeedSource = {
   platform: FeedPlatform;
   platformSourceId: string;
   title: string;
-  thumbnailUrl: string | null;
+  thumbnailUrl: AppImageSource | null;
   sourceUrl: string | null;
   addedAt?: string;
 };
@@ -15,7 +17,7 @@ export type FeedItem = {
   platformSourceId: string;
   title: string;
   sourceTitle: string;
-  thumbnailUrl: string | null;
+  thumbnailUrl: AppImageSource | null;
   publishedAt: string;
   sourceUrl: string;
 };

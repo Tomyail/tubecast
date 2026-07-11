@@ -27,6 +27,7 @@ import { createShareMoment } from "../features/shareLinks/momentsApi";
 import { useTranslation } from "../i18n";
 import { formatDuration } from "../i18n/formatters";
 import { useAppTheme } from "../app/theme";
+import { toExpoImageSource } from "../shared/imageSource";
 import type { RootStackParamList } from "../app/navigation/types";
 import { getDisplayedProgressTime, getProgressXFromPageX, getSeekTimeFromDrag } from "./playerProgress";
 
@@ -266,7 +267,7 @@ export default function PlayerScreen() {
         <View style={styles.trackHeader}>
           <View style={[styles.artwork, { backgroundColor: colors.elevatedSurface }]}>
             {activeTrack.thumbnailUrl ? (
-              <Image source={{ uri: activeTrack.thumbnailUrl }} style={styles.artworkImage} contentFit="cover" transition={300} />
+              <Image source={toExpoImageSource(activeTrack.thumbnailUrl)} style={styles.artworkImage} contentFit="cover" transition={300} />
             ) : (
               <Ionicons name="musical-note" size={44} color={colors.tint} />
             )}

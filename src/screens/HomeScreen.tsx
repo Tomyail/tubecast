@@ -18,6 +18,8 @@ import { usePlaylist } from "../features/playlist/context";
 import { useRemoteConfig } from "../features/remoteConfig/context";
 import { useTranslation } from "../i18n";
 import { useAppTheme } from "../app/theme";
+import { screenshotDemoMode } from "../features/demoMode/config";
+import { getDemoTrackByJobId, getDemoTracks } from "../features/demoMode/data";
 
 // 推荐流首页：苹果播客式纵向滚动 + 横向 shelf。粘贴入口降级为右下角 FAB。
 export default function HomeScreen() {
@@ -37,6 +39,16 @@ export default function HomeScreen() {
   }, [refetch]);
 
   const handlePressItem = async (item: DiscoverItem) => {
+    if (screenshotDemoMode) {
+      const demoTracks = getDemoTracks();
+      const track = getDemoTrackByJobId(item.jobId) ?? demoTracks[0] ?? null;
+      if (track) {
+        await playTrack(track, demoTracks);
+        navigation.navigate("Player", { jobId: track.jobId });
+      }
+      return;
+    }
+
     setPendingJobId(item.jobId);
     try {
       const job = await getJob(item.jobId);

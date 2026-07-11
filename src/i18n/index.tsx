@@ -4,6 +4,7 @@ import i18n from "i18next";
 import { initReactI18next, useTranslation } from "react-i18next";
 import { createContext, type ReactNode, useContext, useEffect, useMemo, useState } from "react";
 import { resources } from "./translations";
+import { screenshotDemoMode } from "../features/demoMode/config";
 
 export type AppLanguage = "system" | "en" | "zh-CN";
 export type ResolvedLanguage = Exclude<AppLanguage, "system">;
@@ -29,9 +30,14 @@ const I18nContext = createContext<I18nContextValue | null>(null);
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [preference, setPreference] = useState<AppLanguage>("system");
   const [ready, setReady] = useState(false);
-  const language = resolveLanguage(preference);
+  const language = screenshotDemoMode ? "en" : resolveLanguage(preference);
 
   useEffect(() => {
+    if (screenshotDemoMode) {
+      void i18n.changeLanguage("en").finally(() => setReady(true));
+      return;
+    }
+
     AsyncStorage.getItem(LANGUAGE_KEY).then((stored) => {
       const next: AppLanguage = stored === "en" || stored === "zh-CN" || stored === "system" ? stored : "system";
       setPreference(next);

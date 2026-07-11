@@ -4,11 +4,24 @@ import { getSubscribedChannels, addChannel, removeChannel, isChannelSubscribed }
 import { fetchFeedItems, resolveFeedSource } from "./api";
 import type { FeedItemWithStatus, FeedSource } from "./types";
 import { getCachedYoutubeFeed, saveCachedYoutubeFeed } from "./cache";
+import { screenshotDemoMode } from "../demoMode/config";
+import { getDemoFeedItems, getDemoFeedSources } from "../demoMode/data";
 
 const MAX_FEED_ITEMS = 100;
 const YOUTUBE_FEED_QUERY_KEY = ["youtubeFeed"] as const;
 
 export function useSubscribedChannels() {
+  if (screenshotDemoMode) {
+    const data = getDemoFeedSources();
+    return {
+      data,
+      isLoading: false,
+      isError: false,
+      isRefetching: false,
+      refetch: async () => ({ data }),
+    };
+  }
+
   return useQuery({
     queryKey: ["youtubeSubscriptions"],
     queryFn: () => getSubscribedChannels(),
@@ -16,6 +29,19 @@ export function useSubscribedChannels() {
 }
 
 export function useFeedVideos() {
+  if (screenshotDemoMode) {
+    const data = getDemoFeedItems();
+    return {
+      data,
+      isLoading: false,
+      isError: false,
+      isRefetching: false,
+      isRestoring: false,
+      error: null,
+      refetch: async () => ({ data }),
+    };
+  }
+
   const queryClient = useQueryClient();
   const [isRestoring, setIsRestoring] = useState(() => queryClient.getQueryData(YOUTUBE_FEED_QUERY_KEY) === undefined);
 
@@ -71,6 +97,14 @@ export function useFeedVideos() {
 }
 
 export function useAddChannel() {
+  if (screenshotDemoMode) {
+    const [channel] = getDemoFeedSources();
+    return {
+      isPending: false,
+      mutateAsync: async () => channel,
+    };
+  }
+
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ input }: { input: string }) => {
@@ -89,6 +123,13 @@ export function useAddChannel() {
 }
 
 export function useRemoveChannel() {
+  if (screenshotDemoMode) {
+    return {
+      isPending: false,
+      mutate: () => {},
+    };
+  }
+
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (channelId: string) => {
@@ -104,6 +145,14 @@ export function useRemoveChannel() {
 // 直接用我们已有的 FeedSource（channel_id + name）订阅，不调 resolve-source。
 // 给发布者预览 sheet 用——sheet 已从播放中的 job 拿到频道身份。
 export function useSubscribeChannel() {
+  if (screenshotDemoMode) {
+    return {
+      isPending: false,
+      mutate: () => {},
+      mutateAsync: async (channel: FeedSource) => channel,
+    };
+  }
+
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (channel: FeedSource) => {
@@ -119,6 +168,13 @@ export function useSubscribeChannel() {
 
 // 单个频道 id 的纯本地订阅检查。给 sheet 渲染订阅按钮初始态用，不走网络。
 export function useChannelSubscription(platformSourceId: string | null) {
+  if (screenshotDemoMode) {
+    return {
+      data: !!platformSourceId,
+      isLoading: false,
+    };
+  }
+
   return useQuery({
     queryKey: ["youtubeSubscriptions", platformSourceId],
     enabled: !!platformSourceId,

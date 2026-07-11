@@ -6,6 +6,8 @@ import {
   getDefaultPlaylist, addTrackToPlaylist, removeTrackFromPlaylist,
   savePlaylistOrder, removeTracks, removeTracksFromPlaylist,
 } from "./storage";
+import { screenshotDemoMode } from "../demoMode/config";
+import { getDemoTracks } from "../demoMode/data";
 
 type PlaylistContextValue = {
   tracks: Track[];
@@ -39,6 +41,27 @@ function mergeTrack(existing: Track | undefined, incoming: Track): Track {
 }
 
 export function PlaylistProvider({ children }: { children: ReactNode }) {
+  if (screenshotDemoMode) {
+    const demoTracks = getDemoTracks();
+    const playlist: Playlist = {
+      id: "default",
+      name: "My Music",
+      trackIds: demoTracks.map((track) => track.id),
+      createdAt: "2026-07-01T08:00:00.000Z",
+    };
+    const value: PlaylistContextValue = {
+      tracks: demoTracks,
+      playlist,
+      addTrack: async () => {},
+      deleteTrack: async () => {},
+      deleteTracks: async () => {},
+      incrementPlayCount: async () => {},
+      reorderTracks: async () => {},
+    };
+
+    return <PlaylistContext.Provider value={value}>{children}</PlaylistContext.Provider>;
+  }
+
   const [tracks, setTracks] = useState<Track[]>([]);
   const [playlist, setPlaylist] = useState<Playlist | null>(null);
 

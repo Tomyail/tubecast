@@ -18,6 +18,7 @@ import type { Track } from "../features/playlist/storage";
 import { useTranslation } from "../i18n";
 import { formatDuration, formatFileSize } from "../i18n/formatters";
 import { useAppTheme } from "../app/theme";
+import { toExpoImageSource } from "../shared/imageSource";
 import { getPlaylistFilterCounts, getVisiblePlaylistTracks } from "./playlistFilter";
 import type { PlaylistFilter } from "./playlistFilter";
 
@@ -339,7 +340,7 @@ function SwipeableTrackItem({
 
       <View style={[styles.trackThumbnail, { backgroundColor: colors.elevatedSurface }]}>
         {track.thumbnailUrl ? (
-          <Image source={{ uri: track.thumbnailUrl }} style={styles.trackThumbnailImage} contentFit="cover" transition={250} />
+          <Image source={toExpoImageSource(track.thumbnailUrl)} style={styles.trackThumbnailImage} contentFit="cover" transition={250} />
         ) : (
           <Ionicons name="musical-note" size={18} color={colors.tint} />
         )}

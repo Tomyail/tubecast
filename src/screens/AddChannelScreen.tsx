@@ -12,6 +12,7 @@ import type { FeedSource } from "../features/youtubeFeed/types";
 import { useTranslation } from "../i18n";
 import { useAppTheme } from "../app/theme";
 import { useRemoteConfig } from "../features/remoteConfig/context";
+import { toExpoImageSource } from "../shared/imageSource";
 
 export default function AddChannelScreen() {
   const { t } = useTranslation();
@@ -112,7 +113,7 @@ export default function AddChannelScreen() {
           <View style={styles.previewHeader}>
             <View style={[styles.thumbnail, { backgroundColor: colors.elevatedSurface }]}>
               {preview.thumbnailUrl ? (
-                <Image source={{ uri: preview.thumbnailUrl }} style={styles.thumbnailImage} contentFit="cover" transition={300} />
+                <Image source={toExpoImageSource(preview.thumbnailUrl)} style={styles.thumbnailImage} contentFit="cover" transition={300} />
               ) : (
                 <Ionicons name="play" size={22} color={colors.tint} />
               )}

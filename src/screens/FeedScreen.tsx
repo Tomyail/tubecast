@@ -28,6 +28,7 @@ import { getFeedProgressLabel } from "../features/jobs/progress";
 import { useTranslation } from "../i18n";
 import { useAppTheme } from "../app/theme";
 import { useRemoteConfig } from "../features/remoteConfig/context";
+import { toExpoImageSource, type AppImageSource } from "../shared/imageSource";
 
 const MINI_PLAYER_HEIGHT = 64;
 const BOTTOM_BASE = 24;
@@ -362,12 +363,12 @@ const VideoCard = memo(function VideoCard({
   );
 });
 
-function VideoThumbnail({ thumbnailUrl }: { thumbnailUrl: string | null }) {
+function VideoThumbnail({ thumbnailUrl }: { thumbnailUrl: AppImageSource | null }) {
   const { colors } = useAppTheme();
   return (
     <View style={[styles.thumbnail, { backgroundColor: colors.elevatedSurface }]}>
       {thumbnailUrl ? (
-        <Image source={{ uri: thumbnailUrl }} style={styles.thumbnailImage} contentFit="cover" transition={300} />
+        <Image source={toExpoImageSource(thumbnailUrl)} style={styles.thumbnailImage} contentFit="cover" transition={300} />
       ) : (
         <Ionicons name="play" size={22} color={colors.tint} />
       )}
