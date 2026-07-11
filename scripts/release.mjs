@@ -309,13 +309,20 @@ function cmdTestflightChangelog() {
 }
 
 function cmdTestflightDistribute() {
-  if (!process.env.TESTFLIGHT_CHANGELOG?.trim()) {
+  const changelog = process.env.TESTFLIGHT_CHANGELOG?.trim();
+  if (!changelog) {
     throw new Error("缺少 TESTFLIGHT_CHANGELOG。先写好面向测试用户的 What to Test，再运行 distribute。");
   }
+
+  // 写到文件作为兜底：env 经 node→execSync→mise→fastlane 传递不稳定，
+  // Fastfile 会先读 ENV，读不到再读这个文件。
+  const whatsNewPath = path.join(mobileRoot, ".testflight-whats-new");
+  writeFileSync(whatsNewPath, changelog);
 
   runFastlane("testflight_distribute", {
     env: {
       ...process.env,
+      TESTFLIGHT_CHANGELOG: changelog,
       TESTFLIGHT_VERSION: process.env.TESTFLIGHT_VERSION || currentVersion(),
       TESTFLIGHT_BUILD_NUMBER: process.env.TESTFLIGHT_BUILD_NUMBER || currentBuildNumber(),
       TESTFLIGHT_GROUPS: process.env.TESTFLIGHT_GROUPS || DEFAULT_TESTFLIGHT_GROUPS,

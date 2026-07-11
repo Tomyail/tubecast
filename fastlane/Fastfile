@@ -91,12 +91,15 @@ platform :ios do
 
   desc "Distribute an already-uploaded TestFlight build to tester groups."
   lane :testflight_distribute do |options|
-    changelog = options[:changelog] || ENV["TESTFLIGHT_CHANGELOG"]
+    whats_new_path = File.join(PROJECT_ROOT, ".testflight-whats-new")
+    changelog = options[:changelog] || ENV["TESTFLIGHT_CHANGELOG"] || (File.exist?(whats_new_path) ? File.read(whats_new_path).strip : nil)
+    File.delete(whats_new_path) if File.exist?(whats_new_path)
     UI.user_error!("Set TESTFLIGHT_CHANGELOG before distributing to testers.") if changelog.to_s.strip.empty?
 
     upload_to_testflight(
       app_identifier: APP_IDENTIFIER,
       api_key: asc_api_key,
+      app_platform: "ios",
       distribute_only: true,
       app_version: options[:app_version] || ENV["TESTFLIGHT_VERSION"] || app_version,
       build_number: options[:build_number] || ENV["TESTFLIGHT_BUILD_NUMBER"] || build_number,

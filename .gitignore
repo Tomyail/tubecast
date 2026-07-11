@@ -40,6 +40,7 @@ yarn-error.*
 .env
 .env*.local
 .testflight-changelog.md
+.testflight-whats-new
 
 # typescript
 *.tsbuildinfo
