@@ -1,0 +1,54 @@
+default_platform(:ios)
+opt_out_usage
+
+APP_IDENTIFIER = "com.tomyail.tubecast"
+METADATA_PATH = "./fastlane/metadata"
+SCREENSHOTS_PATH = "./fastlane/screenshots"
+
+platform :ios do
+  desc "Upload localized App Store metadata only. Does not upload a binary or screenshots."
+  lane :metadata_push do
+    deliver(
+      app_identifier: APP_IDENTIFIER,
+      metadata_path: METADATA_PATH,
+      screenshots_path: SCREENSHOTS_PATH,
+      skip_binary_upload: true,
+      skip_app_version_update: true,
+      skip_screenshots: true,
+      submit_for_review: false,
+      automatic_release: false,
+      force: true
+    )
+  end
+
+  desc "Upload localized App Store screenshots only. Does not upload a binary."
+  lane :screenshots_push do
+    deliver(
+      app_identifier: APP_IDENTIFIER,
+      metadata_path: METADATA_PATH,
+      screenshots_path: SCREENSHOTS_PATH,
+      skip_binary_upload: true,
+      skip_app_version_update: true,
+      skip_metadata: true,
+      submit_for_review: false,
+      automatic_release: false,
+      overwrite_screenshots: true,
+      force: true
+    )
+  end
+
+  desc "Upload localized metadata and screenshots. Does not upload a binary."
+  lane :store_assets_push do
+    deliver(
+      app_identifier: APP_IDENTIFIER,
+      metadata_path: METADATA_PATH,
+      screenshots_path: SCREENSHOTS_PATH,
+      skip_binary_upload: true,
+      skip_app_version_update: true,
+      submit_for_review: false,
+      automatic_release: false,
+      overwrite_screenshots: true,
+      force: true
+    )
+  end
+end

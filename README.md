@@ -92,6 +92,48 @@ For same-version TestFlight rebuilds, run `pnpm release:rebuild` and then `pnpm 
 
 Versioning follows [conventional commits](https://www.conventionalcommits.org/) via `commit-and-tag-version` (`feat:` → minor, `fix:` → patch, `BREAKING CHANGE` → major). TestFlight "What's New" is bilingual: English from `CHANGELOG.md`, Chinese written by hand. The first release bootstraps a baseline `v1.0.0` tag from existing history; see `plans/007-mobile-release-flow.md` for the full design.
 
+### App Store metadata automation
+
+App Store Connect metadata and screenshots are managed with fastlane. This does
+not replace the local Xcode Archive / Transporter binary flow.
+
+First-time setup:
+
+```bash
+cd mobile
+mise install
+mise exec -- bundle install
+```
+
+Download the current App Store Connect metadata before making broad edits:
+
+```bash
+pnpm store:download-metadata
+pnpm store:download-screenshots
+```
+
+Edit files under `fastlane/metadata/<locale>/`, then upload metadata only:
+
+```bash
+pnpm store:metadata
+```
+
+Upload screenshots only:
+
+```bash
+pnpm store:screenshots
+```
+
+Upload both metadata and screenshots:
+
+```bash
+pnpm store:assets
+```
+
+The configured locales are Simplified Chinese (`zh-Hans`), English (`en-US`),
+and Traditional Chinese (`zh-Hant`). Add more locales only when you intend to
+maintain their keywords, description, and screenshots.
+
 ## Development
 
 ```bash

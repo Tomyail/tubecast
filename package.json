@@ -21,6 +21,11 @@
     "release:changelog": "node scripts/release.mjs changelog",
     "release:testflight": "node scripts/release.mjs testflight",
     "release:testflight-tag": "node scripts/release.mjs testflight-tag",
+    "store:metadata": "mise exec -- bundle exec fastlane metadata_push",
+    "store:screenshots": "mise exec -- bundle exec fastlane screenshots_push",
+    "store:assets": "mise exec -- bundle exec fastlane store_assets_push",
+    "store:download-metadata": "mise exec -- bundle exec fastlane deliver download_metadata --app_identifier com.tomyail.tubecast --metadata_path ./fastlane/metadata",
+    "store:download-screenshots": "mise exec -- bundle exec fastlane deliver download_screenshots --app_identifier com.tomyail.tubecast --screenshots_path ./fastlane/screenshots --use_live_version true",
     "test": "vitest run"
   },
   "dependencies": {

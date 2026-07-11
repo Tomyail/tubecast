@@ -3,6 +3,10 @@
 # dependencies
 node_modules/
 
+# Ruby / fastlane
+.bundle/
+vendor/bundle/
+
 # Expo
 .expo/
 dist/

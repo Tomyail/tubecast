@@ -1,0 +1,18 @@
+app_identifier("com.tomyail.tubecast")
+platform("ios")
+
+metadata_path("./fastlane/metadata")
+screenshots_path("./fastlane/screenshots")
+
+# This repo still builds and uploads binaries manually through Xcode/Transporter.
+# fastlane is only responsible for App Store Connect metadata and screenshots.
+skip_binary_upload(true)
+skip_app_version_update(true)
+submit_for_review(false)
+automatic_release(false)
+
+# Keep screenshots untouched unless the explicit screenshot lane is used.
+skip_screenshots(true)
+overwrite_screenshots(false)
+
+force(false)

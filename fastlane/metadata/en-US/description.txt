@@ -1,0 +1,5 @@
+TubeCast helps you organize a personal listening library from media links you are authorized to access.
+
+Browse listening picks, add items to your library, manage playlists, and resume playback with a clean, focused player. It is designed for learning clips, interviews, notes, podcasts, and other everyday listening materials.
+
+Please only add content that you have the right to access and manage. Privacy Policy, Terms, and Support are available in Settings.
