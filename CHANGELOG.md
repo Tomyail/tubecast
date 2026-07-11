@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.1.0](https://github.com/Tomyail/tubecast/compare/v1.0.0...v1.1.0) (2026-07-11)
+
+
+### Features
+
+* **mobile:** add App Store Connect API key auth to TestFlight flow ([663cb56](https://github.com/Tomyail/tubecast/commit/663cb5604a2849cbdf16e59156a08aab75709e3b))
+* **mobile:** refresh discover/home UI with hero cards and softer palette ([0cdff0d](https://github.com/Tomyail/tubecast/commit/0cdff0da9fd04816d82bd2ef934535ca3d82c092))
+* **mobile:** split TestFlight flow into separate build/upload/distribute steps ([2c40bf5](https://github.com/Tomyail/tubecast/commit/2c40bf5dd6e0792365a44286c40a658a64a2a484))
 
 ## 1.0.0 (2026-06-27)
 
@@ -107,4 +115,3 @@ All notable changes to this project will be documented in this file. See [commit
 * Update docs for audioHref links
 * Migrate repo to pnpm workspace
 * Implement mobile auth dedupe push
-

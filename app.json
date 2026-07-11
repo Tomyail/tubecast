@@ -3,7 +3,7 @@
     "name": "TubeCast",
     "slug": "tubecast",
     "scheme": "tubecast",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -15,7 +15,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.tomyail.tubecast",
-      "buildNumber": "9",
+      "buildNumber": "10",
       "deploymentTarget": "16.4",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
