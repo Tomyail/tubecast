@@ -6,6 +6,7 @@ node_modules/
 # Ruby / fastlane
 .bundle/
 vendor/bundle/
+fastlane/report.xml
 
 # Expo
 .expo/

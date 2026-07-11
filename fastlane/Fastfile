@@ -4,14 +4,16 @@ default_platform(:ios)
 opt_out_usage
 
 APP_IDENTIFIER = "com.tomyail.tubecast"
-METADATA_PATH = "./fastlane/metadata"
-SCREENSHOTS_PATH = "./fastlane/screenshots"
-WORKSPACE_PATH = "./ios/TubeCast.xcworkspace"
+PROJECT_ROOT = File.expand_path("..", __dir__)
+METADATA_PATH = File.join(PROJECT_ROOT, "fastlane/metadata")
+SCREENSHOTS_PATH = File.join(PROJECT_ROOT, "fastlane/screenshots")
+WORKSPACE_PATH = File.join(PROJECT_ROOT, "ios/TubeCast.xcworkspace")
 SCHEME_NAME = "TubeCast"
-BUILD_OUTPUT_DIRECTORY = "./build/ios"
+BUILD_OUTPUT_DIRECTORY = File.join(PROJECT_ROOT, "build/ios")
 IPA_OUTPUT_NAME = "TubeCast.ipa"
-EXPORT_OPTIONS_PATH = "./fastlane/ExportOptions.plist"
+EXPORT_OPTIONS_PATH = File.join(PROJECT_ROOT, "fastlane/ExportOptions.plist")
 DEFAULT_TESTFLIGHT_GROUPS = ["Public Beta Testers"]
+DEVELOPMENT_TEAM = "G8JC6TALT6"
 
 def expo_config
   JSON.parse(File.read(File.expand_path("../app.json", __dir__))).fetch("expo")
@@ -23,6 +25,22 @@ end
 
 def build_number
   expo_config.fetch("ios").fetch("buildNumber").to_s
+end
+
+# App Store Connect API Key（推荐认证方式）。设置以下 env 后自动启用：
+#   APP_STORE_CONNECT_API_KEY_KEY_ID
+#   APP_STORE_CONNECT_API_KEY_ISSUER_ID
+#   APP_STORE_CONNECT_API_KEY_KEY_FILEPATH  (指向下载的 .p8 文件)
+# 未设置时回退到 FASTLANE_USER 邮箱认证（上传二进制还需 FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD）。
+def asc_api_key
+  return nil unless ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"] && ENV["APP_STORE_CONNECT_API_KEY_KEY_FILEPATH"]
+  @asc_api_key ||= app_store_connect_api_key(
+    key_id: ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"],
+    issuer_id: ENV["APP_STORE_CONNECT_API_KEY_ISSUER_ID"],
+    key_filepath: ENV["APP_STORE_CONNECT_API_KEY_KEY_FILEPATH"],
+    duration: 1_200,
+    in_house: false
+  )
 end
 
 def truthy_env?(name, default: false)
@@ -51,7 +69,8 @@ platform :ios do
       output_directory: options[:output_directory] || ENV["IPA_OUTPUT_DIR"] || BUILD_OUTPUT_DIRECTORY,
       output_name: options[:output_name] || ENV["IPA_OUTPUT_NAME"] || IPA_OUTPUT_NAME,
       export_method: "app-store",
-      export_options: EXPORT_OPTIONS_PATH
+      export_options: EXPORT_OPTIONS_PATH,
+      xcargs: "DEVELOPMENT_TEAM=#{DEVELOPMENT_TEAM} CODE_SIGN_STYLE=Automatic"
     )
   end
 
@@ -63,6 +82,7 @@ platform :ios do
     upload_to_testflight(
       ipa: ipa,
       app_identifier: APP_IDENTIFIER,
+      api_key: asc_api_key,
       skip_submission: true,
       skip_waiting_for_build_processing: false,
       uses_non_exempt_encryption: truthy_env?("TESTFLIGHT_USES_NON_EXEMPT_ENCRYPTION", default: false)
@@ -76,6 +96,7 @@ platform :ios do
 
     upload_to_testflight(
       app_identifier: APP_IDENTIFIER,
+      api_key: asc_api_key,
       distribute_only: true,
       app_version: options[:app_version] || ENV["TESTFLIGHT_VERSION"] || app_version,
       build_number: options[:build_number] || ENV["TESTFLIGHT_BUILD_NUMBER"] || build_number,
@@ -91,6 +112,7 @@ platform :ios do
   lane :metadata_push do
     deliver(
       app_identifier: APP_IDENTIFIER,
+      api_key: asc_api_key,
       metadata_path: METADATA_PATH,
       screenshots_path: SCREENSHOTS_PATH,
       skip_binary_upload: true,
@@ -106,6 +128,7 @@ platform :ios do
   lane :screenshots_push do
     deliver(
       app_identifier: APP_IDENTIFIER,
+      api_key: asc_api_key,
       metadata_path: METADATA_PATH,
       screenshots_path: SCREENSHOTS_PATH,
       skip_binary_upload: true,
@@ -122,6 +145,7 @@ platform :ios do
   lane :store_assets_push do
     deliver(
       app_identifier: APP_IDENTIFIER,
+      api_key: asc_api_key,
       metadata_path: METADATA_PATH,
       screenshots_path: SCREENSHOTS_PATH,
       skip_binary_upload: true,

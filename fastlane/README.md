@@ -1,125 +1,72 @@
-# fastlane App Store automation
+fastlane documentation
+----
 
-This fastlane setup manages App Store Connect metadata, screenshots, and the
-split TestFlight build/upload/distribution flow. The existing local Xcode
-Archive and Transporter flow can still be used as a fallback.
+# Installation
 
-## First-time setup
+Make sure you have the latest version of the Xcode command line tools installed:
 
-```bash
-cd mobile
-mise install
-mise exec -- bundle install
+```sh
+xcode-select --install
 ```
 
-Use either Apple ID auth:
+For _fastlane_ installation instructions, see [Installing _fastlane_](https://docs.fastlane.tools/#installing-fastlane)
 
-```bash
-export FASTLANE_USER="you@example.com"
+# Available Actions
+
+## iOS
+
+### ios testflight_build
+
+```sh
+[bundle exec] fastlane ios testflight_build
 ```
 
-Or App Store Connect API key auth, which is better for repeatable automation.
-Follow fastlane's App Store Connect API key docs, then keep credentials outside
-git.
+Build an App Store IPA for TestFlight. Does not upload.
 
-## Pull current App Store Connect metadata
+### ios testflight_upload
 
-Run this once after manual edits in App Store Connect, then commit the local
-metadata files you want to keep:
-
-```bash
-mise exec -- bundle exec fastlane deliver download_metadata \
-  --app_identifier com.tomyail.tubecast \
-  --metadata_path ./fastlane/metadata
+```sh
+[bundle exec] fastlane ios testflight_upload
 ```
 
-Screenshots can be pulled separately:
+Upload an existing IPA to TestFlight without distributing it to testers.
 
-```bash
-mise exec -- bundle exec fastlane deliver download_screenshots \
-  --app_identifier com.tomyail.tubecast \
-  --screenshots_path ./fastlane/screenshots
+### ios testflight_distribute
+
+```sh
+[bundle exec] fastlane ios testflight_distribute
 ```
 
-## Push changes
+Distribute an already-uploaded TestFlight build to tester groups.
 
-Metadata only:
+### ios metadata_push
 
-```bash
-mise exec -- bundle exec fastlane metadata_push
+```sh
+[bundle exec] fastlane ios metadata_push
 ```
 
-Screenshots only:
+Upload localized App Store metadata only. Does not upload a binary or screenshots.
 
-```bash
-mise exec -- bundle exec fastlane screenshots_push
+### ios screenshots_push
+
+```sh
+[bundle exec] fastlane ios screenshots_push
 ```
 
-Metadata and screenshots:
+Upload localized App Store screenshots only. Does not upload a binary.
 
-```bash
-mise exec -- bundle exec fastlane store_assets_push
+### ios store_assets_push
+
+```sh
+[bundle exec] fastlane ios store_assets_push
 ```
 
-These lanes use `skip_binary_upload: true` and `skip_app_version_update: true`,
-so they are safe to run without a new build.
+Upload localized metadata and screenshots. Does not upload a binary.
 
-## TestFlight flow
+----
 
-Build numbers are bumped separately so failed builds or upload retries do not
-burn additional build numbers.
+This README.md is auto-generated and will be re-generated every time [_fastlane_](https://fastlane.tools) is run.
 
-```bash
-pnpm release:testflight-bump
-pnpm release:testflight-prepare
-pnpm release:testflight-build
-pnpm release:testflight-upload
-pnpm release:testflight-changelog
-pnpm release:testflight-tag
-```
+More information about _fastlane_ can be found on [fastlane.tools](https://fastlane.tools).
 
-The build lane writes the IPA to:
-
-```text
-build/ios/TubeCast.ipa
-```
-
-Override the IPA path for upload if needed:
-
-```bash
-IPA_PATH=/path/to/TubeCast.ipa pnpm release:testflight-upload
-```
-
-`release:testflight-upload` only uploads the IPA. It uses
-`skip_submission: true`, so it does not distribute the build to tester groups.
-
-To distribute an already-uploaded build, provide a tester-facing changelog:
-
-```bash
-TESTFLIGHT_CHANGELOG="Test discovery, playlist playback, sharing, and settings." \
-  pnpm release:testflight-distribute
-```
-
-Distribution defaults:
-
-```text
-TESTFLIGHT_GROUPS=Public Beta Testers
-TESTFLIGHT_EXTERNAL=1
-TESTFLIGHT_NOTIFY=0
-```
-
-Set `TESTFLIGHT_NOTIFY=1` only when you want TestFlight to notify external
-testers.
-
-## Screenshot layout
-
-fastlane expects screenshots under locale-specific folders:
-
-```text
-fastlane/screenshots/zh-Hans/
-fastlane/screenshots/en-US/
-fastlane/screenshots/zh-Hant/
-```
-
-Use numbered filenames such as `01.png`, `02.png`, `03.png`. fastlane detects
-the device slot from image resolution.
+The documentation of _fastlane_ can be found on [docs.fastlane.tools](https://docs.fastlane.tools).

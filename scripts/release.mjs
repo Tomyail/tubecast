@@ -33,6 +33,7 @@ const IOS_PROJECT = path.join(mobileRoot, "ios", "TubeCast.xcodeproj", "project.
 const GH_REPO = "Tomyail/tubecast";
 const TESTFLIGHT_CHANGELOG = path.join(mobileRoot, ".testflight-changelog.md");
 const DEFAULT_TESTFLIGHT_GROUPS = "Public Beta Testers";
+const IOS_DEVELOPMENT_TEAM = "G8JC6TALT6";
 
 function run(cmd, opts = {}) {
   execSync(cmd, { stdio: "inherit", ...opts });
@@ -80,6 +81,12 @@ function syncNativeIosVersion() {
   let project = readFileSync(IOS_PROJECT, "utf8");
   project = project.replace(/CURRENT_PROJECT_VERSION = [^;]+;/g, `CURRENT_PROJECT_VERSION = ${buildNumber};`);
   project = project.replace(/MARKETING_VERSION = [^;]+;/g, `MARKETING_VERSION = ${version};`);
+  project = project.replace(/\n\s*CODE_SIGN_STYLE = [^;]+;/g, "");
+  project = project.replace(/\n\s*DEVELOPMENT_TEAM = [^;]+;/g, "");
+  project = project.replace(
+    /(CURRENT_PROJECT_VERSION = [^;]+;)/g,
+    `$1\n\t\t\t\tCODE_SIGN_STYLE = Automatic;\n\t\t\t\tDEVELOPMENT_TEAM = ${IOS_DEVELOPMENT_TEAM};`,
+  );
   writeFileSync(IOS_PROJECT, project);
 
   console.log(`✅ Xcode 版本已同步：${version} (${buildNumber})`);
@@ -238,7 +245,9 @@ function cmdVersion() {
 }
 
 function prebuildIos() {
-  run("pnpm exec expo prebuild --platform ios --clean", { cwd: mobileRoot, stdio: "inherit" });
+  const clean = ["1", "true", "yes", "y"].includes((process.env.EXPO_PREBUILD_CLEAN || "").toLowerCase());
+  const cleanFlag = clean ? " --clean" : "";
+  run(`pnpm exec expo prebuild --platform ios${cleanFlag}`, { cwd: mobileRoot, stdio: "inherit" });
   syncNativeIosVersion();
 }
 

@@ -99,6 +99,11 @@ pnpm release:testflight-changelog
 pnpm release:testflight-tag
 ```
 
+`release:testflight-prepare` runs `expo prebuild --platform ios` without
+`--clean` by default, preserving the existing native iOS project and share
+extension. Use `EXPO_PREBUILD_CLEAN=1 pnpm release:testflight-prepare` only
+when you intentionally want a clean native regeneration.
+
 `release:testflight-upload` uploads the IPA only; it does not distribute to tester groups. To distribute an already-uploaded build to the default `Public Beta Testers` external group, pass a tester-facing changelog explicitly:
 
 ```bash
