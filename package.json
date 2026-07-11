@@ -32,7 +32,8 @@
     "store:assets": "mise exec -- bundle exec fastlane store_assets_push",
     "store:download-metadata": "mise exec -- bundle exec fastlane deliver download_metadata --app_identifier com.tomyail.tubecast --metadata_path ./fastlane/metadata",
     "store:download-screenshots": "mise exec -- bundle exec fastlane deliver download_screenshots --app_identifier com.tomyail.tubecast --screenshots_path ./fastlane/screenshots --use_live_version true",
-    "test": "vitest run"
+    "test": "vitest run",
+    "prepare": "husky"
   },
   "dependencies": {
     "@expo/dom-webview": "~56.0.5",
@@ -65,9 +66,12 @@
     "react-native-screens": "~4.25.2"
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.2.1",
+    "@commitlint/config-conventional": "^21.2.0",
     "@types/react": "~19.2.2",
     "babel-preset-expo": "~56.0.15",
     "commit-and-tag-version": "^12.7.3",
+    "husky": "^9.1.7",
     "typescript": "~6.0.3",
     "vitest": "^3.2.4"
   },

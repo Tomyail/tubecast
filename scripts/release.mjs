@@ -227,7 +227,8 @@ function latestChangelogSection() {
 // ---- A: 打 tag + 草稿 release ----
 function cmdVersion() {
   const bn = bumpBuildNumber(); // 1) 先改 app.json，CATV 会把它打进同一提交
-  run("pnpm exec commit-and-tag-version", { cwd: mobileRoot, stdio: "inherit" }); // 2) bump 版本+CHANGELOG+提交+建 tag
+  const releaseAsFlag = process.env.RELEASE_AS ? ` --release-as ${process.env.RELEASE_AS}` : "";
+  run(`pnpm exec commit-and-tag-version${releaseAsFlag}`, { cwd: mobileRoot, stdio: "inherit" }); // 2) bump 版本+CHANGELOG+提交+建 tag（RELEASE_AS=1.0.1 可强制版本）
   const ver = currentVersion();
   const tag = `v${ver}`;
   run(`git push origin HEAD --follow-tags`, { cwd: mobileRoot, stdio: "inherit" }); // 3) push 提交 + annotated tag（v1.x）到公开 mobile 仓库

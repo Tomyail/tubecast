@@ -1,0 +1,4 @@
+# commit-msg 钩子：第 2 层（commitlint 格式校验）+ 第 3 层（按文件路径校验类型）
+# 详见 commitlint.config.cjs 与 scripts/commit-type-guard.mjs
+pnpm exec commitlint --edit "$1"
+node scripts/commit-type-guard.mjs "$1"

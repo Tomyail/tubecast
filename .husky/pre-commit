@@ -1,0 +1,2 @@
+# pre-commit 钩子（默认留空）。需要时取消注释启用 lint / format / test。
+# pnpm test
