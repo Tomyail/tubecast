@@ -123,6 +123,7 @@ platform :ios do
       skip_screenshots: true,
       submit_for_review: false,
       automatic_release: false,
+      run_precheck_before_submit: false,
       force: true
     )
   end
@@ -139,6 +140,7 @@ platform :ios do
       skip_metadata: true,
       submit_for_review: false,
       automatic_release: false,
+      run_precheck_before_submit: false,
       overwrite_screenshots: true,
       force: true
     )
@@ -155,6 +157,7 @@ platform :ios do
       skip_app_version_update: true,
       submit_for_review: false,
       automatic_release: false,
+      run_precheck_before_submit: false,
       overwrite_screenshots: true,
       force: true
     )
