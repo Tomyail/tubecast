@@ -1,1 +1,1 @@
-listening,playlist,audio,library,podcast,study,notes,player,focus,mindful,spoken,learning,organizer
+youtube,mp3,audio,video,offline,podcast,study,learning,commute,lecture,playlist,player,notes,library

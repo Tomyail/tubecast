@@ -1,5 +1,14 @@
-TubeCast helps you organize a personal listening library from media links you are authorized to access.
+TubeCast turns video content into a personal, audio-first listening library. Convert the learning, interview, podcast, and lecture videos you already watch into audio, and listen on the go — during your commute, workout, or chores. Follow video channels and catch new uploads like podcast episodes.
 
-Browse listening picks, add items to your library, manage playlists, and resume playback with a clean, focused player. It is designed for learning clips, interviews, notes, podcasts, and other everyday listening materials.
+[Treat videos like podcasts]
+Follow your favorite video channels and see new uploads in your feed, podcast-style. Turn long videos you never have time to watch into audio you can actually listen to, so fragmented time keeps adding up.
+
+[One tap to audio]
+Paste a video link and it's converted to audio and added to your library. Background playback, lock-screen controls, and a mini player mean your phone stays in your pocket while you listen.
+
+[Your personal listening library]
+Organize what you want to hear with playlists, track playback progress and listened status, and cache audio for offline listening.
+
+Built for people who treat learning courses, tech interviews, and knowledge videos as everyday listening.
 
 Please only add content that you have the right to access and manage. Privacy Policy, Terms, and Support are available in Settings.
