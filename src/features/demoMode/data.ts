@@ -3,20 +3,30 @@ import type { DiscoverResponse } from "../discover/types";
 import type { Track } from "../playlist/storage";
 import type { FeedItemWithStatus, FeedSource } from "../youtubeFeed/types";
 
+const DEFAULT_DEMO_COVER_BASE_URL =
+  "https://raw.githubusercontent.com/Tomyail/tubecast/main/mobile/screenshot-assets/demo-covers";
+const DEMO_COVER_BASE_URL = (
+  process.env.EXPO_PUBLIC_SCREENSHOT_DEMO_ASSET_BASE_URL || DEFAULT_DEMO_COVER_BASE_URL
+).replace(/\/$/, "");
+
+function demoCover(filename: string): string {
+  return `${DEMO_COVER_BASE_URL}/${filename}`;
+}
+
 function getDemoCovers() {
   return {
-    lakeReading: require("../../../assets/demo-covers/lake-reading.png"),
-    sunlitBook: require("../../../assets/demo-covers/sunlit-book.png"),
-    nightLake: require("../../../assets/demo-covers/night-lake.png"),
-    yogaDawn: require("../../../assets/demo-covers/yoga-dawn.png"),
-    podcastMic: require("../../../assets/demo-covers/podcast-mic.png"),
-    studyDesk: require("../../../assets/demo-covers/study-desk.png"),
-    minimalRoom: require("../../../assets/demo-covers/minimal-room.png"),
-    guitarRoom: require("../../../assets/demo-covers/guitar-room.png"),
-    travelRoad: require("../../../assets/demo-covers/travel-road.png"),
-    cookingPot: require("../../../assets/demo-covers/cooking-pot.png"),
-    financeChart: require("../../../assets/demo-covers/finance-chart.png"),
-    mindPuzzle: require("../../../assets/demo-covers/mind-puzzle.png"),
+    lakeReading: demoCover("lake-reading.png"),
+    sunlitBook: demoCover("sunlit-book.png"),
+    nightLake: demoCover("night-lake.png"),
+    yogaDawn: demoCover("yoga-dawn.png"),
+    podcastMic: demoCover("podcast-mic.png"),
+    studyDesk: demoCover("study-desk.png"),
+    minimalRoom: demoCover("minimal-room.png"),
+    guitarRoom: demoCover("guitar-room.png"),
+    travelRoad: demoCover("travel-road.png"),
+    cookingPot: demoCover("cooking-pot.png"),
+    financeChart: demoCover("finance-chart.png"),
+    mindPuzzle: demoCover("mind-puzzle.png"),
   };
 }
 

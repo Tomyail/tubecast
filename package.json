@@ -16,7 +16,7 @@
     "ios:screenshots:release": "EXPO_PUBLIC_SCREENSHOT_DEMO_MODE=1 expo run:ios --configuration Release --device \"iPhone 13 Pro Max\"",
     "ios:screenshots:ipad": "EXPO_PUBLIC_SCREENSHOT_DEMO_MODE=1 expo run:ios --configuration Release --device \"iPad Pro 13-inch (M5)\"",
     "web": "expo start --web",
-    "release:ios": "expo prebuild --platform ios --no-install && expo run:ios --device --configuration Release",
+    "release:ios": "node scripts/release.mjs assert-no-demo-assets && expo prebuild --platform ios --no-install && expo run:ios --device --configuration Release",
     "release:version": "node scripts/release.mjs version",
     "release:archive": "node scripts/release.mjs archive",
     "release:publish": "node scripts/release.mjs publish",

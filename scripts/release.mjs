@@ -34,6 +34,7 @@ const GH_REPO = "Tomyail/tubecast";
 const TESTFLIGHT_CHANGELOG = path.join(mobileRoot, ".testflight-changelog.md");
 const DEFAULT_TESTFLIGHT_GROUPS = "Public Beta Testers";
 const IOS_DEVELOPMENT_TEAM = "G8JC6TALT6";
+const BUNDLED_DEMO_COVERS_DIR = path.join(mobileRoot, "assets", "demo-covers");
 
 function run(cmd, opts = {}) {
   execSync(cmd, { stdio: "inherit", ...opts });
@@ -46,6 +47,18 @@ function readJson(p) {
 }
 function writeJson(p, obj) {
   writeFileSync(p, JSON.stringify(obj, null, 2) + "\n");
+}
+
+function assertNoBundledScreenshotDemoAssets() {
+  if (existsSync(BUNDLED_DEMO_COVERS_DIR)) {
+    throw new Error(
+      [
+        "检测到 assets/demo-covers，这会把截图演示素材打进 IPA。",
+        "请把截图素材保存在 screenshot-assets/demo-covers，并保持 demoMode 使用 URL 引用。",
+        `需要删除的目录：${BUNDLED_DEMO_COVERS_DIR}`,
+      ].join("\n"),
+    );
+  }
 }
 
 function currentVersion() {
@@ -254,11 +267,13 @@ function prebuildIos() {
 
 // ---- archive：prebuild，把 buildNumber 写进 native 工程 ----
 function cmdArchive() {
+  assertNoBundledScreenshotDemoAssets();
   prebuildIos();
   console.log("\n✅ prebuild 完成。现在在 Xcode 打开 mobile/ios/TubeCast.xcworkspace → Product → Archive → 导出 IPA → Transporter 上传。");
 }
 
 function cmdTestflightPrepare() {
+  assertNoBundledScreenshotDemoAssets();
   prebuildIos();
   console.log("\n✅ TestFlight prepare 完成。下一步：pnpm release:testflight-build");
 }
@@ -281,6 +296,7 @@ function cmdTestflightBump() {
 }
 
 function cmdTestflightBuild() {
+  assertNoBundledScreenshotDemoAssets();
   runFastlane("testflight_build");
   console.log("\n✅ IPA 已生成。下一步：pnpm release:testflight-upload");
 }
@@ -431,6 +447,7 @@ function cmdRebuild() {
 }
 
 const COMMANDS = {
+  "assert-no-demo-assets": assertNoBundledScreenshotDemoAssets,
   version: cmdVersion,
   publish: cmdPublish,
   archive: cmdArchive,
@@ -448,7 +465,8 @@ const COMMANDS = {
 };
 const cmd = process.argv[2];
 if (!cmd || !COMMANDS[cmd]) {
-  console.error("用法: release.mjs <version|publish|archive|rebuild|changelog|sync-ios|testflight|testflight-bump|testflight-prepare|testflight-build|testflight-upload|testflight-changelog|testflight-distribute|testflight-tag>");
+  console.error("用法: release.mjs <assert-no-demo-assets|version|publish|archive|rebuild|changelog|sync-ios|testflight|testflight-bump|testflight-prepare|testflight-build|testflight-upload|testflight-changelog|testflight-distribute|testflight-tag>");
+  console.error("  assert-no-demo-assets 确认截图演示素材未放在会被打包的 assets/demo-covers");
   console.error("  version   A 段：bump 版本/buildNumber + CHANGELOG + tag + 草稿 release");
   console.error("  archive   B 前：expo prebuild（写 buildNumber 进工程）");
   console.error("  publish   C 段：草稿转正 + 根仓库指针 bump");
