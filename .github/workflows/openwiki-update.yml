@@ -3,7 +3,8 @@ name: OpenWiki Update
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 8 * * *"
+    # UTC 19:00 = 北京 03:00 (错开 yt-audio)
+    - cron: "0 19 * * *"
 
 permissions:
   contents: write
