@@ -67,3 +67,13 @@ type(scope): subject
 3. header ≤ 100 字符吗？
 
 提交信息写好后，`.husky/commit-msg` 钩子会跑 commitlint + commit-type-guard 替你把关。
+
+<!-- OPENWIKI:START -->
+
+## OpenWiki
+
+This repository uses OpenWiki for recurring code documentation. Start with `openwiki/quickstart.md`, then follow its links to architecture, workflows, domain concepts, operations, integrations, testing guidance, and source maps.
+
+The scheduled OpenWiki GitHub Actions workflow refreshes the repository wiki. Do not hand-edit generated OpenWiki pages unless explicitly asked; prefer updating source code/docs and letting OpenWiki regenerate.
+
+<!-- OPENWIKI:END -->
