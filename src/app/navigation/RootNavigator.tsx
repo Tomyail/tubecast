@@ -290,7 +290,7 @@ export default function RootNavigator() {
           name="ManageChannels"
           component={ManageChannelsScreen}
           options={{
-            presentation: "formSheet",
+            presentation: "modal",
             title: t("feed.manageChannels"),
             headerLeft: () => <CloseModalButton />,
           }}

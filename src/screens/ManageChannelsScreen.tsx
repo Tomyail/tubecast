@@ -1,16 +1,18 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Alert, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
-import Screen from "../components/Screen";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRemoveChannel, useSubscribedChannels } from "../features/youtubeFeed/hooks";
 import type { FeedSource } from "../features/youtubeFeed/types";
 import { useTranslation } from "../i18n";
 import { useAppTheme } from "../app/theme";
 import { toExpoImageSource } from "../shared/imageSource";
+import { getManageChannelsListBottomPadding, getManageChannelsListContentHeight, manageChannelsListTopPadding } from "./manageChannelsLayout";
 
 export default function ManageChannelsScreen() {
   const { t } = useTranslation();
   const { colors } = useAppTheme();
+  const insets = useSafeAreaInsets();
   const { data: channels = [] } = useSubscribedChannels();
   const removeChannel = useRemoveChannel();
 
@@ -26,45 +28,50 @@ export default function ManageChannelsScreen() {
   };
 
   return (
-    <Screen scroll={false}>
-      <FlatList
-        data={channels}
-        keyExtractor={(channel) => channel.platformSourceId}
-        contentContainerStyle={styles.listContent}
-        renderItem={({ item }) => (
-          <View style={[styles.row, { borderBottomColor: colors.border }]}>
-            <View style={[styles.thumbnail, { backgroundColor: colors.elevatedSurface }]}>
-              {item.thumbnailUrl ? (
-                <Image source={toExpoImageSource(item.thumbnailUrl)} style={styles.thumbnailImage} contentFit="cover" transition={300} />
-              ) : (
-                <Ionicons name="play" size={20} color={colors.tint} />
-              )}
-            </View>
-            <Text numberOfLines={2} style={[styles.title, { color: colors.primaryText }]}>{item.title}</Text>
-            <Pressable
-              accessibilityLabel={`${t("common.remove")} ${item.title}`}
-              accessibilityRole="button"
-              disabled={removeChannel.isPending}
-              onPress={() => confirmRemove(item)}
-              style={styles.removeButton}
-            >
-              <Text style={[styles.removeText, { color: colors.destructive }]}>{t("common.remove")}</Text>
-            </Pressable>
+    <ScrollView
+      style={[styles.scrollView, { backgroundColor: colors.background }]}
+      contentContainerStyle={[
+        styles.listContent,
+        {
+          height: channels.length > 0 ? getManageChannelsListContentHeight(channels.length, insets.bottom) : undefined,
+          paddingBottom: getManageChannelsListBottomPadding(insets.bottom),
+        },
+      ]}
+    >
+      {channels.map((channel) => (
+        <View key={channel.platformSourceId} style={[styles.row, { borderBottomColor: colors.border }]}>
+          <View style={[styles.thumbnail, { backgroundColor: colors.elevatedSurface }]}>
+            {channel.thumbnailUrl ? (
+              <Image source={toExpoImageSource(channel.thumbnailUrl)} style={styles.thumbnailImage} contentFit="cover" transition={300} />
+            ) : (
+              <Ionicons name="play" size={20} color={colors.tint} />
+            )}
           </View>
-        )}
-        ListEmptyComponent={(
-          <View style={styles.emptyState}>
-            <Ionicons name="albums-outline" size={32} color={colors.secondaryText} />
-            <Text style={[styles.emptyText, { color: colors.secondaryText }]}>{t("feed.noSubscriptions")}</Text>
-          </View>
-        )}
-      />
-    </Screen>
+          <Text numberOfLines={2} style={[styles.title, { color: colors.primaryText }]}>{channel.title}</Text>
+          <Pressable
+            accessibilityLabel={`${t("common.remove")} ${channel.title}`}
+            accessibilityRole="button"
+            disabled={removeChannel.isPending}
+            onPress={() => confirmRemove(channel)}
+            style={styles.removeButton}
+          >
+            <Text style={[styles.removeText, { color: colors.destructive }]}>{t("common.remove")}</Text>
+          </Pressable>
+        </View>
+      ))}
+      {channels.length === 0 && (
+        <View style={styles.emptyState}>
+          <Ionicons name="albums-outline" size={32} color={colors.secondaryText} />
+          <Text style={[styles.emptyText, { color: colors.secondaryText }]}>{t("feed.noSubscriptions")}</Text>
+        </View>
+      )}
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  listContent: { paddingVertical: 4 },
+  scrollView: { flex: 1 },
+  listContent: { paddingHorizontal: 18, paddingTop: 12 + manageChannelsListTopPadding },
   row: { alignItems: "center", borderBottomColor: "#e2d7c9", borderBottomWidth: StyleSheet.hairlineWidth, flexDirection: "row", gap: 12, minHeight: 72, paddingVertical: 10 },
   thumbnail: { alignItems: "center", backgroundColor: "#f1dfc7", borderRadius: 10, height: 48, justifyContent: "center", overflow: "hidden", width: 48 },
   thumbnailImage: { height: "100%", width: "100%" },
