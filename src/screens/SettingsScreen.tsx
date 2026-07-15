@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import type { ComponentProps } from "react";
 import { useEffect, useState } from "react";
-import { Linking, StyleSheet, Text, View } from "react-native";
+import { Alert, Linking, StyleSheet, Text, View } from "react-native";
 import appConfig from "../../app.json";
 import Screen from "../components/Screen";
 import Touchable from "../components/Touchable";
@@ -10,6 +10,7 @@ import { getAllTracks } from "../features/playlist/storage";
 import { formatFileSize } from "../i18n/formatters";
 import { useAppLanguage, useTranslation } from "../i18n";
 import { useAppTheme } from "../app/theme";
+import { appStoreCampaignUrl } from "../features/appStoreMigration/config";
 
 type BuildExtra = {
   buildCommit?: string;
@@ -41,6 +42,16 @@ export default function SettingsScreen() {
     const tracks = await getAllTracks();
     const totalBytes = tracks.reduce((sum, track) => sum + (track.fileSize || 0), 0);
     setStorageInfo(t("settings.storage", { count: tracks.length, size: formatFileSize(totalBytes, language) }));
+  };
+
+  const openStableVersion = async () => {
+    if (!appStoreCampaignUrl) return;
+
+    try {
+      await Linking.openURL(appStoreCampaignUrl);
+    } catch {
+      Alert.alert(t("appStoreMigration.openFailedTitle"), t("appStoreMigration.openFailedMessage"));
+    }
   };
 
   // 进入设置页自动刷新一次存储空间信息，仍可点击行手动刷新
@@ -99,6 +110,19 @@ export default function SettingsScreen() {
           </View>
         </Touchable>
       </Section>
+
+      {appStoreCampaignUrl ? (
+        <Section title={t("settings.versionChoice")} colors={colors}>
+          <Touchable accessibilityRole="link" onPress={() => void openStableVersion()} style={styles.settingRow}>
+            <View style={[styles.rowIcon, { backgroundColor: colors.elevatedSurface }]}><Ionicons name="storefront-outline" size={20} color={colors.tint} /></View>
+            <View style={styles.rowContent}>
+              <Text style={[styles.rowTitle, { color: colors.primaryText }]}>{t("settings.stableVersion")}</Text>
+              <Text numberOfLines={2} style={[styles.rowDetail, { color: colors.secondaryText }]}>{t("settings.stableVersionDetail")}</Text>
+            </View>
+            <Ionicons name="arrow-up-right-box" size={18} color={colors.tint} />
+          </Touchable>
+        </Section>
+      ) : null}
 
       <Section title={t("settings.about")} colors={colors}>
         <View style={styles.aboutHeader}>

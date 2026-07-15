@@ -133,6 +133,20 @@ TESTFLIGHT_CHANGELOG="Test discovery, playlist playback, sharing, and settings."
 
 External tester notifications are off by default. Add `TESTFLIGHT_NOTIFY=1` when you intentionally want TestFlight to notify testers.
 
+To offer TestFlight users an optional path to the stable App Store version, set
+the campaign link only when building that TestFlight release:
+
+```bash
+export EXPO_PUBLIC_APP_STORE_CAMPAIGN_URL='https://apps.apple.com/app/apple-store/id…?pt=…&ct=testflight-migration&mt=8'
+pnpm release:testflight-prepare
+pnpm release:testflight-build
+```
+
+When this variable is absent or is not an `https://apps.apple.com` URL, the
+startup choice and the persistent Settings link stay hidden. Do not set it for
+the App Store production archive. The variable must still be present during
+`release:testflight-build`, when the JavaScript bundle is generated.
+
 Versioning follows [conventional commits](https://www.conventionalcommits.org/) via `commit-and-tag-version` (`feat:` → minor, `fix:` → patch, `BREAKING CHANGE` → major). TestFlight "What's New" is bilingual: English from `CHANGELOG.md`, Chinese written by hand. The first release bootstraps a baseline `v1.0.0` tag from existing history; see `plans/007-mobile-release-flow.md` for the full design.
 
 ### App Store metadata automation

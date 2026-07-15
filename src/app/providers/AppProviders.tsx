@@ -7,6 +7,7 @@ import { SettingsProvider } from "../../features/settings/context";
 import { PlaylistProvider } from "../../features/playlist/context";
 import { PlayerProvider } from "../../features/player/context";
 import { RemoteConfigProvider } from "../../features/remoteConfig/context";
+import AppStoreMigrationPrompt from "../../features/appStoreMigration/AppStoreMigrationPrompt";
 import { I18nProvider } from "../../i18n";
 import { AppThemeProvider } from "../theme";
 
@@ -31,7 +32,10 @@ export default function AppProviders({ children }: { children: ReactNode }) {
               <RemoteConfigProvider>
                 <SettingsProvider>
                   <PlaylistProvider>
-                    <PlayerProvider>{children}</PlayerProvider>
+                    <PlayerProvider>
+                      {children}
+                      <AppStoreMigrationPrompt />
+                    </PlayerProvider>
                   </PlaylistProvider>
                 </SettingsProvider>
               </RemoteConfigProvider>
