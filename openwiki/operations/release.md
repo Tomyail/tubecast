@@ -1,3 +1,10 @@
+---
+type: Operations Playbook
+title: Release Operations
+description: TubeCast release workflows, including TestFlight distribution, App Store metadata, version management, and fastlane automation.
+tags: [operations, release, testflight, app-store, fastlane, versioning]
+---
+
 # Release Operations
 
 This document covers TubeCast release workflows, including TestFlight distribution, App Store metadata, and version management.

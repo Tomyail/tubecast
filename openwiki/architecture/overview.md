@@ -1,3 +1,10 @@
+---
+type: Architecture Overview
+title: Architecture Overview
+description: TubeCast Expo/React Native app architecture, including navigation, routing, state management, and core systems design.
+tags: [architecture, navigation, routing, state-management, expo]
+---
+
 # Architecture Overview
 
 TubeCast is an Expo / React Native app with a feature-based architecture. This document explains the app structure, navigation, and core systems.

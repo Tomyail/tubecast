@@ -1,3 +1,10 @@
+---
+type: Development Guide
+title: Development Conventions
+description: Commit message conventions, version management, and development guidelines for TubeCast using Conventional Commits with automated version bumping.
+tags: [development, conventions, commits, versioning, git]
+---
+
 # Development Conventions
 
 This document covers commit message conventions, version management, and development guidelines for TubeCast.

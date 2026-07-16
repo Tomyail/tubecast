@@ -1,3 +1,10 @@
+---
+type: Documentation Hub
+title: TubeCast Documentation
+description: TubeCast is an independent Expo / React Native client for iOS and Android that turns YouTube channels into a personal, audio-first listening library.
+tags: [tubecast, expo, react-native, mobile-app, documentation]
+---
+
 # TubeCast Documentation
 
 TubeCast is an independent Expo / React Native client for iOS and Android that turns YouTube channels into a personal, audio-first listening library.

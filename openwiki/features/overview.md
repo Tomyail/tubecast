@@ -1,3 +1,10 @@
+---
+type: Feature Module Collection
+title: Feature Modules
+description: TubeCast feature modules under /src/features/, including player, playlist, YouTube feed, jobs, discover, demo mode, remote config, share links, settings, and audio export.
+tags: [features, modules, react-native, expo]
+---
+
 # Feature Modules
 
 TubeCast is organized into feature modules under `/src/features/`. Each module encapsulates its own state, API, storage, and UI logic.
@@ -232,6 +239,9 @@ User preferences and app settings.
 **Settings:**
 - Theme preference (light, dark, system)
 - Language preference (English, Simplified Chinese, Traditional Chinese)
+
+**Screens:**
+- **Manage Channels** - `/src/screens/ManageChannelsScreen.tsx` with scrollable layout utilities in `/src/screens/manageChannelsLayout.ts`
 
 Source: `/src/features/settings/storage.ts`
 
