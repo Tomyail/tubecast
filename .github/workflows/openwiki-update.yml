@@ -8,7 +8,6 @@ on:
 
 permissions:
   contents: write
-  pull-requests: write
 
 jobs:
   update:
@@ -17,6 +16,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 0
           persist-credentials: true
 
@@ -36,15 +36,16 @@ jobs:
           ANTHROPIC_BASE_URL: https://open.bigmodel.cn/api/anthropic
           OPENWIKI_MODEL_ID: glm-4.7
 
-      - name: Create OpenWiki update pull request
-        uses: peter-evans/create-pull-request@v7
-        with:
-          add-paths: |
-            openwiki
-            AGENTS.md
-            CLAUDE.md
-          branch: openwiki/update
-          commit-message: "docs: update OpenWiki"
-          title: "docs: update OpenWiki"
-          body: |
-            Automated OpenWiki documentation update.
+      - name: Commit and push OpenWiki updates
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- openwiki AGENTS.md CLAUDE.md
+
+          if git diff --cached --quiet; then
+            echo "No OpenWiki updates to commit."
+            exit 0
+          fi
+
+          git commit -m "docs: update OpenWiki"
+          git push origin HEAD:main
