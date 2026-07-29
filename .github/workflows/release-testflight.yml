@@ -68,7 +68,7 @@ jobs:
             cat eas-build-result.json
             exit 1
           fi
-          curl -fL "$IPA_URL" -o build/ios/TubeCast.ipa
+          curl -fL "$IPA_URL" -o "$GITHUB_WORKSPACE/build/ios/TubeCast.ipa"
 
       - name: Write App Store Connect API key
         run: echo "${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}" > "$RUNNER_TEMP/asc-api-key.p8"
@@ -86,7 +86,7 @@ jobs:
       - name: Upload build to TestFlight
         run: mise exec -- bundle exec fastlane testflight_upload
         env:
-          IPA_PATH: build/ios/TubeCast.ipa
+          IPA_PATH: ${{ github.workspace }}/build/ios/TubeCast.ipa
           APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
           APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
           APP_STORE_CONNECT_API_KEY_KEY_FILEPATH: ${{ runner.temp }}/asc-api-key.p8
