@@ -16,5 +16,12 @@
         "image": "auto"
       }
     }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "ascAppId": "6783834717"
+      }
+    }
   }
 }

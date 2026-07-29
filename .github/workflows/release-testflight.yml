@@ -59,16 +59,16 @@ jobs:
       - name: EAS Build (iOS)
         run: eas build --platform ios --profile production --non-interactive --wait --json > eas-build-result.json
 
-      - name: Download IPA artifact
+      - name: Upload build to TestFlight (EAS Submit)
+        # fastlane's upload_to_testflight (pilot) shells out to Apple's Transporter
+        # tool, which has long-standing, unresolved bugs on Linux runners
+        # (https://github.com/fastlane/fastlane/issues/16996). EAS Submit uploads
+        # through EAS's own infrastructure instead, so it works fine here. The ASC
+        # API Key it uses is stored server-side (configured once via
+        # `eas credentials` -> App Store Connect -> API Key), not a GitHub secret.
         run: |
-          mkdir -p build/ios
-          IPA_URL=$(jq -r '.[0].artifacts.buildUrl' eas-build-result.json)
-          if [ -z "$IPA_URL" ] || [ "$IPA_URL" = "null" ]; then
-            echo "EAS build did not produce an artifact URL:"
-            cat eas-build-result.json
-            exit 1
-          fi
-          curl -fL "$IPA_URL" -o "$GITHUB_WORKSPACE/build/ios/TubeCast.ipa"
+          BUILD_ID=$(jq -r '.[0].id' eas-build-result.json)
+          eas submit --platform ios --id "$BUILD_ID" --non-interactive --wait
 
       - name: Write App Store Connect API key
         run: echo "${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}" > "$RUNNER_TEMP/asc-api-key.p8"
@@ -82,14 +82,6 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           ANTHROPIC_BASE_URL: https://open.bigmodel.cn/api/anthropic
           RELEASE_NOTES_MODEL_ID: glm-5.2
-
-      - name: Upload build to TestFlight
-        run: mise exec -- bundle exec fastlane testflight_upload
-        env:
-          IPA_PATH: ${{ github.workspace }}/build/ios/TubeCast.ipa
-          APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
-          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
-          APP_STORE_CONNECT_API_KEY_KEY_FILEPATH: ${{ runner.temp }}/asc-api-key.p8
 
       - name: Distribute build to TestFlight testers
         run: mise exec -- bundle exec fastlane testflight_distribute
