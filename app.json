@@ -4,7 +4,7 @@
     "slug": "tubecast",
     "owner": "tomyail",
     "scheme": "tubecast",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -16,7 +16,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.tomyail.tubecast",
-      "buildNumber": "10",
+      "buildNumber": "11",
       "deploymentTarget": "16.4",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
@@ -63,7 +63,9 @@
                   "targetName": "TubeCastShareExtension",
                   "bundleIdentifier": "com.tomyail.tubecast.ShareExtension",
                   "entitlements": {
-                    "com.apple.security.application-groups": ["group.com.tomyail.tubecast"]
+                    "com.apple.security.application-groups": [
+                      "group.com.tomyail.tubecast"
+                    ]
                   }
                 }
               ]

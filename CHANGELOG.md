@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.2.0](https://github.com/Tomyail/tubecast/compare/v1.1.0...v1.2.0) (2026-07-29)
+
+
+### Features
+
+* 新增 App Store 截图演示模式 ([21d7aba](https://github.com/Tomyail/tubecast/commit/21d7abae400835c7d90cc9764032f8b7286066dc))
+
+
+### Bug Fixes
+
+* make managed channels list scrollable ([c1eeec4](https://github.com/Tomyail/tubecast/commit/c1eeec4c8d117d55366bb2ea16ac891c4b44f71c))
+* **screenshots:** 演示封面改用 URL 引用，不再打进生产 IPA ([0e66e68](https://github.com/Tomyail/tubecast/commit/0e66e686c926ec0be6b19b7e1abf6c7e5c0193ed))
+
 ## [1.1.0](https://github.com/Tomyail/tubecast/compare/v1.0.0...v1.1.0) (2026-07-11)
 
 
