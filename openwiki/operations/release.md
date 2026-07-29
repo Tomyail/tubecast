@@ -1,22 +1,23 @@
 ---
 type: Operations Playbook
 title: Release Operations
-description: TubeCast release workflows, including TestFlight distribution, App Store metadata, version management, and fastlane automation.
-tags: [operations, release, testflight, app-store, fastlane, versioning]
+description: TubeCast release workflows, including the CI-driven TestFlight pipeline (EAS Build + Submit, fastlane distribute), tag-first trigger design, LLM-generated bilingual release notes, App Store metadata, and version management.
+tags: [operations, release, testflight, eas, github-actions, app-store, fastlane, versioning]
 ---
 
 # Release Operations
 
-This document covers TubeCast release workflows, including TestFlight distribution, App Store metadata, and version management.
+This document covers TubeCast release workflows, including the CI-driven TestFlight pipeline, App Store metadata, and version management.
 
 ## Prerequisites
 
 ### Tools
 
-- **fastlane** - Ruby gem for iOS automation (managed via `mise` and `Gemfile`)
+- **EAS CLI** - Cloud iOS builds (`eas build`) and TestFlight upload (`eas submit`) used by CI
+- **fastlane** - Ruby gem for iOS automation: `testflight_distribute` lane and store metadata (managed via `mise` and `Gemfile`)
 - **mise** - Task runner and version manager (`.mise.toml`)
 - **Expo CLI** - For prebuild and native project generation
-- **Xcode** - For iOS builds and archives
+- **Xcode** - For local iOS builds and archives (manual fallback)
 
 ### Environment Variables
 
@@ -74,25 +75,28 @@ pnpm release:changelog
 
 # --- TestFlight workflow ---
 
-# Bump buildNumber and commit
+# Bump buildNumber, commit, tag and push testflight/<version>-<build> (triggers CI)
 pnpm release:testflight-bump
 
-# Prebuild and sync Xcode version
+# Prebuild and sync Xcode version (local fastlane fallback path)
 pnpm release:testflight-prepare
 
-# Build IPA with fastlane
+# Build IPA with fastlane (local fastlane fallback path)
 pnpm release:testflight-build
 
-# Upload IPA to TestFlight (no distribution)
+# Upload IPA to TestFlight via fastlane (local fastlane fallback path, no distribution)
 pnpm release:testflight-upload
 
-# Generate changelog from commits
+# Generate raw changelog from commits (used by CI and locally)
 pnpm release:testflight-changelog
 
-# Distribute to tester groups
+# Generate bilingual LLM "What to Test" notes (.testflight-whats-new)
+pnpm release:notes:generate
+
+# Distribute already-uploaded build to tester groups (local fastlane fallback path)
 pnpm release:testflight-distribute
 
-# Tag and publish GitHub release
+# Tag and fill GitHub prerelease notes (skips tag creation if it already exists)
 pnpm release:testflight-tag
 
 # Full TestFlight flow (bump + build + upload + distribute)
@@ -103,94 +107,88 @@ Source: `/scripts/release.mjs`
 
 ## TestFlight Workflow
 
-### Step-by-Step Process
+TestFlight distribution is **CI-driven**. The only manual step is cutting the version locally; building the IPA, uploading to App Store Connect, generating "What to Test" notes, and distributing to testers all happen automatically in `.github/workflows/release-testflight.yml`.
 
-#### 1. Bump Build Number
+The pipeline uses a **tag-first** trigger design: the local command creates and pushes the trigger tag *before* any build runs. The workflow listens for two tag patterns and never creates a tag matching either pattern itself (this avoids a self-retrigger loop), so `testflight-tag` only ever fills in GitHub release notes when the tag already exists.
+
+```mermaid
+flowchart TD
+    subgraph Local["Local (manual)"]
+        V["pnpm release:version\nfeat/fix → vX.Y.Z tag"]
+        B["pnpm release:testflight-bump\nbuildNumber+1 → testflight/v-b tag"]
+    end
+    subgraph CI[".github/workflows/release-testflight.yml"]
+        T{Tag pushed}
+        EB["EAS Build (iOS, production profile)\ncloud macOS, EAS-managed signing"]
+        ES["eas submit\nupload to App Store Connect"]
+        CL["release.mjs testflight-changelog\nraw conventional-commit list"]
+        LLM["generate-testflight-notes.mjs\nLLM writes bilingual EN/中文 notes"]
+        DIST["fastlane testflight_distribute\nApp Store Connect API → Public Beta Testers"]
+        GT["release.mjs testflight-tag\nGitHub prerelease notes only"]
+        PROM["gh release edit --draft=false\nv-tag only"]
+    end
+    V --> T
+    B --> T
+    T --> EB --> ES --> CL --> LLM --> DIST
+    DIST --> GT
+    DIST -. "v-tag path only" .-> PROM
+```
+
+### Release paths
+
+| Tag pushed | Triggered by | Steps run | Notes |
+|---|---|---|---|
+| `v*.*.*` | `pnpm release:version` | build → submit → changelog → LLM notes → distribute → **promote draft Release** | Marketing version release. Draft GitHub Release is flipped to published. |
+| `testflight/*` | `pnpm release:testflight-bump` | build → submit → changelog → LLM notes → distribute → tag (notes only) | Same-version hotfix. buildNumber+1, no marketing version bump. No Release promotion. |
+| — | `workflow_dispatch` (GitHub UI / `gh workflow run`) | same as `testflight/*` | Manual fallback for re-running without pushing a new tag. |
+
+### Same-version hotfix rebuild
 
 ```bash
 pnpm release:testflight-bump
 ```
 
-This increments `ios.buildNumber` in `app.json` and commits the change.
+This now does three things:
+1. Increments `ios.buildNumber` in `app.json` and commits the change.
+2. Creates the `testflight/<version>-<build>` tag locally (skipped if it already exists).
+3. Pushes the tag, which **auto-triggers** the workflow.
 
-#### 2. Prepare Native Project
+No manual `workflow_dispatch` click is needed. CI runs the same build/upload/distribute steps as a version release, then calls `release:testflight-tag` — which detects the tag already exists and only fills in the GitHub prerelease notes (it never pushes a new tag).
 
-```bash
-pnpm release:testflight-prepare
-```
+### Why EAS Submit, not fastlane upload
 
-This runs:
-- `expo prebuild --platform ios --no-install` - Generates native iOS project
-- Syncs version from `app.json` to Xcode project files
+CI uploads the IPA via `eas submit`, not fastlane's `upload_to_testflight` (pilot). Pilot shells out to Apple's Transporter tool, which has long-standing unresolved bugs on Linux runners ([fastlane/fastlane#16996](https://github.com/fastlane/fastlane/issues/16996)) and crashed on the `ubuntu-latest` runner. `eas submit` uploads through EAS's own infrastructure and is unaffected.
 
-#### 3. Build IPA
+The fastlane `testflight_distribute` step is kept, because it is a pure App Store Connect API call (no binary transport) and is therefore Linux-safe.
 
-```bash
-pnpm release:testflight-build
-```
+### LLM-generated "What to Test" notes
 
-This calls fastlane:
-```ruby
-fastlane ios testflight_build
-```
+`scripts/generate-testflight-notes.mjs` reads `.testflight-changelog.md` (the raw conventional-commit list produced by `release.mjs testflight-changelog`) and calls an LLM (Anthropic-compatible API, configured to `glm-5.2` via `RELEASE_NOTES_MODEL_ID` and `ANTHROPIC_BASE_URL`) to rewrite it into a bilingual EN/中文 "What to Test" summary. The output is written to `.testflight-whats-new`, which is the fallback file the `testflight_distribute` fastlane lane reads when `TESTFLIGHT_CHANGELOG` is unset.
 
-Builds `TubeCast.ipa` in `build/ios/` using:
-- Configuration: Release
-- Export method: app-store
-- Export options: `fastlane/ExportOptions.plist`
-- Development team: G8JC6TALT6
-
-#### 4. Upload to TestFlight
+Locally you can preview the output without writing the file:
 
 ```bash
-pnpm release:testflight-upload
+pnpm release:notes:generate -- --dry-run
 ```
 
-This calls fastlane:
-```ruby
-fastlane ios testflight_upload
-```
+### CI prerequisites (one-time)
 
-Uploads the IPA to TestFlight without distributing to testers.
+Before the workflow can run end-to-end:
 
-#### 5. Generate Changelog
+- **EAS Build** — `eas login` / `eas init` writes `expo.extra.eas.projectId` into `app.json`; `eas credentials` for iOS → Build Credentials lets EAS manage the Apple signing certificate/provisioning profile (no `fastlane match` needed). The `expo.extra.eas.build.experimental.ios.appExtensions` entry in `app.json` is required so `eas credentials` also provisions the `TubeCastShareExtension` target (EAS does not discover hand-added extension targets on its own).
+- **EAS Submit** — `eas credentials` for iOS → App Store Connect: Manage your API Key, stored server-side by EAS (not a GitHub secret).
+- **GitHub secrets** — `EXPO_TOKEN` (Expo service-account token), `APP_STORE_CONNECT_API_KEY_KEY_ID` / `APP_STORE_CONNECT_API_KEY_ISSUER_ID` / `APP_STORE_CONNECT_API_KEY_P8` (used only by the fastlane distribute step), and `ANTHROPIC_API_KEY` (reused from the OpenWiki workflow).
+- **`eas.json`** — `submit.production.ios.ascAppId` (the app's numeric App Store Connect ID) is required by `eas submit`.
+
+Source: `.github/workflows/release-testflight.yml`, `eas.json`, `scripts/generate-testflight-notes.mjs`
+
+### Local fastlane fallback
+
+If EAS is unavailable, the original local fastlane path still works as a manual fallback. `release:testflight-prepare`, `release:testflight-build`, `release:testflight-upload`, `release:testflight-distribute`, and `release:testflight-tag` together reproduce the build → upload → distribute → tag sequence locally:
 
 ```bash
-pnpm release:testflight-changelog
+pnpm release:testflight         # full local fastlane flow
 ```
-
-Generates `.testflight-changelog.md` from recent git commits.
-
-#### 6. Distribute to Testers
-
-```bash
-pnpm release:testflight-distribute
-```
-
-This calls fastlane:
-```ruby
-fastlane ios testflight_distribute
-```
-
-Distributes the uploaded build to tester groups with changelog.
-
-#### 7. Tag Release
-
-```bash
-pnpm release:testflight-tag
-```
-
-Creates a GitHub tag and release with the changelog.
-
-### Combined Command
-
-For a full TestFlight release, run:
-
-```bash
-pnpm release:testflight
-```
-
-This executes all steps (bump → prepare → build → upload → changelog → distribute → tag).
 
 Source: `/scripts/release.mjs`
 
@@ -206,13 +204,13 @@ Builds an App Store IPA without uploading.
 
 **Output:** `build/ios/TubeCast.ipa`
 
-### Upload
+### Upload (CI)
 
 ```bash
-fastlane ios testflight_upload
+eas submit --platform ios --id <buildId> --non-interactive --wait
 ```
 
-Uploads an existing IPA to TestFlight (no distribution).
+Uploads the EAS-built IPA to App Store Connect via EAS's own infrastructure. Used by CI instead of fastlane's `upload_to_testflight` (Transporter is broken on Linux — see [TestFlight Workflow](#why-eas-submit-not-fastlane-upload)).
 
 ### Distribute
 
@@ -279,8 +277,8 @@ Source: `/fastlane/README.md`
 
 ### Version Components
 
-- **Marketing version** (`app.json` → `expo.version`) - User-facing version (e.g., 1.1.0)
-- **Build number** (`app.json` → `expo.ios.buildNumber`) - Integer for App Store (e.g., 10)
+- **Marketing version** (`app.json` → `expo.version`) - User-facing version (e.g., 1.2.0)
+- **Build number** (`app.json` → `expo.ios.buildNumber`) - Integer for App Store (e.g., 11)
 
 ### Version Bumps
 

@@ -14,7 +14,7 @@ TubeCast is an independent Expo / React Native client for iOS and Android that t
 This documentation covers the TubeCast mobile app implementation across:
 - **Architecture** - Expo/React Native app structure, navigation, and core systems
 - **Features** - Audio conversion, YouTube feeds, playlist management, player, and demo mode
-- **Release Workflows** - TestFlight distribution, App Store metadata, and versioning
+- **Release Workflows** - CI-driven TestFlight pipeline (EAS Build/Submit + fastlane distribute), App Store metadata, and versioning
 - **Development Practices** - Commit conventions (AGENTS.md), testing, and AI agent guidance
 
 ## Quick Navigation
@@ -48,7 +48,9 @@ mobile/
 - **React Navigation** - Bottom tabs and native stack navigation
 - **@tanstack/react-query** - Data fetching and caching
 - **Expo Audio** - Background audio playback with lock-screen controls
-- **Fastlane** - App Store metadata and screenshot automation
+- **EAS Build / Submit** - Cloud iOS builds and TestFlight upload (CI-driven)
+- **Fastlane** - App Store metadata, screenshots, and TestFlight distribution
+- **GitHub Actions** - Automated TestFlight release pipeline
 - **pnpm** - Package management
 
 ## Development Setup
@@ -83,23 +85,23 @@ Demo mode only activates when `EXPO_PUBLIC_SCREENSHOT_DEMO_MODE=1` is set. Norma
 
 ### iOS Release Builds
 
-```bash
-pnpm release:ios    # Build and install Release build on device
-```
+Releasing to TestFlight is CI-driven. The only manual step is `pnpm release:version` (which bumps the marketing version + buildNumber, tags `vX.Y.Z`, and pushes). Pushing the tag triggers `.github/workflows/release-testflight.yml`, which builds the IPA with EAS Build, uploads via `eas submit`, distributes to TestFlight, and promotes the GitHub Release — no manual Archive or App Store Connect clicks. See [Release Operations](operations/release.md) for the full pipeline, CI prerequisites, and the local fastlane fallback.
 
-Use Xcode's **Product → Archive** to create an archive for TestFlight or App Store Connect.
+```bash
+pnpm release:ios    # Local Release build for on-device testing (not the CI release path)
+```
 
 ## Version Status
 
-- **Current Version**: 1.1.0
-- **iOS Build Number**: 10
+- **Current Version**: 1.2.0
+- **iOS Build Number**: 11
 - **Distribution**: TestFlight beta only (no public Android release)
 
 ## Important Notes
 
 - **Commit Conventions**: Follow the rules in `/AGENTS.md`. Commit types (`feat`, `fix`, `build`, etc.) directly drive version bumps. Using `feat` or `fix` for toolchain changes will incorrectly bump the App Store version.
 - **Demo Mode Assets**: Never move files from `screenshot-assets/` into `assets/`. Bundled demo assets increase IPA size unnecessarily.
-- **Local Builds**: TubeCast builds locally via Xcode/Android Studio. It does not use EAS build services.
+- **Local Builds**: Local development builds use Xcode/Android Studio. Production TestFlight builds are produced by EAS Build in CI (see [Release Operations](operations/release.md)).
 
 ## Next Steps
 
