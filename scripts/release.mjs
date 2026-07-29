@@ -7,13 +7,20 @@
 //   pnpm --filter mobile release:archive   B 前: expo prebuild（把 buildNumber 写进 native 工程）
 //   pnpm --filter mobile release:publish   C: 草稿 release 转正 + 根仓库子模块指针 bump
 //   pnpm --filter mobile release:rebuild   热修: 只 buildNumber+1（不动 marketing 版本）后重打包重传
-//   pnpm --filter mobile release:testflight-bump       TestFlight: buildNumber+1 → commit → push
-//   pnpm --filter mobile release:testflight-prepare    TestFlight: prebuild + 同步 Xcode 版本
-//   pnpm --filter mobile release:testflight-build      TestFlight: fastlane build_app 生成 IPA
-//   pnpm --filter mobile release:testflight-upload     TestFlight: 上传 IPA，不分发给测试组
+//   pnpm --filter mobile release:testflight-bump       TestFlight 热修: buildNumber+1 → commit+push →
+//                                                       打并推送 testflight/<version>-<build> tag（触发 CI 自动构建/上传/分发）
+//   pnpm --filter mobile release:testflight-prepare    （本地 fastlane 应急路径用）prebuild + 同步 Xcode 版本
+//   pnpm --filter mobile release:testflight-build      （本地 fastlane 应急路径用）fastlane build_app 生成 IPA
+//   pnpm --filter mobile release:testflight-upload     （本地 fastlane 应急路径用）上传 IPA，不分发给测试组
 //   pnpm --filter mobile release:testflight-changelog  TestFlight: 从 git commit 生成工程版变更记录
-//   pnpm --filter mobile release:testflight-distribute TestFlight: 分发已上传 build 到测试组
-//   pnpm --filter mobile release:testflight-tag        TestFlight: 打 testflight/<version>-<build> tag + GitHub changelog
+//   pnpm --filter mobile release:testflight-distribute （本地 fastlane 应急路径用）分发已上传 build 到测试组
+//   pnpm --filter mobile release:testflight-tag        补 testflight/<version>-<build> tag（若已存在则跳过）+ GitHub prerelease notes
+//
+// CI（.github/workflows/release-testflight.yml）采用"先打 tag 再发布"：push 一个
+// vX.Y.Z tag（release:version）或 testflight/<version>-<build> tag（release:testflight-bump）
+// 都会自动触发完整的构建/上传/分发；CI 自身不会在运行过程中创建任何匹配触发规则的
+// 新 tag（避免自我重触发），release:testflight-tag 在 CI 里跑到时 tag 早已存在，只负责
+// 补 GitHub prerelease notes。
 //
 // 跨两个仓库：mobile（公开 GitHub Tomyail/tubecast）+ 根（私有 Gitea yt-audio）。
 // 全程用 git -C / cwd，绝不 cd（避免权限提示与不可重入）。
@@ -290,9 +297,20 @@ function commitBuildNumberBump() {
   return bn;
 }
 
+// 先打 tag 再发布：tag 本身就是 CI 的触发信号，不是发布完之后的记录。
+// 复用 testflight-tag 已有的"tag 已存在就跳过创建"逻辑——CI 跑到 testflight-tag
+// 这步时 tag 早已存在，只会去补 GitHub prerelease notes，不会重复 push tag。
 function cmdTestflightBump() {
   const bn = commitBuildNumberBump();
-  console.log(`\n✅ TestFlight buildNumber → ${bn}。下一步：pnpm release:testflight-prepare`);
+  const tag = testflightTagName();
+  if (tagExists(tag)) {
+    console.log(`ℹ  tag 已存在：${tag}`);
+  } else {
+    run(`git tag ${tag}`, { cwd: mobileRoot, stdio: "inherit" });
+    run(`git push origin refs/tags/${tag}`, { cwd: mobileRoot, stdio: "inherit" });
+    console.log(`✅ 已创建并推送 tag：${tag}`);
+  }
+  console.log(`\n✅ TestFlight buildNumber → ${bn}。tag 已推送，CI 会自动构建/上传/分发（无需再手动点 workflow_dispatch）。`);
 }
 
 function cmdTestflightBuild() {

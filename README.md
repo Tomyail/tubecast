@@ -106,16 +106,16 @@ If you distribute a fork, replace `expo.ios.bundleIdentifier` and `expo.android.
 Releasing to TestFlight is CI-driven. The only manual step is cutting the version locally; everything from building the IPA to distributing it to testers happens in GitHub Actions.
 
 1. `pnpm release:version` — bumps the marketing version + `ios.buildNumber`, updates `CHANGELOG.md`, tags `vX.Y.Z`, pushes the tag, and opens a **draft** GitHub Release.
-2. Pushing the `vX.Y.Z` tag triggers `.github/workflows/release-testflight.yml`, which: builds the IPA with EAS Build (cloud macOS, EAS-managed signing), uploads it to TestFlight via `eas submit` (fastlane's `upload_to_testflight` shells out to Apple's Transporter tool, which has [known unresolved bugs on Linux](https://github.com/fastlane/fastlane/issues/16996) — `eas submit` uploads through EAS's own infra instead and works fine on the Ubuntu runner), generates bilingual (EN/中文) "What to Test" notes with an LLM call, distributes the build via fastlane to the `Public Beta Testers` group (this part is a pure App Store Connect API call, no binary upload, so it's unaffected), tags `testflight/<version>-<build>` with a prerelease GitHub changelog, and flips the draft Release to published — no manual clicks.
+2. Pushing the `vX.Y.Z` tag triggers `.github/workflows/release-testflight.yml`, which: builds the IPA with EAS Build (cloud macOS, EAS-managed signing), uploads it to TestFlight via `eas submit` (fastlane's `upload_to_testflight` shells out to Apple's Transporter tool, which has [known unresolved bugs on Linux](https://github.com/fastlane/fastlane/issues/16996) — `eas submit` uploads through EAS's own infra instead and works fine on the Ubuntu runner), generates bilingual (EN/中文) "What to Test" notes with an LLM call, distributes the build via fastlane to the `Public Beta Testers` group (this part is a pure App Store Connect API call, no binary upload, so it's unaffected), and flips the draft Release to published — no manual clicks.
 3. The private root repo's `mobile` submodule pointer is intentionally **not** bumped by CI (the two repos stay independent; no cross-repo write token is granted). Run `pnpm release:publish` locally whenever you want to sync it, same as before.
 
-For a same-version hotfix rebuild (buildNumber bump only, no new marketing version/tag), push a plain commit and trigger the workflow manually:
+For a same-version hotfix rebuild (buildNumber bump only, no new marketing version/tag):
 
 ```bash
-pnpm release:testflight-bump   # buildNumber+1, commit + push (no tag)
+pnpm release:testflight-bump   # buildNumber+1, commit + push, then tags + pushes testflight/<version>-<build>
 ```
 
-Then run the `Release to TestFlight` workflow via `workflow_dispatch` (GitHub UI or `gh workflow run release-testflight.yml`). The hotfix path runs the same build/upload/distribute/tag steps but skips promoting a Release (that only applies to an actual version-tag release).
+The pushed tag triggers the workflow automatically — no manual step needed. It runs the same build/upload/distribute steps, tags a prerelease GitHub changelog (the tag itself already exists by the time CI runs, since it's tag-first — CI just fills in the release notes), and skips promoting a Release (that only applies to an actual version-tag release). `workflow_dispatch` (GitHub UI or `gh workflow run release-testflight.yml`) still exists as a manual fallback for re-running without pushing a new tag.
 
 Versioning follows [conventional commits](https://www.conventionalcommits.org/) via `commit-and-tag-version` (`feat:` → minor, `fix:` → patch, `BREAKING CHANGE` → major). The first release bootstraps a baseline `v1.0.0` tag from existing history. See `plans/007-mobile-release-flow.md` for the original local-only design and `plans/009-mobile-eas-ci-release.md` for the CI/EAS automation that superseded its build/upload/distribution steps.
 
