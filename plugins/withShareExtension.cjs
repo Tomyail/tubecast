@@ -7,6 +7,11 @@ const TEMPLATE_DIR = "ios-share-extension";
 const EXTENSION_DIR = TARGET_NAME;
 const EXTENSION_BUNDLE_SUFFIX = "ShareExtension";
 const APP_GROUP_IDENTIFIER = "group.com.tomyail.tubecast";
+// 跟 release.mjs 的 IOS_DEVELOPMENT_TEAM / Fastfile 的 DEVELOPMENT_TEAM 保持一致。
+// 不能只从主 target 读回填：在 EAS Build 里 expo prebuild 自己跑，不会经过
+// release.mjs 的 syncNativeIosVersion() 那一步，届时主 target 也还没写入 team，
+// 会连带导致这个扩展 target 也拿不到 team、headless 构建签名失败。
+const DEVELOPMENT_TEAM_ID = "G8JC6TALT6";
 
 function copyDirectory(source, destination) {
   fs.rmSync(destination, { force: true, recursive: true });
@@ -184,7 +189,7 @@ function ensureShareExtensionTarget(project, bundleIdentifier, appVersion, build
     project.addSourceFile(`${EXTENSION_DIR}/ShareViewController.swift`, { target: targetUuid }, groupKey);
   }
 
-  const developmentTeam = getMainTargetBuildSetting(project, "DEVELOPMENT_TEAM");
+  const developmentTeam = getMainTargetBuildSetting(project, "DEVELOPMENT_TEAM") || DEVELOPMENT_TEAM_ID;
   const currentProjectVersion = buildNumber || getMainTargetBuildSetting(project, "CURRENT_PROJECT_VERSION");
   const marketingVersion = appVersion || getMainTargetBuildSetting(project, "MARKETING_VERSION");
   const targetDeviceFamily = getMainTargetBuildSetting(project, "TARGETED_DEVICE_FAMILY");
@@ -206,7 +211,7 @@ function ensureShareExtensionTarget(project, bundleIdentifier, appVersion, build
   setTargetBuildProperty(project, targetUuid, "SWIFT_VERSION", "5.0");
   setTargetBuildProperty(project, targetUuid, "VERSIONING_SYSTEM", "apple-generic");
 
-  if (developmentTeam) setTargetBuildProperty(project, targetUuid, "DEVELOPMENT_TEAM", developmentTeam);
+  setTargetBuildProperty(project, targetUuid, "DEVELOPMENT_TEAM", developmentTeam);
   if (currentProjectVersion) setTargetBuildProperty(project, targetUuid, "CURRENT_PROJECT_VERSION", currentProjectVersion);
   if (marketingVersion) setTargetBuildProperty(project, targetUuid, "MARKETING_VERSION", marketingVersion);
   if (targetDeviceFamily) setTargetBuildProperty(project, targetUuid, "TARGETED_DEVICE_FAMILY", targetDeviceFamily);

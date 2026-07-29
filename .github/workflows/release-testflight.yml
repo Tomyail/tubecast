@@ -1,0 +1,107 @@
+name: Release to TestFlight
+
+# 触发方式：
+#   - push 一个 vX.Y.Z tag（由本地 `pnpm release:version` 产出）→ 完整发布：
+#     构建 + 上传 + 分发 + 打 testflight tag + 草稿 Release 转正。
+#   - workflow_dispatch（手动）→ 热修重传路径：配合本地先跑一次
+#     `pnpm release:testflight-bump`（只 buildNumber+1，不打新 tag，避免和上面的
+#     tag-push 触发规则冲突/自我重触发），推送后手动点这个按钮重新构建上传分发，
+#     不做"转正 Release"这步（只属于正式版本 tag）。
+#
+# 私有 Gitea 根仓库的 mobile 子模块指针 bump 有意不放进这个 workflow——
+# 两边仓库保持独立，不给 CI 发跨仓库写权限的 token。仍然需要同步指针时，
+# 照旧手动跑 `pnpm release:publish`（本地 git 凭据，不经过任何新 token）。
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install JS dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Set up mise (Ruby toolchain)
+        uses: jdx/mise-action@v2
+
+      - name: Install fastlane (bundler)
+        run: bundle install
+
+      - name: Set up Expo / EAS CLI
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: EAS Build (iOS)
+        run: eas build --platform ios --profile production --non-interactive --wait --json > eas-build-result.json
+
+      - name: Download IPA artifact
+        run: |
+          mkdir -p build/ios
+          IPA_URL=$(jq -r '.[0].artifacts.buildUrl' eas-build-result.json)
+          if [ -z "$IPA_URL" ] || [ "$IPA_URL" = "null" ]; then
+            echo "EAS build did not produce an artifact URL:"
+            cat eas-build-result.json
+            exit 1
+          fi
+          curl -fL "$IPA_URL" -o build/ios/TubeCast.ipa
+
+      - name: Write App Store Connect API key
+        run: echo "${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}" > "$RUNNER_TEMP/asc-api-key.p8"
+
+      - name: Generate raw TestFlight changelog
+        run: node scripts/release.mjs testflight-changelog
+
+      - name: Generate bilingual TestFlight notes
+        run: node scripts/generate-testflight-notes.mjs
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_BASE_URL: https://open.bigmodel.cn/api/anthropic
+          RELEASE_NOTES_MODEL_ID: glm-5.2
+
+      - name: Upload build to TestFlight
+        run: mise exec -- bundle exec fastlane testflight_upload
+        env:
+          IPA_PATH: build/ios/TubeCast.ipa
+          APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
+          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_KEY_FILEPATH: ${{ runner.temp }}/asc-api-key.p8
+
+      - name: Distribute build to TestFlight testers
+        run: mise exec -- bundle exec fastlane testflight_distribute
+        env:
+          APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
+          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_KEY_FILEPATH: ${{ runner.temp }}/asc-api-key.p8
+
+      - name: Tag TestFlight build + update GitHub prerelease notes
+        run: node scripts/release.mjs testflight-tag
+
+      # 只属于"正式版本 tag"发布路径，热修 workflow_dispatch 不做。
+      - name: Promote draft GitHub Release
+        if: ${{ github.event_name == 'push' }}
+        run: gh release edit "${{ github.ref_name }}" -R Tomyail/tubecast --draft=false

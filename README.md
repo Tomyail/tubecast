@@ -103,37 +103,33 @@ If you distribute a fork, replace `expo.ios.bundleIdentifier` and `expo.android.
 
 ## Releases
 
-Releases are cut locally — no CI builds the binary. The flow:
+Releasing to TestFlight is CI-driven. The only manual step is cutting the version locally; everything from building the IPA to distributing it to testers happens in GitHub Actions.
 
-1. `pnpm release:version` — bumps the marketing version + `ios.buildNumber`, updates `CHANGELOG.md`, tags `vX`, pushes the tag, and opens a **draft** GitHub Release.
-2. `pnpm release:archive` → Archive in Xcode (`Product → Archive`) → upload to App Store Connect via Transporter → wait for processing → add the build to the TestFlight group by hand.
-3. `pnpm release:publish` — flips the GitHub Release from draft to published and bumps the root repo's submodule pointer.
+1. `pnpm release:version` — bumps the marketing version + `ios.buildNumber`, updates `CHANGELOG.md`, tags `vX.Y.Z`, pushes the tag, and opens a **draft** GitHub Release.
+2. Pushing the `vX.Y.Z` tag triggers `.github/workflows/release-testflight.yml`, which: builds the IPA with EAS Build (cloud macOS, EAS-managed signing), uploads it to TestFlight via fastlane, generates bilingual (EN/中文) "What to Test" notes with an LLM call, distributes the build to the `Public Beta Testers` group, tags `testflight/<version>-<build>` with a prerelease GitHub changelog, and flips the draft Release to published — no manual clicks.
+3. The private root repo's `mobile` submodule pointer is intentionally **not** bumped by CI (the two repos stay independent; no cross-repo write token is granted). Run `pnpm release:publish` locally whenever you want to sync it, same as before.
 
-For same-version TestFlight rebuilds, use the split TestFlight flow:
-
-```bash
-pnpm release:testflight-bump
-pnpm release:testflight-prepare
-pnpm release:testflight-build
-pnpm release:testflight-upload
-pnpm release:testflight-changelog
-pnpm release:testflight-tag
-```
-
-`release:testflight-prepare` runs `expo prebuild --platform ios` without
-`--clean` by default, preserving the existing native iOS project and share
-extension. Use `EXPO_PREBUILD_CLEAN=1 pnpm release:testflight-prepare` only
-when you intentionally want a clean native regeneration.
-
-`release:testflight-upload` uploads the IPA only; it does not distribute to tester groups. To distribute an already-uploaded build to the default `Public Beta Testers` external group, pass a tester-facing changelog explicitly:
+For a same-version hotfix rebuild (buildNumber bump only, no new marketing version/tag), push a plain commit and trigger the workflow manually:
 
 ```bash
-TESTFLIGHT_CHANGELOG="Test discovery, playlist playback, sharing, and settings." pnpm release:testflight-distribute
+pnpm release:testflight-bump   # buildNumber+1, commit + push (no tag)
 ```
 
-External tester notifications are off by default. Add `TESTFLIGHT_NOTIFY=1` when you intentionally want TestFlight to notify testers.
+Then run the `Release to TestFlight` workflow via `workflow_dispatch` (GitHub UI or `gh workflow run release-testflight.yml`). The hotfix path runs the same build/upload/distribute/tag steps but skips promoting a Release (that only applies to an actual version-tag release).
 
-Versioning follows [conventional commits](https://www.conventionalcommits.org/) via `commit-and-tag-version` (`feat:` → minor, `fix:` → patch, `BREAKING CHANGE` → major). TestFlight "What's New" is bilingual: English from `CHANGELOG.md`, Chinese written by hand. The first release bootstraps a baseline `v1.0.0` tag from existing history; see `plans/007-mobile-release-flow.md` for the full design.
+Versioning follows [conventional commits](https://www.conventionalcommits.org/) via `commit-and-tag-version` (`feat:` → minor, `fix:` → patch, `BREAKING CHANGE` → major). The first release bootstraps a baseline `v1.0.0` tag from existing history. See `plans/007-mobile-release-flow.md` for the original local-only design and `plans/009-mobile-eas-ci-release.md` for the CI/EAS automation that superseded its build/upload/distribution steps.
+
+### One-time CI setup
+
+Before the workflow can run, someone with the right account access needs to do this once:
+
+- `eas login` / `eas init` (writes `expo.extra.eas.projectId` into `app.json`) and `eas credentials` for iOS, so EAS manages the Apple signing certificate/provisioning profile itself — no `fastlane match` needed. Done — see `expo.extra.eas.build.experimental.ios.appExtensions` in `app.json`, which is required for `eas credentials` to also provision the `TubeCastShareExtension` target (EAS doesn't discover hand-added extension targets on its own).
+- Mint an Expo robot/service-account token and store it as the `EXPO_TOKEN` GitHub Actions secret.
+- Store the existing App Store Connect API key as `APP_STORE_CONNECT_API_KEY_KEY_ID`, `APP_STORE_CONNECT_API_KEY_ISSUER_ID`, and the `.p8` file's contents as `APP_STORE_CONNECT_API_KEY_P8`.
+- `ANTHROPIC_API_KEY` is reused from the existing OpenWiki workflow secret.
+- `eas build --platform ios --profile production` has been dry-run by hand and produces an installable IPA. Getting there required: adding a standalone `mobile/pnpm-lock.yaml` (this repo never had its own — the lockfile only ever existed in the private monorepo's workspace), pinning `react-native-reanimated` to the exact version already in use (an unpinned range resolved to a newer, incompatible `react-native-worklets` requirement without lockfile history), adding `@expo/config-plugins` as an explicit devDependency (`withShareExtension.cjs` needs it directly, previously only available via workspace hoisting), and fixing `withShareExtension.cjs` to hardcode the Apple Team ID on the extension target instead of reading it back from the main target (EAS's own `expo prebuild` never runs `release.mjs`'s `syncNativeIosVersion()`, so neither target had it yet at plugin-run time).
+
+The local `fastlane testflight_build`/`release:archive` (Xcode Archive) path still works as a manual fallback if EAS is ever unavailable.
 
 ### App Store metadata automation
 

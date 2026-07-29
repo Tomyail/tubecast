@@ -2,6 +2,7 @@
   "expo": {
     "name": "TubeCast",
     "slug": "tubecast",
+    "owner": "tomyail",
     "scheme": "tubecast",
     "version": "1.1.0",
     "orientation": "portrait",
@@ -51,6 +52,25 @@
       "expo-secure-store",
       "./plugins/withShareExtension.cjs"
     ],
-    "extra": {}
+    "extra": {
+      "eas": {
+        "projectId": "7be65898-e040-4536-a2c8-514bcd251567",
+        "build": {
+          "experimental": {
+            "ios": {
+              "appExtensions": [
+                {
+                  "targetName": "TubeCastShareExtension",
+                  "bundleIdentifier": "com.tomyail.tubecast.ShareExtension",
+                  "entitlements": {
+                    "com.apple.security.application-groups": ["group.com.tomyail.tubecast"]
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
   }
 }
