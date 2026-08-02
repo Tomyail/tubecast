@@ -1,14 +1,23 @@
-TubeCast turns video content into a personal, audio-first listening library. Convert the learning, interview, podcast, and lecture videos you already watch into audio, and listen on the go — during your commute, workout, or chores. Follow video channels and catch new uploads like podcast episodes.
+Make long-form video easier to fit into your day.
 
-[Treat videos like podcasts]
-Follow your favorite video channels and see new uploads in your feed, podcast-style. Turn long videos you never have time to watch into audio you can actually listen to, so fragmented time keeps adding up.
+TubeCast turns supported video links into a personal, audio-first listening library. Follow channels, find recent uploads in a podcast-style feed, and choose what you want to hear next.
 
-[One tap to audio]
-Paste a video link and it's converted to audio and added to your library. Background playback, lock-screen controls, and a mini player mean your phone stays in your pocket while you listen.
+LISTEN YOUR WAY
+• Play in the background with Lock Screen controls
+• Pick up where you left off with saved playback progress
+• Use the mini player to control listening as you browse
 
-[Your personal listening library]
-Organize what you want to hear with playlists, track playback progress and listened status, and cache audio for offline listening.
+BUILD A PERSONAL LIBRARY
+• Add supported links and save the resulting audio
+• Reorder your listening queue and mark items played or unplayed
+• Cache tracks for offline listening
+• Share an audio file or a link to a listening moment
 
-Built for people who treat learning courses, tech interviews, and knowledge videos as everyday listening.
+FOLLOW NEW UPLOADS
+• Add supported channels
+• Browse recent uploads in a podcast-style feed
+• Save interesting items to listen to later
 
-Please only add content that you have the right to access and manage. Privacy Policy, Terms, and Support are available in Settings.
+TubeCast is designed for lectures, interviews, courses, and other long-form content you have permission to access and manage.
+
+Only add content you are authorized to use. Privacy Policy, Terms, and Support are available in Settings.

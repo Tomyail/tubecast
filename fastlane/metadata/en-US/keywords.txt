@@ -1,1 +1,1 @@
-youtube,mp3,audio,video,offline,podcast,study,learning,commute,lecture,playlist,player,notes,library
+podcast,playlist,lecture,learning,study,commute,interview,channel,library,education,courses,queue

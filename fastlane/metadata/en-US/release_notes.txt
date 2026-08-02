@@ -1,7 +1,3 @@
-This update makes Home better:
+Improved channel management:
 
-• Refreshed Home feed: bigger cards and a cleaner, softer look make it easier to find something worth listening to
-• Sharing fix: resolves an issue with the share sheet after creating a clip
-• More reliable recommendations
-
-Turn the videos you keep meaning to watch into audio for your commute or workout.
+• Fixed an issue where the full list could not be reached when managing many subscribed channels.
