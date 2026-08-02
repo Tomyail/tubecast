@@ -9,6 +9,8 @@ import { screenshotDemoMode } from "../features/demoMode/config";
 export type AppLanguage = "system" | "en" | "zh-CN";
 export type ResolvedLanguage = Exclude<AppLanguage, "system">;
 const LANGUAGE_KEY = "settings_language";
+const SCREENSHOT_LANGUAGE: ResolvedLanguage =
+  process.env.EXPO_PUBLIC_SCREENSHOT_DEMO_LANGUAGE === "zh-CN" ? "zh-CN" : "en";
 
 export function resolveLanguage(preference: AppLanguage, systemTag?: string): ResolvedLanguage {
   if (preference === "en" || preference === "zh-CN") return preference;
@@ -30,11 +32,11 @@ const I18nContext = createContext<I18nContextValue | null>(null);
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [preference, setPreference] = useState<AppLanguage>("system");
   const [ready, setReady] = useState(false);
-  const language = screenshotDemoMode ? "en" : resolveLanguage(preference);
+  const language = screenshotDemoMode ? SCREENSHOT_LANGUAGE : resolveLanguage(preference);
 
   useEffect(() => {
     if (screenshotDemoMode) {
-      void i18n.changeLanguage("en").finally(() => setReady(true));
+      void i18n.changeLanguage(SCREENSHOT_LANGUAGE).finally(() => setReady(true));
       return;
     }
 

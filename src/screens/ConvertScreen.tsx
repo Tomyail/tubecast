@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation, useRoute, type RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import * as Clipboard from "expo-clipboard";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Alert, StyleSheet, Text, TextInput, View } from "react-native";
@@ -18,6 +19,9 @@ import { useRemoteConfig } from "../features/remoteConfig/context";
 import { useTranslation } from "../i18n";
 import { useAppTheme } from "../app/theme";
 import { isSupportedYouTubeChannelInput } from "../features/youtubeFeed/input";
+import { screenshotDemoMode } from "../features/demoMode/config";
+import { getDemoTracks } from "../features/demoMode/data";
+import { toExpoImageSource } from "../shared/imageSource";
 
 const PENDING_JOB_KEY = "pending_job_id";
 
@@ -146,6 +150,8 @@ export default function ConvertScreen() {
         {submit.isPending ? <ActivityIndicator color={colors.tintText} /> : <><Ionicons name="arrow-down" size={20} color={colors.tintText} /><Text style={[styles.submitText, { color: colors.tintText }]}>{t("home.convert")}</Text></>}
       </Touchable>
 
+      {screenshotDemoMode && url.trim() ? <ScreenshotConversionProof /> : null}
+
       {cacheState === "error" && job?.status === "ready" && (
         <StatusCard error title={t("home.cacheFailed")} icon="alert-circle-outline">
           <Touchable accessibilityRole="button" style={styles.retryButton} onPress={retryCache}><Text style={[styles.retryText, { color: colors.tint }]}>{t("home.retryCache")}</Text></Touchable>
@@ -184,11 +190,44 @@ export default function ConvertScreen() {
   );
 }
 
+function ScreenshotConversionProof() {
+  const { t } = useTranslation();
+  const { colors } = useAppTheme();
+  const demoTrack = getDemoTracks()[0];
+
+  return (
+    <View style={[styles.demoProof, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+      <View style={styles.demoSteps}>
+        <View style={styles.demoStep}>
+          <View style={[styles.demoStepIcon, { backgroundColor: colors.elevatedSurface }]}><Ionicons name="link" size={18} color={colors.tint} /></View>
+          <Text style={[styles.demoStepText, { color: colors.secondaryText }]}>{t("home.linkAdded")}</Text>
+        </View>
+        <View style={[styles.demoConnector, { backgroundColor: colors.tint }]} />
+        <Ionicons name="chevron-forward" size={16} color={colors.tint} />
+        <View style={styles.demoStep}>
+          <View style={[styles.demoStepIcon, { backgroundColor: colors.elevatedSurface }]}><Ionicons name="headset" size={18} color={colors.tint} /></View>
+          <Text style={[styles.demoStepText, { color: colors.primaryText }]}>{t("home.audioReady")}</Text>
+        </View>
+      </View>
+      <View style={[styles.demoAudioCard, { backgroundColor: colors.elevatedSurface }]}>
+        <View style={[styles.demoCover, { backgroundColor: colors.tint }]}>
+          {demoTrack ? <Image source={toExpoImageSource(demoTrack.thumbnailUrl)} style={styles.demoCoverImage} contentFit="cover" transition={200} /> : <Ionicons name="musical-note" size={28} color={colors.tintText} />}
+        </View>
+        <View style={styles.demoAudioCopy}>
+          <Text numberOfLines={2} style={[styles.demoAudioTitle, { color: colors.primaryText }]}>{t("home.demoAudioTitle")}</Text>
+          <Text style={[styles.demoAudioMeta, { color: colors.secondaryText }]}>{t("home.demoAudioMeta")}</Text>
+        </View>
+        <View style={[styles.demoReadyBadge, { backgroundColor: colors.tint }]}><Ionicons name="checkmark" size={19} color={colors.tintText} /></View>
+      </View>
+    </View>
+  );
+}
+
 function StatusCard({ title, icon, error = false, children }: { title: string; icon: "alert-circle-outline" | "time-outline" | "checkmark-circle" | "cloud-download-outline"; error?: boolean; children?: React.ReactNode }) {
   const { colors } = useAppTheme();
   return <View style={[styles.statusCard, { backgroundColor: colors.surface, borderColor: colors.border }, error && { borderColor: colors.destructive }]}><View style={styles.statusHeading}><Ionicons name={icon} size={20} color={error ? colors.destructive : colors.tint} /><Text style={[styles.statusTitle, { color: error ? colors.destructive : colors.primaryText }]}>{title}</Text></View>{children}</View>;
 }
 
 const styles = StyleSheet.create({
-  formGroup: { gap: 8 }, fieldHeader: { alignItems: "center", flexDirection: "row", gap: 6 }, fieldLabel: { color: "#6f6256", fontSize: 13, fontWeight: "600" }, inputRow: { flexDirection: "row", gap: 8 }, input: { backgroundColor: "#fff9f3", borderColor: "#d8c9b8", borderRadius: 12, borderWidth: 1, flex: 1, fontSize: 16, minHeight: 48, paddingHorizontal: 14 }, pasteButton: { alignItems: "center", backgroundColor: "#eee6dc", borderRadius: 12, height: 48, justifyContent: "center", width: 48 }, submitButton: { alignItems: "center", backgroundColor: "#b65a36", borderRadius: 12, flexDirection: "row", gap: 8, justifyContent: "center", minHeight: 48 }, submitText: { color: "#fff9f3", fontSize: 16, fontWeight: "600" }, disabled: { opacity: 0.5 }, statusCard: { borderRadius: 16, borderWidth: 1, gap: 10, marginTop: 24, padding: 16 }, statusHeading: { alignItems: "center", flexDirection: "row", gap: 8 }, statusTitle: { color: "#241a12", flex: 1, fontSize: 17, fontWeight: "700" }, statusText: { color: "#6f6256", fontSize: 14, lineHeight: 20 }, retryButton: { alignSelf: "flex-start", paddingVertical: 6 }, retryText: { color: "#8b5c48", fontSize: 15, fontWeight: "600" }, playButton: { alignItems: "center", backgroundColor: "#b65a36", borderRadius: 10, flexDirection: "row", gap: 8, justifyContent: "center", minHeight: 44 }, playText: { color: "#fff9f3", fontSize: 16, fontWeight: "600" }, stepsRow: { alignItems: "center", flexDirection: "row", marginTop: 4 }, stepItem: { alignItems: "center", flex: 1, flexDirection: "row" }, stepDot: { alignItems: "center", borderRadius: 8, height: 16, justifyContent: "center", width: 16 }, stepLine: { flex: 1, height: 2 },
+  formGroup: { gap: 8 }, fieldHeader: { alignItems: "center", flexDirection: "row", gap: 6 }, fieldLabel: { color: "#6f6256", fontSize: 13, fontWeight: "600" }, inputRow: { flexDirection: "row", gap: 8 }, input: { backgroundColor: "#fff9f3", borderColor: "#d8c9b8", borderRadius: 12, borderWidth: 1, flex: 1, fontSize: 16, minHeight: 48, paddingHorizontal: 14 }, pasteButton: { alignItems: "center", backgroundColor: "#eee6dc", borderRadius: 12, height: 48, justifyContent: "center", width: 48 }, submitButton: { alignItems: "center", backgroundColor: "#b65a36", borderRadius: 12, flexDirection: "row", gap: 8, justifyContent: "center", minHeight: 48 }, submitText: { color: "#fff9f3", fontSize: 16, fontWeight: "600" }, disabled: { opacity: 0.5 }, demoProof: { borderRadius: 18, borderWidth: 1, gap: 16, marginTop: 10, padding: 16 }, demoSteps: { alignItems: "center", flexDirection: "row", justifyContent: "center" }, demoStep: { alignItems: "center", flex: 1, gap: 7 }, demoStepIcon: { alignItems: "center", borderRadius: 20, height: 40, justifyContent: "center", width: 40 }, demoStepText: { fontSize: 13, fontWeight: "700" }, demoConnector: { height: 2, marginLeft: 4, width: 24 }, demoAudioCard: { alignItems: "center", borderRadius: 14, flexDirection: "row", gap: 12, padding: 12 }, demoCover: { alignItems: "center", borderRadius: 12, height: 58, justifyContent: "center", overflow: "hidden", width: 58 }, demoCoverImage: { height: "100%", width: "100%" }, demoAudioCopy: { flex: 1, gap: 4 }, demoAudioTitle: { fontSize: 16, fontWeight: "700", lineHeight: 20 }, demoAudioMeta: { fontSize: 13 }, demoReadyBadge: { alignItems: "center", borderRadius: 18, height: 36, justifyContent: "center", width: 36 }, statusCard: { borderRadius: 16, borderWidth: 1, gap: 10, marginTop: 24, padding: 16 }, statusHeading: { alignItems: "center", flexDirection: "row", gap: 8 }, statusTitle: { color: "#241a12", flex: 1, fontSize: 17, fontWeight: "700" }, statusText: { color: "#6f6256", fontSize: 14, lineHeight: 20 }, retryButton: { alignSelf: "flex-start", paddingVertical: 6 }, retryText: { color: "#8b5c48", fontSize: 15, fontWeight: "600" }, playButton: { alignItems: "center", backgroundColor: "#b65a36", borderRadius: 10, flexDirection: "row", gap: 8, justifyContent: "center", minHeight: 44 }, playText: { color: "#fff9f3", fontSize: 16, fontWeight: "600" }, stepsRow: { alignItems: "center", flexDirection: "row", marginTop: 4 }, stepItem: { alignItems: "center", flex: 1, flexDirection: "row" }, stepDot: { alignItems: "center", borderRadius: 8, height: 16, justifyContent: "center", width: 16 }, stepLine: { flex: 1, height: 2 },
 });
