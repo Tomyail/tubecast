@@ -94,7 +94,7 @@ pnpm release:ios    # Local Release build for on-device testing (not the CI rele
 ## Version Status
 
 - **Current Version**: 1.2.0
-- **iOS Build Number**: 11
+- **iOS Build Number**: 13
 - **Distribution**: TestFlight beta only (no public Android release)
 
 ## Important Notes

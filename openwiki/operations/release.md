@@ -305,7 +305,11 @@ When preparing App Store screenshots, use screenshot demo mode to avoid exposing
 
 ```bash
 export EXPO_PUBLIC_SCREENSHOT_DEMO_MODE=1
+# Optional: render the in-app demo UI in Simplified Chinese instead of English
+export EXPO_PUBLIC_SCREENSHOT_DEMO_LANGUAGE=zh-CN
 ```
+
+In demo mode the app language is forced to `en` unless `EXPO_PUBLIC_SCREENSHOT_DEMO_LANGUAGE=zh-CN` is set (`src/i18n/index.tsx`). This drives only the in-app UI capture language, not the marketing copy overlaid by the screenshot generator.
 
 ### Run with Demo Mode
 
@@ -338,6 +342,20 @@ https://raw.githubusercontent.com/Tomyail/tubecast/main/mobile/screenshot-assets
 **⚠️ Important:** Do not move demo covers into `assets/`. Files in `assets/` are bundled into the IPA by Metro. Demo mode must use URL references to avoid bloating production builds.
 
 Source: `/screenshot-assets/README.md`, `/src/features/demoMode/config.ts`
+
+### Store Screenshot Generation
+
+App Store screenshots are composed into five-slide marketing stories for three locales (en-US, zh-Hans, zh-Hant), each slide pairing a localized headline with a single-line supporting message over a framed in-app UI capture. Slide five is a Lock Screen playback composition demonstrating background audio controls. The full set is 30 assets (five slides × three locales × iPhone/iPad).
+
+```bash
+swift scripts/generate-store-screenshots.swift
+```
+
+Run from the mobile directory. The generator reads the unframed UI captures in `screenshot-assets/store-ui/` and overlays localized marketing copy; keep those source captures unchanged so repeated runs do not nest an already-framed screenshot. Traditional Chinese intentionally reuses the English UI captures beneath localized copy until native `zh-Hant` simulator captures exist. fastlane infers the App Store screenshot slot from each output image's resolution; upload with `bundle exec fastlane ios screenshots_push`.
+
+The demo-mode-only conversion proof rendered in `ConvertScreen.tsx` (`ScreenshotConversionProof`, gated on `screenshotDemoMode && url.trim()`) supplies the in-app UI for these compositions and uses the `home.linkAdded`, `home.audioReady`, `home.demoAudioTitle`, and `home.demoAudioMeta` translation keys.
+
+Source: `scripts/generate-store-screenshots.swift`, `fastlane/screenshots/README.md`, `src/screens/ConvertScreen.tsx`
 
 ## Conventional Commits
 
