@@ -9,6 +9,13 @@ tags: [tubecast, expo, react-native, mobile-app, documentation]
 
 TubeCast is an independent Expo / React Native client for iOS and Android that turns YouTube channels into a personal, audio-first listening library.
 
+## How to Use This Wiki
+
+This wiki is an optional **just-in-time evidence index**, not required startup reading. It mirrors the framing declared in `/AGENTS.md`:
+
+- **Source code and tests are authoritative.** Treat the wiki as a navigation aid; when a page and the source disagree, the source wins. Items flagged as unknowns or review notes are verification gaps to confirm, not automatic requirements.
+- **Prefer the narrowest quiet validation** that proves the changed behavior, and preserve complete failure output. Each page lists focused validation commands where applicable — run those, not a broad repo-wide sweep, unless a specific boundary (public API, generated artifact, release) requires more.
+
 ## What This Wiki Covers
 
 This documentation covers the TubeCast mobile app implementation across:
