@@ -82,8 +82,8 @@ pnpm android        # Run on Android emulator
 Demo mode is used for App Store screenshots. It replaces real user data with fixed demo content:
 
 ```bash
-EXPO_PUBLIC_SCREENSHOT_DEMO_MODE=1 pnpm start
-EXPO_PUBLIC_SCREENSHOT_DEMO_MODE=1 pnpm run:ios
+pnpm start:screenshots   # Expo dev server (sets EXPO_PUBLIC_SCREENSHOT_DEMO_MODE=1)
+pnpm ios:screenshots     # Run on iOS simulator with demo mode
 ```
 
 Demo mode only activates when `EXPO_PUBLIC_SCREENSHOT_DEMO_MODE=1` is set. Normal development, TestFlight, and App Store builds use real user data.
