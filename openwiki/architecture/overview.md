@@ -1,175 +1,173 @@
 ---
 type: Architecture Overview
 title: Architecture Overview
-description: TubeCast Expo/React Native app architecture, including navigation, routing, state management, and core systems design.
-tags: [architecture, navigation, routing, state-management, expo]
+description: TubeCast Expo/React Native app architecture, including the provider stack, nested navigation and tubecast:// deep-link handling, React Query data layer, and AsyncStorage persistence model.
+tags: [architecture, navigation, providers, deep-linking, react-query, asyncstorage, expo]
+verified:
+  - by: openwiki/0.5.0
+    at: 2026-09-01T21:28:30.610Z
+sources:
+  - id: openwiki-source-793969521ec720f036ecaf07
+    resource: repo://app.json
+  - id: openwiki-source-f35da1e74133517d40998acd
+    resource: repo://App.tsx
+  - id: openwiki-source-5c3217a89037e6ba6bf7226c
+    resource: repo://index.ts
+  - id: openwiki-source-5b54a58d1b51cd490b0e7162
+    resource: repo://package.json
+  - id: openwiki-source-ad9a6a9aa0ff64c915ac5bbb
+    resource: repo://src/app/navigation/RootNavigator.tsx
+  - id: openwiki-source-c470db6d17f627b4291de651
+    resource: repo://src/app/providers/AppProviders.tsx
+  - id: openwiki-source-210da315630366c762609b2e
+    resource: repo://src/app/theme.tsx
+  - id: openwiki-source-64602d346c7f8791d46c2a9f
+    resource: repo://src/features/discover/hooks.ts
+  - id: openwiki-source-b5aec4b320e01b6025149936
+    resource: repo://src/features/player/context.tsx
+  - id: openwiki-source-e75f9fb0e074869a28cb19f0
+    resource: repo://src/features/playlist/storage.ts
+  - id: openwiki-source-1b12fa433711c80b6e12a479
+    resource: repo://src/features/remoteConfig/context.tsx
+  - id: openwiki-source-92058c19cfc40db567c4c326
+    resource: repo://src/features/shareLinks/links.ts
+  - id: openwiki-source-5dcaf85f5d0d9305302b8180
+    resource: repo://src/features/youtubeFeed/cache.ts
+  - id: openwiki-source-0153bfa9d1d97b64a1431674
+    resource: repo://src/screens/ConvertScreen.tsx
+  - id: openwiki-source-c457d3d1a63d5dc86f0da7ef
+    resource: repo://src/types.ts
+generated: { by: "openwiki/0.5.0", at: "2026-09-01T21:28:30.610Z" }
 ---
 
 # Architecture Overview
 
-TubeCast is an Expo / React Native app with a feature-based architecture. This document explains the app structure, navigation, and core systems.
+TubeCast is an Expo / React Native app (Expo SDK 56, React Native 0.85, React 19) that converts YouTube videos into listenable audio tracks. The app shell is intentionally tiny: `index.ts` registers the root component (and enables screen freezing via `react-native-screens` to save CPU on hidden tabs), `App.tsx` composes just two pieces — `AppProviders` wrapping `RootNavigator` — and everything else lives under `src/`.
 
-## App Structure
-
-### Technology Stack
-
-- **Expo SDK 50+** - Managed React Native with native modules
-- **React Navigation 7** - Bottom tabs and native stack navigation
-- **@tanstack/react-query 5** - Data fetching, caching, and state synchronization
-- **Expo Audio** - Background playback with lock-screen controls
-- **AsyncStorage** - Local data persistence (channels, playlists, jobs)
-- **Expo Localization** - i18n with English, Simplified Chinese, Traditional Chinese
-
-### Directory Layout
+## Directory Layout
 
 ```
 src/
 ├── app/                    # App-level configuration
-│   ├── navigation/         # React Navigation setup (RootNavigator, types)
-│   ├── providers/          # Context providers (AppProviders wrapper)
-│   ├── theme.tsx           # Theme definitions (light/dark)
-│   └── theme-preference.ts # Theme persistence
-├── components/             # Shared UI components
-│   ├── DiscoverCard.tsx    # Home/Discover card component
-│   ├── MiniPlayer.tsx      # Persistent mini-player above tab bar
-│   ├── EmptyState.tsx      # Empty state illustrations
-│   └── ...                 # Other reusable components
-├── features/               # Feature modules
-│   ├── audioExport/        # Audio file export and naming
-│   ├── demoMode/           # Screenshot demo mode (fixed data)
-│   ├── discover/            # Home screen discovery content
-│   ├── jobs/               # Conversion job tracking and progress
-│   ├── player/             # Audio playback state and controls
-│   ├── playlist/           # Local playlist/library storage
-│   ├── remoteConfig/       # Remote feature flags
-│   ├── settings/           # User settings persistence
-│   ├── shareLinks/         # tubecast:// URL parsing and moments
-│   └── youtubeFeed/        # YouTube feed, channels, conversions
-├── screens/                # Screen components (one per route)
-├── i18n/                   # Translations and formatters
-└── shared/                 # Shared utilities
-    ├── apiClient.ts        # Axios wrapper with timeout
-    ├── errors.ts           # Error types and factories
-    └── imageSource.ts     # Image source type helpers
+│   ├── navigation/         # RootNavigator + param list types
+│   ├── providers/          # AppProviders (single provider stack)
+│   ├── theme.tsx           # Theme tokens, light/dark palettes, AppThemeProvider
+│   └── theme-preference.ts # Theme preference resolution ("system" default)
+├── components/             # Shared UI components (MiniPlayer, DiscoverCard, ...)
+├── features/               # Feature modules (player, playlist, jobs, youtubeFeed,
+│                           # remoteConfig, settings, shareLinks, discover, ...)
+├── screens/                # One screen component per route
+├── i18n/                   # Translations and I18nProvider
+└── shared/                 # Utilities (apiClient, errors, imageSource)
 ```
+
+The split is feature-based: each `src/features/<name>/` module owns its own context, storage, and hooks (e.g. `features/player/context.tsx`, `features/playlist/storage.ts`). Screens are thin route targets; state and persistence live in features.
+
+## Provider Stack
+
+`AppProviders` (`src/app/providers/AppProviders.tsx`) defines the single, ordered provider stack mounted once in `App.tsx`:
+
+```text
+GestureHandlerRootView
+└── SafeAreaProvider
+    └── QueryClientProvider          (React Query, queries retry: 1)
+        └── AppThemeProvider         (colors, isDark; persists "settings_theme")
+            └── I18nProvider         (locale; persists language key)
+                └── RemoteConfigProvider  (feature flags fetched at mount)
+                    └── SettingsProvider
+                        └── PlaylistProvider
+                            └── PlayerProvider   (innermost; uses playlist)
+```
+
+Composition rules that matter:
+
+- **Ordering is semantic.** `PlayerProvider` is innermost because playback depends on playlist state; `RemoteConfigProvider` sits above `SettingsProvider` and the rest so feature flags are readable app-wide; theme and i18n must precede any consumer that renders localized/themed UI at mount.
+- **React Query client** is created once via `useState` with `defaultOptions.queries.retry = 1` — deliberately low because the shared API client has a 15s timeout and the default 3 retries would keep spinners up ~45s+ on hung requests.
+- **Remote config** (`features/remoteConfig/context.tsx`) starts from hardcoded defaults (`linkProcessingEnabled: true`, `audioExportEnabled: true`), then on mount tries `EXPO_PUBLIC_MOBILE_CONFIG_URL` and falls back to `${SERVER_URL}/api/mobile-config`, cache-busting each fetch; if every fetch fails the defaults remain in effect for the whole session.
+- **Theme** (`src/app/theme.tsx`) exposes `{ colors, isDark, preference, setTheme }`. The preference defaults optimistically to `"system"` (avoids a startup white flash), is corrected after an AsyncStorage read of key `settings_theme`, and `isDark` tracks `useColorScheme()` live while in system mode. Static design tokens (`typography`, `spacing`, `radii`) are exported as plain constants, not context values.
 
 ## Navigation Structure
 
-The app uses a nested navigator structure:
+`RootNavigator` (`src/app/navigation/RootNavigator.tsx`) builds a native stack whose first screen is a bottom-tab navigator; each tab wraps its screen in a one-screen native stack (giving every tab its own stack root for future depth):
 
-```
-RootStackNavigator
-├── HomeStack (Tab)
-│   └── HomeScreen
-├── FeedStack (Tab)
-│   └── FeedScreen
-├── PlaylistStack (Tab)
-│   └── PlaylistScreen
-├── SettingsStack (Tab)
-│   └── SettingsScreen
-├── ConvertScreen           # Modal for pasting YouTube URLs
-├── PlayerScreen            # Full-screen audio player (modal)
-├── AddChannelScreen        # Add channel by URL/handle
-├── ManageChannelsScreen   # Manage subscriptions
-└── PublisherPreviewSheet   # Channel preview modal
+```text
+RootStackNavigator (native stack)
+├── Tabs (bottom tabs, header hidden)
+│   ├── Home      → HomeStack.HomeRoot       → HomeScreen
+│   ├── Feed      → FeedStack.FeedRoot       → FeedScreen
+│   ├── Playlist  → PlaylistStack.PlaylistRoot → PlaylistScreen
+│   └── Settings  → SettingsStack.SettingsRoot → SettingsScreen
+│   └── MiniPlayer rendered above the tab bar (inside Tabs)
+├── Player            modal, slide_from_bottom, no header
+├── AddChannel        formSheet
+├── ManageChannels    modal
+├── Convert           formSheet
+└── PublisherPreview  formSheet
 ```
 
-### Key Navigation Flows
+Route param types live in `src/app/navigation/types.ts` (`RootStackParamList`, `RootTabParamList`). The `NavigationContainer` theme is derived from the app theme colors each render, and `onReady` flips a `navigationReady` flag that gates deep-link processing. `MiniPlayer` is not a route — it is rendered by `Tabs` with the computed tab-bar height and navigates to `Player` on tap.
 
-- **Deep Linking**: Handles `tubecast://listen/<trackId>` and `tubecast://open?url=...` URLs
-- **Mini Player**: Tapping the mini player (above tab bar) opens `PlayerScreen`
-- **Channel Discovery**: Channel cards from Home/Feed open `PublisherPreviewSheet`
-- **Share Extension**: iOS share extension sends YouTube URLs via deep linking
+## Deep Linking (tubecast://)
 
-Source: `/src/app/navigation/RootNavigator.tsx`
+The app registers the `tubecast` URL scheme (`app.json`). Deep links are handled imperatively in `RootNavigator` — there is no linking config; `handleDeepLink` parses the URL and navigates via the navigation ref once the container is ready. On mount (after `onReady`) it processes `Linking.getInitialURL()` exactly once (guarded by a ref), then subscribes to `url` events for runtime links (e.g. from the iOS share extension).
 
-## State Management
+Two link formats are parsed by `features/shareLinks/links.ts`:
 
-### React Query for Data
+- `tubecast://listen?url=<sourceUrl>&t=<seconds>` — a "moment" with a start timestamp
+- `tubecast://open?url=<sourceUrl>` — a plain open/share link
 
-Most data fetching uses `@tanstack/react-query`:
+Resolution order (verified from source):
 
-- **YouTube feeds**: `useFeedQuery()`, `useChannelQuery()` in `/src/features/youtubeFeed/hooks.ts`
-- **Discover content**: `useDiscoverQuery()` in `/src/features/discover/hooks.ts`
-- **Conversion jobs**: `useJobsQuery()` in `/src/features/jobs/hooks.ts`
+```mermaid
+flowchart TD
+    L["tubecast URL received"] --> R{"NavigationContainer ready?"}
+    R -- no --> X["ignore"]
+    R -- yes --> O{"open link and input is a supported YouTube channel input?"}
+    O -- yes --> AC["navigate AddChannel with prefilled input"]
+    O -- no --> E{"matching track already in playlist?"}
+    E -- yes --> P["playTrack then navigate Player"]
+    E -- no --> F{"remoteConfig.linkProcessingEnabled?"}
+    F -- no --> EXT["Linking.openURL to the source URL (external browser)"]
+    F -- yes --> C["navigate Convert with sourceUrl (and startAtSeconds for listen links)"]
+```
 
-React Query provides:
-- Automatic background refetching
-- Request deduplication
-- Cache management
-- Optimistic updates
+*Deep-link resolution order in `RootNavigator.handleDeepLink`; listen links additionally pass `startAtSeconds` to both playback and the Convert screen.*
 
-### Context APIs
+Note the fallback invariant: when server-side link processing is disabled by remote config and no local track matches, the app refuses to convert and instead hands the URL to the OS browser.
 
-Feature-specific state is managed with React Context:
+## Data Layer
 
-- **Player**: `/src/features/player/context.tsx` - Playback state, current track, progress
-- **Playlist**: `/src/features/playlist/context.tsx` - Track list, filters, edits
-- **Settings**: `/src/features/settings/context.tsx` - Theme, language preferences
-- **Remote Config**: `/src/features/remoteConfig/context.tsx` - Feature flags from server
+### React Query
 
-### Local Storage
+Server data (YouTube feeds, channel queries, discover content, conversion job polling) flows through `@tanstack/react-query` v5 hooks in each feature's `hooks.ts` (e.g. `features/youtubeFeed/hooks.ts`, `features/jobs/hooks.ts`). React Query provides background refetching, request deduplication, and cache management; feature modules add AsyncStorage-backed persistence layers beneath the query cache so feeds/discover content survive cold starts (e.g. `youtubeFeed/cache.ts`, `discover/cache.ts` with a 24h freshness window).
 
-AsyncStorage persists user data:
+### Core model
 
-- **Subscribed channels**: `/src/features/youtubeFeed/storage.ts`
-- **Playlist tracks**: `/src/features/playlist/storage.ts`
-- **Conversion jobs**: `/src/features/youtubeFeed/submittedJobsStorage.ts`
-- **Settings**: `/src/features/settings/storage.ts`
+`src/types.ts` defines `Job` — the central conversion entity — with `status: "queued" | "processing" | "ready" | "failed"`, a parallel `summaryStatus` for AI summaries, audio location fields (`audioPath` / `audioHref` / `audioUrl` / `audioExpiresAt`), and an `idempotencyKey` for safe resubmission.
 
-## Theming
+## Persistence Model
 
-The app supports light, dark, and system appearance:
+AsyncStorage is the sole on-device key/value store; each feature owns namespaced keys:
 
-- **Theme definitions**: `/src/app/theme.tsx`
-- **Theme preference**: `/src/app/theme-preference.ts` (persists to AsyncStorage)
-- **Components**: Use `useAppTheme()` hook to access colors and typography
+| Data | Owner | Notes |
+|---|---|---|
+| Theme preference (`settings_theme`) | `app/theme.tsx` | `"system" \| "light" \| "dark"` |
+| Language | `i18n/index.tsx` | optimistic default, corrected after read |
+| Tracks & playlists | `features/playlist/storage.ts` | source of `getAllTracks()` used by deep links |
+| Channels | `features/youtubeFeed/storage.ts` | subscriptions |
+| Feed / discover caches | `features/*/cache.ts` | time-windowed cold-start restore |
+| Playback progress (`progress:<trackId>`) | `features/player/context.tsx` | written during playback, removed on completion |
+| Pending job id | `ConvertScreen` | survives a kill mid-conversion |
 
-## Screenshot Demo Mode
+`expo-secure-store` is available for secrets; conversion jobs themselves are created server-side and polled via React Query.
 
-Demo mode is activated via `EXPO_PUBLIC_SCREENSHOT_DEMO_MODE=1`:
+## Native Configuration Highlights
 
-- **Config**: `/src/features/demoMode/config.ts` - Environment variable check
-- **Data**: `/src/features/demoMode/data.ts` - Fixed demo tracks, channels, discover content
-- **Assets**: Referenced by URL from `screenshot-assets/demo-covers/` (not bundled)
+From `app.json`: background audio playback is enabled via the `expo-audio` plugin; Android declares media-playback foreground-service permissions; an iOS share extension (`TubeCastShareExtension`, app group `group.com.tomyail.tubecast`) is wired through `plugins/withShareExtension.cjs` and delivers YouTube URLs into the app via the `tubecast://` scheme.
 
-Demo mode replaces network/storage calls with fixed data, allowing consistent App Store screenshots without real user content.
+## Related Pages
 
-## Error Handling
-
-- **API client**: `/src/shared/apiClient.ts` - Axios wrapper with timeout and error factories
-- **Error types**: `/src/shared/errors.ts` - Custom error classes (NetworkError, TimeoutError, etc.)
-- **Job errors**: `/src/features/jobs/errors.ts` - Conversion-specific error types
-
-## Build and Native Projects
-
-### Expo Prebuild
-
-The app uses `expo prebuild` to generate native projects:
-
-- **iOS**: `/ios/` directory (Xcode project)
-- **Android**: `/android/` directory (Gradle project)
-
-Run `expo prebuild --platform ios` after:
-- Installing new Expo modules
-- Changing `app.json` config
-- Modifying plugins
-
-### Release Script
-
-`/scripts/release.mjs` orchestrates TestFlight builds:
-- Bumps `buildNumber` in `app.json`
-- Syncs version to native Xcode project
-- Generates changelog from commits
-- Manages TestFlight distribution
-
-See `/openwiki/operations/release.md` for detailed release workflows.
-
-## AI Agent Guidance
-
-This repository includes agent-specific conventions in `/AGENTS.md`:
-- Commit message format (Conventional Commits)
-- Type classification rules (feat, fix, build, docs, etc.)
-- File-aware commit type guard (prevents `feat` for toolchain changes)
-
-Read `/openwiki/development/conventions.md` for detailed development guidelines.
+- [/openwiki/development/conventions.md](/openwiki/development/conventions.md)
+- [/openwiki/features/conversion-pipeline.md](/openwiki/features/conversion-pipeline.md)
+- [/openwiki/features/overview.md](/openwiki/features/overview.md)
+- [/openwiki/features/playback-library.md](/openwiki/features/playback-library.md)

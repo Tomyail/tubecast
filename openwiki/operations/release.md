@@ -3,6 +3,23 @@ type: Operations Playbook
 title: Release Operations
 description: TubeCast release workflows, including the CI-driven TestFlight pipeline (EAS Build + Submit, fastlane distribute), tag-first trigger design, LLM-generated bilingual release notes, App Store metadata, and version management.
 tags: [operations, release, testflight, eas, github-actions, app-store, fastlane, versioning]
+verified:
+  - by: openwiki/0.5.0
+    at: 2026-09-01T21:28:30.610Z
+sources:
+  - id: openwiki-source-182be48333368e42e9b0f245
+    resource: repo://.github/workflows/release-testflight.yml
+  - id: openwiki-source-a99f25ce0c934f6ec523b633
+    resource: repo://.versionrc
+  - id: openwiki-source-a0bfbabfdb9ed958ffea8703
+    resource: repo://eas.json
+  - id: openwiki-source-7af97a29763d6f133e4b4851
+    resource: repo://fastlane/Fastfile
+  - id: openwiki-source-3ee71b00dc0356f536efb762
+    resource: repo://scripts/generate-testflight-notes.mjs
+  - id: openwiki-source-99267eb31f174540a6c513b1
+    resource: repo://scripts/release.mjs
+generated: { by: "openwiki/0.5.0", at: "2026-09-01T21:28:30.610Z" }
 ---
 
 # Release Operations
@@ -163,7 +180,7 @@ The fastlane `testflight_distribute` step is kept, because it is a pure App Stor
 
 ### LLM-generated "What to Test" notes
 
-`scripts/generate-testflight-notes.mjs` reads `.testflight-changelog.md` (the raw conventional-commit list produced by `release.mjs testflight-changelog`) and calls an LLM (Anthropic-compatible API, configured to `glm-5.2` via `RELEASE_NOTES_MODEL_ID` and `ANTHROPIC_BASE_URL`) to rewrite it into a bilingual EN/中文 "What to Test" summary. The output is written to `.testflight-whats-new`, which is the fallback file the `testflight_distribute` fastlane lane reads when `TESTFLIGHT_CHANGELOG` is unset.
+`scripts/generate-testflight-notes.mjs` reads `.testflight-changelog.md` (the raw conventional-commit list produced by `release.mjs testflight-changelog`) and calls an LLM (Anthropic-compatible API, configured to `glm-5.2` via `RELEASE_NOTES_MODEL_ID` and `ANTHROPIC_BASE_URL`) to rewrite it into a bilingual EN/中文 "What to Test" summary. The output is written to `.testflight-whats-new`, which is the fallback file the `testflight_distribute` fastlane lane reads when `TESTFLIGHT_CHANGELOG` is unset. The file is one-shot: the lane deletes it after reading, so each distribution needs a fresh one.
 
 Locally you can preview the output without writing the file:
 
@@ -178,7 +195,7 @@ Before the workflow can run end-to-end:
 - **EAS Build** — `eas login` / `eas init` writes `expo.extra.eas.projectId` into `app.json`; `eas credentials` for iOS → Build Credentials lets EAS manage the Apple signing certificate/provisioning profile (no `fastlane match` needed). The `expo.extra.eas.build.experimental.ios.appExtensions` entry in `app.json` is required so `eas credentials` also provisions the `TubeCastShareExtension` target (EAS does not discover hand-added extension targets on its own).
 - **EAS Submit** — `eas credentials` for iOS → App Store Connect: Manage your API Key, stored server-side by EAS (not a GitHub secret).
 - **GitHub secrets** — `EXPO_TOKEN` (Expo service-account token), `APP_STORE_CONNECT_API_KEY_KEY_ID` / `APP_STORE_CONNECT_API_KEY_ISSUER_ID` / `APP_STORE_CONNECT_API_KEY_P8` (used only by the fastlane distribute step), and `ANTHROPIC_API_KEY` (reused from the OpenWiki workflow).
-- **`eas.json`** — `submit.production.ios.ascAppId` (the app's numeric App Store Connect ID) is required by `eas submit`.
+- **`eas.json`** — `submit.production.ios.ascAppId` (the app's numeric App Store Connect ID, `6783834717`) is required by `eas submit`. Note `cli.appVersionSource: "local"` and `build.production.autoIncrement: false`: the version and buildNumber are owned by `app.json` and the local bump commands, never auto-incremented by EAS.
 
 Source: `.github/workflows/release-testflight.yml`, `eas.json`, `scripts/generate-testflight-notes.mjs`
 
@@ -408,3 +425,4 @@ See `/openwiki/development/conventions.md` for commit message rules and the `/AG
 - **Export options:** `/fastlane/ExportOptions.plist`
 - **Commit conventions:** `/AGENTS.md`
 - **Conventional Commits:** See `/openwiki/development/conventions.md`
+See `/openwiki/development/conventions.md`

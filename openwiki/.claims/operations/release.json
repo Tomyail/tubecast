@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:92b579919c204a18c8ed806ad80e0b35e340fcfff864d77b079c54cfed667ca4",
+  "claims": [
+    {
+      "id": "claim_c35d6de9e9894840bc044d305ce88c24",
+      "statement": "commit-and-tag-version (.versionrc, tag prefix v) bumps both package.json and app.json (expo.version synced via scripts/appjson-updater.cjs); package.json's version is the authoritative source for tag names.",
+      "evidence": [
+        {
+          "resource": "repo://.versionrc",
+          "version": "repo-file-v1:sha256:b5d0c145d9af7b191d761f667414c47b4252d80c06f5d51a96316a3f91bcd296"
+        },
+        {
+          "resource": "repo://scripts/release.mjs#L71-L75",
+          "version": "repo-lines-v1:sha256:40196b11cb609b5c0fc8a06203f824e9fd68f61a11d56666bfc27356560542f8:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZWIwYWQzN2U5Nzc3MDI1NmU3NGYxNTI0M2NmZDk5YjFiOTc1ZDNiZTkwMzAwMjNmNmMyYTJkMzAxM2RmOGQzMiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZmI1ODBlOTY0ZjgzYTQ3M2Y0M2Q0NDM4NDYyOTQ5ZDY4YjU2MDBmZGE3ODdmMTYzNzQ1ZDAwZGU4OWNiZjM2YSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYzM5MmNlMGNlYTg2OTJjYmEzNWIzZThhNjZhNzljY2Y1MjZjZDk3ODA2YTY1MmZiMTgwMDAyNjNiNWZiZWMwNCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_d5f370a05293432c9ecc4a1e0b87cdef",
+      "statement": "eas.json sets cli.appVersionSource to local and build.production.autoIncrement to false, so version and buildNumber are owned by app.json and local bump commands, and submit.production.ios.ascAppId (6783834717) is required by eas submit.",
+      "evidence": [
+        {
+          "resource": "repo://eas.json",
+          "version": "repo-file-v1:sha256:6a80e329c59a016dc6443b39e1ae46dd75a56b4af78c1c6a6349f3c3f0cb9d3d"
+        }
+      ]
+    },
+    {
+      "id": "claim_d8d928ada46d4afab1b0be60351a8e3d",
+      "statement": ".testflight-whats-new is a one-shot contract: the fastlane testflight_distribute lane reads it as fallback when TESTFLIGHT_CHANGELOG is unset and deletes it after reading.",
+      "evidence": [
+        {
+          "resource": "repo://fastlane/Fastfile#L92-L97",
+          "version": "repo-lines-v1:sha256:1bfb5201611015039cfcc1016b16443650b34745b2fb006298e7106094a368a9:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjE0YmQ0ZjFjNjljYWRkMmQ3YTk2YjM4NThmNGE4ZTU1NGFiMGIyMjY0NGJhZWI2NTVmMmEzMzg5ZWQ5ZmMyNyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYjg5ODY4MGE2YWRlZGE2YmQ1MjExNTAwMjRlYTg4OWNiYjdmMzExNzM4NmJkMWUzNWQ4MmY4M2RlNGYwYzQxOSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiM2VjOWE0M2ZlNjU0ZWIyOTI1OWNhZDY5M2I4MTUzZjg3ODM3YjdjOTkwMGE4Yzg4ZWViNTg1NzI4YjcxMjg5YiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNGNhYmEyOWM0Y2Y2YTBlMjBjOTZkZDg4NjBjMDg0MzYzM2M2ZDA0NDE2YjUyZDNhNWY2YWMwNmJlY2I5NjQ0ZCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_a87e8e332eac4e749d5ee3c1e091cb77",
+      "statement": "CI uploads the IPA with eas submit instead of fastlane upload_to_testflight because pilot shells out to Apple's Transporter, which is broken on Linux runners (fastlane/fastlane#16996); eas submit uploads through EAS's own infrastructure and its ASC API key is stored server-side via eas credentials, not as a GitHub secret.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/release-testflight.yml#L66-L75",
+          "version": "repo-lines-v1:sha256:79f65ee07fd49ac938dd90eff31fe424c5125680a4f96da95561184daac75b3e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJhY2EyNjIxYzc0MGMzYjA1OGU0MWQ0NDhiMzdmMmFiYzQ4MTE4MWE1ZTlmNzJmNWE3NGE4MDVjYTU4ZmQwNzciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRmOWYxMWRiYjIxYzRkYzJkMzMyOGFjNzQ1ODVlNjQ3MzdkZjk4ODViNjY3Y2RlN2RiOGY5ZWQzMDgyZmU5NWYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM0ZTI3NGQ3MjRjYzVkZDE4Yzg5ZGRmMmFiNWFlMmJiOTc3NmZmNmE3ZjU5YjU3ODA0NzBlZDJiZmVjYjRmN2UiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjljMzg3ZWI5MzRmYzQ2Zjk1NGU4NTlmZmU5YjkxYzI1NjE0OTViOTIwMzRlOWM1M2JlNjI5NDRjMTA5ZDRkYzEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_6ed3e65a640244a38f87198f177bbeaf",
+      "statement": "The TestFlight workflow uses a tag-first design: it triggers on push of v*.*.* tags (from release:version) and testflight/* tags (from release:testflight-bump) plus workflow_dispatch, and never creates a tag matching either pattern itself to avoid self-retriggering; the testflight-tag step only fills GitHub prerelease notes when the tag already exists and draft Release promotion (gh release edit --draft=false) runs only for v-tags.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/release-testflight.yml#L100-L107",
+          "version": "repo-lines-v1:sha256:cf196a84700b4abe87814e2e2827261115aa952ee886ba3eda417a01d3e167aa:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYWQxZmNjMDA0Nzc5ZDRiZGY3NDkwOTJmNzk4M2UzMjM0YTU4NWRlZGVkMmQwNDY1NTZjOTQ3OTk5ODNkYTM3ZiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMWQ5YzZkNWQ2ZjdkZjlkNTNjNjA4ZDU0ZjE2YmFhOThkMzAwNzhkMzM3NWU2MGRlMWMzNDNmNmM2Y2Q4Nzc5YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMTZlZGZiNjRiN2VjZDJlMjRhMzEyZjIwY2E0NGRiOGM3NTE4MDU5YjVmNDVlYzA4YmFmMDVmNGY5YTI4MGNmYyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        },
+        {
+          "resource": "repo://.github/workflows/release-testflight.yml#L17-L22",
+          "version": "repo-lines-v1:sha256:fc90ee1a0becffce15fa36858a4c06f1b59e5615b1947e20551c8e8a9bafca0d:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZTk2ZGM0ODE0OWY1YTgzZDFlZDZkYmIzOWJiYzdlMmI5MDJhYTNkMzRkNmJkNWFlNGIyOTFiNjhkZjBjYTc5YSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiM2YyZmE3M2YwNzA0ODlkOTcyNGEwMjlkZmI1MDJhYTA4ODUwN2QwODU3OWJiYmNjOTRlZDkzNWMxYTA1MzMxNiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiM2U0YjE3ZDkyMmRmMDRhODE1MTFiNTZiNjgxNDIxYzQ5ZmFmOWVlMTczNmYwMDMyYjliZTJmNGE2ZTUzNjJlMCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMzk0NjJkNWYyYzIwN2U2YjRmODI4NDNkOTE1NGZmMGJiYWQwMzQzOTI0YjJjM2M0YmFiZDk5Yjg3Y2NkNGI4MiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_592f55b071224b02bebcd6d00a339c09",
+      "statement": "release:testflight-bump increments ios.buildNumber in app.json (no marketing version change), commits it, and creates and pushes the testflight/<version>-<build> tag which auto-triggers the CI workflow for build/submit/changelog/notes/distribute.",
+      "evidence": [
+        {
+          "resource": "repo://scripts/release.mjs#L303-L313",
+          "version": "repo-lines-v1:sha256:60fdd256d08fa97a84b511cd9357980b898580ea863c4e54b341b1628cdf5a03:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA3MjY3MTZiMDZiMTJmM2M0MmNkYTU5MDE3ZTZjYmY3Njk2Nzk4M2UxMjg2MTdlODE0YzQ4NzI2ZTBkZTg0NmEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIxMmE1NDVjZjExYzI0NjY0MWYzYzI4ZGFjZjIwMGJhMThmNTBhY2JkZDA2ZGQ4NDA0NjkzM2I1ZjRkOTk3NGMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFiM2E0OTVlMDIyMTQwYTVmNzI1MDNmNzI0ZGE5OTQ2MmJkNTY3NWUxOGMzODRlYzY2OTkyM2JkZTM1YzQ2ZjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU2YjlhZThlZTY5NmE5NDgyZGM3NjY4N2E2ODdmMTk2MDZmNGE0MjY3NTU2OTU4YmNlODZkNzY4YmI3MzQ2NWUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_6d849932933e4b5db08acda5dbee6e4b",
+      "statement": "scripts/generate-testflight-notes.mjs reads .testflight-changelog.md (raw conventional-commit list from release.mjs testflight-changelog) and calls an Anthropic-compatible API (model glm-5.2 via RELEASE_NOTES_MODEL_ID, base URL via ANTHROPIC_BASE_URL) to produce bilingual EN/中文 What to Test JSON written to .testflight-whats-new; it errors if the input file or ANTHROPIC_API_KEY is missing or the LLM response lacks en/zh fields.",
+      "evidence": [
+        {
+          "resource": "repo://scripts/generate-testflight-notes.mjs#L18-L79",
+          "version": "repo-lines-v1:sha256:9d0164889f1d3cbb54ed658efcd9fd32abaf827b1220df6610354dbb10738af1:eyJzZWxlY3RlZExpbmVDb3VudCI6NjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZlNTFhYzBmOGIxMjE1OGU4ZjY2MmQ1NjE1MTBlOGJhNTEyNWZhMDMyMTBkMjA1M2Y2YzEwNDIwNzU3NmNiYjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgwNGZhOTRmZjQ3OTU2ZDNhZmMxMDdlMWU4MDY5NDI0Zjg1ZDM0Mzg2NWE0YTI0ZmQ0NjE2YmNiN2M1OTU1YjciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjcyODJlYmJlMTVlMTU0ZTExYzllN2UzZTkzMjJmZTQ3NTAyMmFjNzQ4YjZmZjVhNjQ3ZGRlY2VlMjIxYmFjMjQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFmZTc4NDBjZDBkYTUyZGM3NDVhN2Y2YWM3YWE3MDk3ZDI5NGRmZjgzM2ZlNWI4NWI4MTMxYzhhYWU0OGUyMDMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_02fb8003fcc747d18ae7e171a140b947",
+      "statement": "The fastlane testflight_distribute lane distributes an already-uploaded build (upload_to_testflight with distribute_only: true) to tester groups defaulting to Public Beta Testers, using the ASC API key env vars; external distribution defaults to enabled while tester notification defaults to disabled.",
+      "evidence": [
+        {
+          "resource": "repo://fastlane/Fastfile#L92-L112",
+          "version": "repo-lines-v1:sha256:3b11566b34c6c423e896cdb31a801787b00b12410c792fa7a0638749416c3092:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYxNGJkNGYxYzY5Y2FkZDJkN2E5NmIzODU4ZjRhOGU1NTRhYjBiMjI2NDRiYWViNjU1ZjJhMzM4OWVkOWZjMjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc3OTgxMWM1ZmJlMjVjM2Q0ZTVmM2QxZmQzNWFiOWRhNmJjZjhhNjhjNWVkZjlkNmJhOTdmNjg2ODZjMzk2ODAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNlYzlhNDNmZTY1NGViMjkyNTljYWQ2OTNiODE1M2Y4NzgzN2I3Yzk5MDBhOGM4OGVlYjU4NTcyOGI3MTI4OWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU5YWE5MzhkZDNkOWU2M2I0YmRiZDMxY2VlMTNlNTg0OTNhYmVhZjE4NzE1YjE4ZjUxY2Q4MGYwYjdjMDRlNmYifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.5.0",
+    "at": "2026-09-01T21:28:30.610Z"
+  }
+}

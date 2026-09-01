@@ -1,0 +1,200 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:7da192f2da74093b3a1dd77ffc7934526da3d01c6e8115e93a358117557a0565",
+  "claims": [
+    {
+      "id": "claim_72750c6695b944c0bf62a0e45b296648",
+      "statement": "Jobs API client submits via POST /api/jobs with sourceUrl, polls GET /api/jobs/:id for a JobResponse with status queued/processing/ready/failed/expired and a finer progressPhase (queued/starting/downloading/transcoding/uploading/ready), and fetches a presigned download URL from GET /api/jobs/:id/download.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/jobs/api.ts#L49-L63",
+          "version": "repo-lines-v1:sha256:859bd19427abf9632c5b14d0462273944e5100caa63794ac7604d4a5f4d57a13:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY0ODRmMTU3OTcwZGU5ZjZhNzRlOTExY2Y2ZGRhMTJkNjhmYjFhNGY2OWNlNmNhNWE5M2E4YWFkMzNmNzA2MjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU4OTI5YTBkM2M1MjkzM2FiZTM2NWE5NjA1Y2ZkMDQ1OTg1MWVjNzdmNjM2MzZhOGJkYjEyZGYxODRlYjIwNGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_6d9ffc6674d849c5b2102e04a361e395",
+      "statement": "useJobStatus is a React Query keyed by [\"job\", jobId] that refetches every 3 seconds and stops polling (refetchInterval false) once status is ready, failed, or expired.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/jobs/hooks.ts#L14-L27",
+          "version": "repo-lines-v1:sha256:bd1b3cde6ed96e65ed537f62399234449a2f8722ab449a79bcc0c7e394cf1cff:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNkMmM2MmIyOTkwNWMxYTMyYTQ4NDEwYmJkODQ1NTlmYTIyZjFjZTFiMDM4ZjA4YjcwOWRmOTA3ZWE4ZGQ2MDYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJkMGYyZDNhM2FhZGEyNzU4NjQ1NzhkMGE0MzkxNTYzOGQ1NDNmZWNhMmM5NDg1OGRiOTQxMjExZTg2Y2VmMmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUxMWJlNzY4YWM3YjdkOGYxNjk4ZTYxMTZiOGVkOWJiYzVjMTBjOWIxMDZjYWE2NTgwNWUyZjJlMTViYjZhOTkifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5577ecdb81414a748016144013493842",
+      "statement": "The shared axios apiClient has a 15s timeout and maps HTTP 410 to AudioExpiredError, 429 to RateLimitError (with Retry-After parsed, default 60), other non-2xx to ApiError, and network/timeout failures to plain Error.",
+      "evidence": [
+        {
+          "resource": "repo://src/shared/apiClient.ts#L8-L57",
+          "version": "repo-lines-v1:sha256:3f3a7f9928b155be6192e8dc80bb3ad8e0a0fac1e40813c141a893359b44a9af:eyJzZWxlY3RlZExpbmVDb3VudCI6NTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY0YTgxODI1YThhMmI1MzI3ODE3Nzg4NjE2OTA4MWIyYzA4MTY2M2EwNDhhMTU3ZjljY2Y1OGMwNzIyYzFjN2MiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI3ZTU3ODhkNWQ5ZDczZDI0YTgxZGJjMGE1YTc0YmZhODJjOWMzYjNhZjk5ZTUyYWY3OTZlOTBiNDY4YThhM2QiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhiYjExZWNiYjU3MTBlMmQ4ZGExYzViYjliNTA4NDgyNTMyMDg4OTdjZDQxN2NkYTBmMGM1NmZiZjllNTdmMTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ5OTY3ZWMxZWQzODM2ZjhlYjE3YWZmMTcyYjViZmVmN2RlNjA0ODVhNDM5YzZjYTExYzU5MWUxNzU1NzM5YWUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_7166beec568c47e2897d2e84ef391424",
+      "statement": "RemoteConfigProvider fetches /api/mobile-config (EXPO_PUBLIC_MOBILE_CONFIG_URL or server fallback) with cache busting and parses features.linkProcessingEnabled and features.audioExportEnabled, both defaulting to true when absent or non-boolean.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/remoteConfig/context.tsx#L9-L92",
+          "version": "repo-lines-v1:sha256:eb10aecdec5c42904094aeb28ddced5aae801206e65dad85e40eedbcab3c3ee5:eyJzZWxlY3RlZExpbmVDb3VudCI6ODQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY0MzU5MTQxZjQ1MzE0MmNkYzhlNmRmYzY1NDg3N2VhY2VmNWZkZmM5NDNlMGQ5ZGExZDNlNjQ3ZTlmMTI3NDYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImRmMGNmNDVmOTYxNGI4NmNjZjNkZWZhNDdmZThiNzIxNGJmZDc3MmRlNTYyMjc5OTk5YjkxNDQ0NDA2MzA5MGUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM4NDAxMzdjZDI0MDUyMGI3N2I2YjQzNjY0NDZkZTcxNmJlZTliN2RlNjY4YTc1Y2NkYmUzYmY1YmNhNDI5YWQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_55b8eb3089114ba6a0111d60a6eb02be",
+      "statement": "When linkProcessingEnabled is false, ConvertScreen disables submission and shows a feature-unavailable error, HomeScreen/FeedScreen/AddChannelScreen hide conversion entrypoints, and deep links to un-cached sources are redirected to the OS via Linking.openURL instead of navigating to Convert.",
+      "evidence": [
+        {
+          "resource": "repo://src/app/navigation/RootNavigator.tsx#L184-L226",
+          "version": "repo-lines-v1:sha256:f4b716a9bd8e695d83dec856ecf5dadf5cd19c6e9e9e5c1d4ce0b69d71a8387c:eyJzZWxlY3RlZExpbmVDb3VudCI6NDMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZkMWVjYmYyM2M5ODY2MzViODc1MDk2OGUxNjQyMWU0MGMyZmY2NjNjZmJiOGZmZmM5NDRmZTY5ZDQxMTdjMjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIyZDExY2FmNDNlOTdlZjM2OWU2YmVlZDFhMjY4YmQwNTgzOGYyOWI5ZGQyNTRiZjY5YmE2NDg4NDE0NzIzNGEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM0NWJjNWMxNTJiNGZlOGQyYTFhNzQ5MGE0YmE1YWJmOGRiMDRmZDA0ZGY4YmU3ZDQ0ZWZlOTE0MzA4ZDUzMTAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA0MThlODE2YmIzZmFkNjBhZGQ4MDM3ZDFhMjJlMWE0YjYyNjBjYWFkM2E5NjFkODE5ZWQwM2I5MWYzZDEyYjUifQ"
+        },
+        {
+          "resource": "repo://src/screens/ConvertScreen.tsx#L83-L99",
+          "version": "repo-lines-v1:sha256:1c1eb440c8488861ac5860403330a5f6a5ff065a7c5f7fdde86148461ab3d74d:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFiZDIwNjhlNDVkYWQwNGQ3ZjRlOThhZDRkMTRhYTllMDEwN2I3MmEyZjBkMzYzMDk5NTM4Yjg5NThlYjJkN2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE3OTJmODQ3YmIyMWNiMjkyZGQwOWY3ZmE2ZTdjYWM0YThjMTRkOTdkMzg5NjMzYjNkMTUyMGVhMTRiNWIxZGMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQwZWJlNjgzM2NkNTFkODQ4MDlkN2UyNTMyMTYwYTFjZDJlN2I1NTZmMmUyMmNlNDQyODljYzZmMGEwMTYyMTAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImEyMjZhZTE5Zjk1YjFkYTg3ZjA2NTFlMzVkOGQ1OTE2YTU3MTUwZmRmZWU2ZTYyOGZjZmQ5OGJjZjAxNzZmNzMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_1feab44fd436458198a0b53575acef3b",
+      "statement": "When audioExportEnabled is false, PlayerScreen and PlaylistScreen hide the audio export/actions UI, leaving only the share-moment action.",
+      "evidence": [
+        {
+          "resource": "repo://src/screens/PlayerScreen.tsx#L209-L259",
+          "version": "repo-lines-v1:sha256:94d4c7b640779d7521b9d54bc7e809f5242332fb306a2d43d5f48e7d626144f7:eyJzZWxlY3RlZExpbmVDb3VudCI6NTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdkZjk1YWE3YjQwY2Y4NzZhMTc0Mzc0OTYyZTUzNTNlM2I5MDIxMjM5OTQ5ZjViZDc1YTdkYzEwMGRjNWRjNGIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk5YmEwNmU3OTk2YTZiMjVjZTNmZjRjNDlmZjI2ZTNkNzU0N2YzNGRmYWYxZjg2ZGIzODdmOTZkNTFkZTc0YjciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhmNDM5YWI1ZjRjZjM0N2E5NTIwNGFkMjU2Yjk5NmY3NzU5ZGQ1MzFhZGIxNzI2NWM5NDE2MTRhMmUxMWNhZDYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRkYjY4OWJjYWQzMDUwMDM3N2VkMGQxY2MxOGI0NjhiOGM2MTBmYTA2ZjNlNjdkN2Q3Njc2MjNhM2UzMjg0OTYifQ"
+        },
+        {
+          "resource": "repo://src/screens/PlaylistScreen.tsx#L191-L387",
+          "version": "repo-lines-v1:sha256:0563a6d35bf5356753c6aba52451116f56d66e65f369b93e0bf9205ca201eb49:eyJzZWxlY3RlZExpbmVDb3VudCI6MTk3LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIyOTIwMGI3Y2UwNDY1YTUxZGM5ZDg4ZTc5MjY3ZGUyYjA3NDM1M2QyYjA1ZTUxYTQ5NTI2MTExMWE3N2QzZGI4IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJmMDQxNWQ0NTFhNWEyMTQxYjNhZWEzODgyMTM1ZTEwMzA1NzI5ZDNlYzE3Yjc5MGQ1MjZhM2ViMGFiZTdmYjA4IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJlODkwMWFkNWI4YTI0YzBhNzI1OTIzODEzZDk4ODYyMDY2OTk3YjU1ZWNkMGFlYzkwZDhmM2VhMjBmMzAxYzUxIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI1OWU1ODc0NGUwMjAzNDExNjUyOTUzYjMzMjY2MDE2NGM3ODBmNWFkNzI4NjhjZGNlYzNiMjJkZjdmMGZhNzk1In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_0b6adfef49ad4c0781562bfcfc98b206",
+      "statement": "URLs enter the pipeline either by manual paste in ConvertScreen (which persists the job id to AsyncStorage key pending_job_id so an in-flight conversion resumes after app restart, cleared on terminal status) or via tubecast://open and tubecast://listen deep links in RootNavigator, which play an existing matching track or route to Convert with sourceUrl/startAtSeconds.",
+      "evidence": [
+        {
+          "resource": "repo://src/app/navigation/RootNavigator.tsx#L163-L227",
+          "version": "repo-lines-v1:sha256:a509d0c47e1b142b4b1653b14f6c723cb817e14d206d5fc62547eebfe5a51b54:eyJzZWxlY3RlZExpbmVDb3VudCI6NjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU3Y2EwMWI3MWU0MmQxMmUyMGY3OGIxN2Q2ODEzZWFiZmQ0NmVlOTE2ODU3OTVkYzU4OTk0YzYwYmFmMmIxMmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk0NjczMDM3ODA4OGVkZGU3ZTIzM2MwZmNkNTA1MmZhMTliNjEyM2EzOThmNDBjZjMzMjI3ZjgwNjhmMDFlMDAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc5MTYwOTE3NjE4ZjNhNjM4ZTY4ZWNmZmQ2ZGJlYmMxMGI4M2E5Y2I5YThlMWY3OTNmNDcxZjU5OGU5ZWMwMDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc0YWFmMGQyOTg2YTVmNTAxY2FjMTJhOGQyNGYwMTAwOTUzZjZiMDMxNDgwYzkwNzIzZTgxOWJiYmI5OWVhNzAifQ"
+        },
+        {
+          "resource": "repo://src/features/shareLinks/links.ts#L78-L103",
+          "version": "repo-lines-v1:sha256:6142bcf534a569f1784515f1724bbaf10f3b05cd0c24201db4f04f1d7262190d:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNmNmYzMmQwNWQ4MWNmM2EwNTFhMDEyMWQ3M2M1MmIxMzFmNzY1ZWEwMGIyMmRlNmYzYzBmYzhmMTYyNjgyYTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMzODIxZDRhM2Q0ODc0YzE1MTY3MzI4MTlhNjJhMjk4YjRjOTU1N2JiNjQzNTQxYjQxNzNjODUxNTVkZWY5YmUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZiNTgwZTk2NGY4M2E0NzNmNDNkNDQzODQ2Mjk0OWQ2OGI1NjAwZmRhNzg3ZjE2Mzc0NWQwMGRlODljYmYzNmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVmMjcxMDI2ODBhZDNjMzg5YTI0ZmFjMTlhZWEzM2E0ODc5ZTZhOGI5ZGFjOGQwNmE4ZDA4NjY1NjFjYzA2ZTEifQ"
+        },
+        {
+          "resource": "repo://src/screens/ConvertScreen.tsx#L26-L109",
+          "version": "repo-lines-v1:sha256:036dc9e81fe9a14ccc69056cd9a7cfd74b8b586c8b40e74339aff037101cef91:eyJzZWxlY3RlZExpbmVDb3VudCI6ODQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgwNzZiNTdhNmNkMmMyZjZkODE2MTBkM2FmNWQ4YjcyOTliOTU2ZGE1MjRmMTdiOWQyMmFkZjI1MDk5YzEzMWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyYTJjYjI1YTEyMmI0NDIyMWE2MjM0ZWM2NjBhN2I1ZmI3ZjliZGU3YjNiOWUyYjNjNTU5YTBkOTZmYWM3MzkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjgzNDk3YzlmMTNmOGUyZTVlNzdmYWMxYjhkNmU4MzRhNDEyYWI0NTk5MWFlMGI1ZDBkN2RkYWFhNjk0OTVhMGQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZmMjVjOTkzODAzYTVhODJjMTJhY2MzM2RmNTU3ZmI3MjU0OWRlOTI4NWRiMTRkYmJjMmJiMmM1NTkwY2E3ZTAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_e74068e91c1c45169c0fb3256fe2c913",
+      "statement": "Deep-link resolution matches existing tracks by YouTube video id first and exact sourceUrl second via findTrackForSourceUrl/youtubeVideoIdFromUrl (supporting youtu.be, /watch, /embed, and /shorts URLs).",
+      "evidence": [
+        {
+          "resource": "repo://src/app/navigation/RootNavigator.tsx#L175-L213",
+          "version": "repo-lines-v1:sha256:0372843b5cd63349e6c6d5261113653805a1877a2683d321f6addb4a8b1190c4:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAwMjE5MmY0ZTQxNGNjMDdlZTUzZjg0MzkyNzA2NWQ0YTNiNTMwMjQ4Nzk5Njk3MTBlNTgyNDFjNTdhODJjZDUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4OTNmNDBlMzc4MWViODk2YzgyZDA0NmEwODA2N2ExMWUzNWNkZjJmMWRmYWYyNmZlYTkwYjhkYjY2NzY0MTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM0NWJjNWMxNTJiNGZlOGQyYTFhNzQ5MGE0YmE1YWJmOGRiMDRmZDA0ZGY4YmU3ZDQ0ZWZlOTE0MzA4ZDUzMTAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNhOWUxMDc4NWJiZDg2NWQwOWI4MGQ4OWI3N2QxMGE2NzYxZjk4MzQ0MTJmNDIxNmQwMWIwMzk0MWRkMTkxZTYifQ"
+        },
+        {
+          "resource": "repo://src/features/shareLinks/matching.ts#L3-L28",
+          "version": "repo-lines-v1:sha256:dbec9d43e1b6ab79c1a0d7c942e92880f4bfbc8c41e352079f7d0f07c0aaa1e1:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAzNDJhMDJmNjg0NTc3YTBlMDgzOWNkMmFhOTliZWM2Y2Q1NjU0MzY1ODAxYjZlN2Q3YzFmYTU3NWE4MDcxM2IiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjoyLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdmZmZmNzFkMDgyMDFkN2ZmMGUxYzVhNjI0YTYyNTZkMzA0NGI2ZTllNGM3ZmM0ODIxMjMxMDYyZGUyODM1NWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c4800096df3447b08818a6d1ba320208",
+      "statement": "ensureTrackCached downloads to Documents/audio/<jobId>.<ext>.tmp via the presigned URL, verifies byte size against job.audioFileSize, atomically renames to the final file (extension from job.audioFormat, default m4a), deduplicates concurrent downloads with an in-flight promise map keyed by job id, and deletes the temp file on failure; an existing final file short-circuits to a cached track.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/jobs/cache.ts#L21-L82",
+          "version": "repo-lines-v1:sha256:5fe3f9be7cc442180e360babf369e4500ca86f348d987f4569f77560b52bb26f:eyJzZWxlY3RlZExpbmVDb3VudCI6NjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg3Mjc4YWJiZGJkMWZmYWNjYmI2N2MzMmU3YjZhZWMxN2QzMWViNzBmZmY0NGY3MzIyMTg5YzU1ZTk2M2Y2NTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZiNTgwZTk2NGY4M2E0NzNmNDNkNDQzODQ2Mjk0OWQ2OGI1NjAwZmRhNzg3ZjE2Mzc0NWQwMGRlODljYmYzNmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNiM2RiM2IyZmIyMjk3YzJiMmVlYzMxNzM5MDgwZDI1ZTcwMmNjMjBjMzAyNmU1NDkxYjE1MDZhZWFlNjJiZDcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_e6af3076042e47e48b6c3c118a4d0012",
+      "statement": "On a ready job, useCacheReadyJob adds a Track from trackFromReadyJob immediately, then caches; playableTrackFromReadyJob dedupes existing tracks by jobId then by YouTube video id (preferring job.sourceId) so re-submitting the same video reuses the existing track.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/jobs/hooks.ts#L31-L93",
+          "version": "repo-lines-v1:sha256:f69fc9718d6111db24cfc9f2e0ab0d883ac1429eff19b9478ab9d1f17aa72e87:eyJzZWxlY3RlZExpbmVDb3VudCI6NjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVjODk1ZDFhMTFkY2Y2NzA0NTc2NmY2OTc2NGNiNWQwNjk2ZWFiMzY1MDExNjY3ZGFiYzkzYWRiZTZmNWUyNjEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUxMWJlNzY4YWM3YjdkOGYxNjk4ZTYxMTZiOGVkOWJiYzVjMTBjOWIxMDZjYWE2NTgwNWUyZjJlMTViYjZhOTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://src/features/jobs/track.ts#L53-L63",
+          "version": "repo-lines-v1:sha256:307d14e40043775c0b08b3fd288f25dcda35d840a9215515c18231379b21dd85:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ5YWMwZTUxYWU0MjU2NWFlMTU2ZjBlOGE0YjI1YjE3NmFjMzA0NzkzZTljZmE2MmZiYjBkYjMyNTM3NDllZGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ2Njk0MzRjYWJiOGZhYjhkMDRlOGY0Y2VkMmNjNzgyMDBkNGRmYzI5ZmZjYzRkNjVhZTM2MTJjOTYxZWQ1NWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkyMDQwZTA5NWE5NGUyYWRhNzRlNDIxZjM3MTg3NTFhOTFhODEwYmZkNjZmNDhmNGU5MzljN2I3NDgwZWI2NzAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_3031327350764e08bbd73b7d9493fa6d",
+      "statement": "If local caching fails while the job is ready, the track is saved with cacheStatus \"failed\" and a cacheError message, playback remains possible via streaming, and retryCache re-runs the download.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/jobs/hooks.ts#L45-L92",
+          "version": "repo-lines-v1:sha256:fbd230ed2ca0efde9e5cdab6d065a07bae7bf24bedac3c71ce51bc89f01ae3ed:eyJzZWxlY3RlZExpbmVDb3VudCI6NDgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjExZGY4N2E0NzMxNmM3MDhjNTUwMjA5OGU5YWY2YzQ0NTM0ZWI4MGJlYWRjZjYwNjMwMjhlZmNhODU5MzdhYmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ4MWVlYjQyMDg0M2E5MjIwYmRlYzIyOWIzODM3YjhiYjczMzJmMjA3NmFhOWNkN2EyZWNmODNiZWRhOGE2NTkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJjOGY3YzdmYTBmOWZhZmY2MDUyNDI5OTUwN2NmODAwMDcyNDNhNDMxOTBjYzA2NWMzMDlhMmJjNDMwMzc4MmYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEifQ"
+        },
+        {
+          "resource": "repo://src/screens/ConvertScreen.tsx#L155-L159",
+          "version": "repo-lines-v1:sha256:ab436deaf6b97a99f57d9d161f2393537404281f9b2f9479ed90d35b5be36291:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNTNlNDZkZWY1NDMwYjYwYjViYmU5ZTIwNjkzODQzYmYxOGE4MmFkOGVjZjEzYTlmYjA2ZTExOWRkZmMwMWZjYyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNzEzMDA0ODQ3ZTA0ZDg4NDEyZjk0ZWFiNmIwNTY0OWQ2MmIwNDIzZDA0OWJiNGIzMjdhODE2MzE2ZDY0NDNjYiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNTU0NmU3OWJlNDdlMDBiODdiNTY3OWI4NjdmZmFiYzZlYTc2NmJhMDhhZTBmZGFjNDcxMWRiNjg3NDllZTEzOCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMDA5ZWYxN2U2OTU3MTQ1MDJkNGE0MmE4YzQ3MDAzMzQ1YzZkZjY2YmI1ZmJjY2Y3MWZiZjg5NGNmYTM5NzgyNSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_fec1d9710d4b49028dac8cb04b00fd97",
+      "statement": "Progress display normalizes the server progressPhase (unknown non-empty phases map to starting, missing phases derive from status), renders a five-step UI (queued, download, transcode, save, playable), shows a retry state when attemptCount > 0 and lastErrorMessage is set, and cache states override job-phase display at the playable step.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/jobs/progress.ts#L21-L98",
+          "version": "repo-lines-v1:sha256:0929de4924ef3ced803069be67a339f6a349ef2a2c819a7f5abcb1b3498d13c3:eyJzZWxlY3RlZExpbmVDb3VudCI6NzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNhOGRhMTA1MDBkMDA2N2QyZDQ1M2VjOGM1ZjZjZGViNDM5NTUzMGMzZTVkZGNlN2FiY2UwMDQ5Y2I2ZTg1NzQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI3ZTU3ODhkNWQ5ZDczZDI0YTgxZGJjMGE1YTc0YmZhODJjOWMzYjNhZjk5ZTUyYWY3OTZlOTBiNDY4YThhM2QiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNmMjQwNjA2YTk1NTk1ZmVhMDk0ODE0ODY5N2U3YzY4YmM4ZDczNDhhZDg3ZDE5N2NkOTdjMjIwZDBlODdiMDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjkyNjQ0NDc2ZmFmZDFkMmNhNGEwYjY1N2I0ODY2MmFiMDljODhkOWJhM2JmM2JhNTMxYjg2NDA0MjFlMDAxNTMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_491005d8b4ad492dbdecc0cc2629bd79",
+      "statement": "Conversion failure messages localize live-stream/upcoming/premiere errors (pattern list includes Chinese 直播) into errors.liveUnsupported, otherwise surface the raw errorMessage/lastErrorMessage.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/jobs/errors.ts#L4-L31",
+          "version": "repo-lines-v1:sha256:a286001cb306abe897cd7e501a1016481152d851b8a69c306a78a1899456ab80:eyJzZWxlY3RlZExpbmVDb3VudCI6MjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ5ODJiMTViNWRjYTM2YmY0N2VkOTNkMDk5NmE3OWY3ZjBmZGJmNDQ0NTE3NmRjYjZkMGJhYjgwY2FlOTliMmEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjJkMmNlMzI4MmZkOTc3OTViODUxZmYxMTY5MmUzYzIyMTA4M2U4NzM2Y2Y3ODg4ZGNiMjQ4ZTAzY2RiNmIxMDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0160c683789c41fb8372cd35954f5e90",
+      "statement": "useTrackAudioExport re-fetches the job and runs ensureTrackCached when the track is not cached (requiring job status ready), copies the local file to Cache/exports under a sanitized title-channel filename (reserved chars stripped, basename truncated to 120 chars, fallback TubeCast-<jobId>.m4a), and shares it via expo-sharing as audio/mp4 with UTI public.mpeg-4-audio, throwing AudioExportUnavailableError when sharing is unavailable and guarding against concurrent exports.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/audioExport/exportFile.ts#L25-L51",
+          "version": "repo-lines-v1:sha256:0c04999c8620e7b17b219493f8c0aa764559f69a353bf9d671836814bda3c52b:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNlNWRkMzA3ZTdlYWNlYmMyZjg5YzM0YWE3YjQ2ODBmYmQ1YTU0MGRiM2JhODQzMzdmMDMzZjIwOWNjZWNlNTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNhM2U0NmY5NDI3NmI2ZjZmNGVkMWYwMmFmNzhiZWY2YTJlZTFjNDM5ZGQ1NTg0Yjk3Mzk0ODMxMzIxNGQyYjciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZmYmUzNDliNDQ0MzIyYTk1OWY0MTMxZjI0MWE0MjI0ZWJkMTVhYjg4NTIwYWQwNGI1Y2RlMDIxMzI0YTk4NDQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEifQ"
+        },
+        {
+          "resource": "repo://src/features/audioExport/filename.ts#L20-L29",
+          "version": "repo-lines-v1:sha256:2e42ee491d3f2e5945e14d590676d05b87e38981802643eac811a3309139da0e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMzMDZjMGM0ZDM2MmM1YmY0OWRlOWM4NWVlMWIyMWIyNWU5MThkYzIxMWNjMGJiNmMyYjc4YTE4ZWY5YjA1NzQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkxMzk4ZmQ0MTVhMzBmMWM3ODQ3ZDliMWU0NjIzM2UzZDdlYzFkMDY5MjEyZmQ3OTk1NDI1NTQ2MmFmM2FiN2IiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImY4NTRkMDk3MmNhZDg0OWY3MzgyYmQ4YzFkODU4MDAwYWQwZGFkYzk0YTVkZTVjNDdiYTJiMGE5MTY4Njg5N2MiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEifQ"
+        },
+        {
+          "resource": "repo://src/features/audioExport/hooks.ts#L10-L38",
+          "version": "repo-lines-v1:sha256:7df76407191f331f69c115e94aa1b7c72f8c09948f073f55262e708ece0004d2:eyJzZWxlY3RlZExpbmVDb3VudCI6MjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ1YTU1NDllODRhODZlOTRlYzhjZWUxYTExMDI3ODBlODlhMDUwZTA0Zjg2MzhlN2FjZTFjZDFmZTQ1ZDgxMDIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU4OTBlMTU5MjVjZjQ3MTk0YzUyYjI3ZmJkZTcxNWQ4NmVhODhjMjM1MDVlN2FkNzI4OWFjNWEzMmZiZDRlYTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI0M2UyZmVkYWEzYmE3MDJiMjY1MTgwN2MxYjQ4MzcyMGJjNjRlY2Y0ODkxMjJjZDlkMjJhNWM3MzYzZmE0MGEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a13ac157b7894573899bd79eed8ab325",
+      "statement": "Pipeline logic is covered by focused unit tests: test/jobs/cache.test.ts, test/jobs/progress.test.ts, test/jobs/errors.test.ts, test/jobs/track.test.ts, and test/audioExport/filename.test.ts.",
+      "evidence": [
+        {
+          "resource": "repo://test/audioExport/filename.test.ts",
+          "version": "repo-file-v1:sha256:c46d43f9f9ea333c3313951ed5d8173cb5dfa88461a055c2e07b06f13aa7f6f4"
+        },
+        {
+          "resource": "repo://test/jobs/cache.test.ts",
+          "version": "repo-file-v1:sha256:46229df7bb4a925d92c4703f288cce48f367faa5a68554ea6ad38565e19215a4"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.5.0",
+    "at": "2026-09-01T21:28:30.610Z"
+  }
+}

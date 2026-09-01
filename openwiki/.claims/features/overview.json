@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:f874da66a9b2733e33ef7e273916d62bc06f5d82d6540b031bdc188bbd45fc1a",
+  "claims": [
+    {
+      "id": "claim_2cf905015deb4179a75975e97bd69268",
+      "statement": "The player feature module contains only context.tsx (playback actions, source resolution, per-track progress persistence under an AsyncStorage player_progress_<trackId> key with end-of-track restart handling, and request-id guards) and state.ts (reducer, phases including idle/resolving/playing/paused/error); there is no useProgress.ts in the module.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/player/context.tsx",
+          "version": "repo-file-v1:sha256:843c32c5ea40e61b521c2a513a9f1f69d2347e857b0d8b50ea4f4ca941ccdd5a"
+        },
+        {
+          "resource": "repo://src/features/player/state.ts",
+          "version": "repo-file-v1:sha256:46a1914e2aea8c581537bc7b1a713754b556a280637a8999cfe25829b7b634d4"
+        }
+      ]
+    },
+    {
+      "id": "claim_c0b695403258459f95d540460a511b14",
+      "statement": "The player sets Expo audio mode to playsInSilentMode, shouldPlayInBackground, and doNotMix for background playback.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/player/context.tsx#L151-L157",
+          "version": "repo-lines-v1:sha256:ae8ca8d84a9dbfb7a40d1d535e1ba41587feb883f3b860b4455ab9a4983ac76d:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNTk2NmZiZmE4ODk5OGRhNzQ2NTZjNTAxOTQ5NTZjMjVmMDg0OTQ1NzY2MGMwMDlmZTYzZDFlOWZhOWRjOTMxYyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZmRjNTJmMDhiMzliMDhiMDFjOGQzMDhiZjg4MGIwYmVmMDJmZDFkZmNjOWQ5YWE5M2E0ZDFiNWY0ZDU4YjZjYiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZDFjYmY5ODBjYmQ3MGRhZjM0ODhhZDk5ZWRlZWMyNDBlNDdhNjBmODk0ZjAwNWI0MmZhY2E4ODRhMjg1Y2U2OCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOWZkYTU4YjQ2YWMyMzU2NGZjZDI0ZjdlOTU2MDhlOWZjMmM2ZTI4Y2Y5ZTY2OGRkMjA4MGQyZjZiZmZkMWI4NiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_aee31dae2e7747efa57c3e61265490cb",
+      "statement": "useJobStatus polls job status every 3000ms via React Query and stops polling (refetchInterval false) once the job reaches ready, failed, or expired.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/jobs/hooks.ts#L14-L27",
+          "version": "repo-lines-v1:sha256:bd1b3cde6ed96e65ed537f62399234449a2f8722ab449a79bcc0c7e394cf1cff:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNkMmM2MmIyOTkwNWMxYTMyYTQ4NDEwYmJkODQ1NTlmYTIyZjFjZTFiMDM4ZjA4YjcwOWRmOTA3ZWE4ZGQ2MDYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJkMGYyZDNhM2FhZGEyNzU4NjQ1NzhkMGE0MzkxNTYzOGQ1NDNmZWNhMmM5NDg1OGRiOTQxMjExZTg2Y2VmMmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUxMWJlNzY4YWM3YjdkOGYxNjk4ZTYxMTZiOGVkOWJiYzVjMTBjOWIxMDZjYWE2NTgwNWUyZjJlMTViYjZhOTkifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_79ac2bc29d7d4c54b5c352e55bcb9377",
+      "statement": "useCacheReadyJob watches a job, adds a Track to the playlist when the job becomes ready, auto-caches it via ensureTrackCached, records a failed cacheStatus with the error message on failure, and exposes retryCache.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/jobs/hooks.ts#L31-L93",
+          "version": "repo-lines-v1:sha256:f69fc9718d6111db24cfc9f2e0ab0d883ac1429eff19b9478ab9d1f17aa72e87:eyJzZWxlY3RlZExpbmVDb3VudCI6NjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVjODk1ZDFhMTFkY2Y2NzA0NTc2NmY2OTc2NGNiNWQwNjk2ZWFiMzY1MDExNjY3ZGFiYzkzYWRiZTZmNWUyNjEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUxMWJlNzY4YWM3YjdkOGYxNjk4ZTYxMTZiOGVkOWJiYzVjMTBjOWIxMDZjYWE2NTgwNWUyZjJlMTViYjZhOTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_1e4e1c8e191340b799000dd704ce764f",
+      "statement": "The YouTube feed module caches feed items in AsyncStorage under youtube_feed_query_cache_v1, keyed to the subscribed-channel set, with a 24-hour max age; payloads that are malformed, channel-mismatched, or stale are rejected and return null.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/youtubeFeed/cache.ts",
+          "version": "repo-file-v1:sha256:31b6c01279d5596e810c8954e75b61070fae9bc5a4bc5cb2d86ee4cc09aade44"
+        }
+      ]
+    },
+    {
+      "id": "claim_66b00272cefd4b57b0e8de724914fce8",
+      "statement": "The youtubeFeed module's files are api.ts, feed.ts, cache.ts, storage.ts, submittedJobsStorage.ts, hooks.ts, types.ts, and input.ts; FeedItemWithStatus carries status new|converting|ready|failed plus optional jobId.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/youtubeFeed/cache.ts#L1-L5",
+          "version": "repo-lines-v1:sha256:ddf9bc193195edd5722c867c20c76ec6ea6c374bab19945db82c7c7607107eb3:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMzlhODY0ZTJlMzIyOTQ4MWJlY2IwOWNlN2IyMGVkZDlhMzlmNDUzOTM0YWRkNmVkMTY0ZmQ4MWFjMDdkZTMzNiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYjk1MjU0MWQ5YzA5NjA0YjU3NjQ3ODA3YTA0NGQxNzhmZmY4YTcwOTIwMjJhZDZjMWUxZmQwZmVjZTA1ZmE4MiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTI1YzIwOGFhMWFkNjEyMzFmNmNlNDE3Mzg2NDc0ZTczNDZhZjgwNTdjYWEzMDcwMGVjZGUyNmNlMmZlYzE1OSJ9"
+        },
+        {
+          "resource": "repo://src/features/youtubeFeed/types.ts",
+          "version": "repo-file-v1:sha256:d281c2b637e907d8e83704f5df16b9df1fca5dbaeeba8992942c6545f5cce353"
+        }
+      ]
+    },
+    {
+      "id": "claim_d422aabc621b44878435643c90136b68",
+      "statement": "RemoteConfigProvider exposes flags linkProcessingEnabled and audioExportEnabled (defaulting true), fetching JSON from EXPO_PUBLIC_MOBILE_CONFIG_URL with fallback to SERVER_URL/api/mobile-config, cache-busting each request, and keeping defaults if all fetches fail; audioExportEnabled gates export/share UI on the player and playlist screens.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/remoteConfig/context.tsx",
+          "version": "repo-file-v1:sha256:e850a83f5b5d740d1d55db747d753a07b5e1c2d48976eed053bd72e2df7d8a97"
+        },
+        {
+          "resource": "repo://src/screens/PlayerScreen.tsx#L54-L54",
+          "version": "repo-lines-v1:sha256:bbed39e58a0ae4965ea60bb79a48c986e26092f4ce3b6476c9ef23ffdafec318:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYmJlZDM5ZTU4YTBhZTQ5NjVlYTYwYmI3OWE0OGM5ODZlMjYwOTJmNGNlM2I2NDc2YzllZjIzZmZkYWZlYzMxOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYmJlZDM5ZTU4YTBhZTQ5NjVlYTYwYmI3OWE0OGM5ODZlMjYwOTJmNGNlM2I2NDc2YzllZjIzZmZkYWZlYzMxOCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZjMxY2NiOWY5N2ZjNWY2YjcxZTcwODA5ZWU3MTYwNjU4NWU0MTIxOTIwNTZmM2EzMDIzZjU4N2RjZjM5NTE4YiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYzRlMjgwYmZkOGY2YjgyODE1NDI3YWY2NjVkY2E4NDE5OTMxYTljYjNiNzQwNjRmMzMyNTFjOWYyNzYxZTA1YyJ9"
+        },
+        {
+          "resource": "repo://src/screens/PlaylistScreen.tsx#L34-L34",
+          "version": "repo-lines-v1:sha256:bbed39e58a0ae4965ea60bb79a48c986e26092f4ce3b6476c9ef23ffdafec318:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYmJlZDM5ZTU4YTBhZTQ5NjVlYTYwYmI3OWE0OGM5ODZlMjYwOTJmNGNlM2I2NDc2YzllZjIzZmZkYWZlYzMxOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYmJlZDM5ZTU4YTBhZTQ5NjVlYTYwYmI3OWE0OGM5ODZlMjYwOTJmNGNlM2I2NDc2YzllZjIzZmZkYWZlYzMxOCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNmMyYjAwOTdjNGJhMzQ3OGQ5Y2NiMmVkMTI5MGJmOGFiM2VhNDgxYjFlZjI4YjNmM2UwNTk4ZDliZmU3NDdhOCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZjc1MzVkMDc3MjBmNTEzOTlhMGU0ODBmOWVmMTA0YzcyZmE1YWMzYjI4OGU5YWRmNjIzODUwNzZmNTk0NDhmYyJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_9ef003aa736f40908617c60ab5948312",
+      "statement": "The settings module is a thin stub: storage.ts exports SERVER_URL (EXPO_PUBLIC_SERVER_URL, default https://yt-audio.tomyail.com) and context.tsx provides an empty-settings SettingsProvider; theme preference now lives in the app theme layer (useAppTheme in SettingsScreen.tsx), not in this module.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/settings/context.tsx",
+          "version": "repo-file-v1:sha256:bd6b85fb2c22af74347d55a3347a140b0488b2d4eebe3e7359091662cff51ad5"
+        },
+        {
+          "resource": "repo://src/features/settings/storage.ts",
+          "version": "repo-file-v1:sha256:83510a2326947fb820df720ea77d29d7a1470efd285b3282a8d1680102409e1d"
+        },
+        {
+          "resource": "repo://src/screens/SettingsScreen.tsx#L37-L37",
+          "version": "repo-lines-v1:sha256:ebd3a9e9e4f7407d3ce77dca6c478b8205e8c05a5307d5d99e29d9fa800dd238:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZWJkM2E5ZTllNGY3NDA3ZDNjZTc3ZGNhNmM0NzhiODIwNWU4YzA1YTUzMDdkNWQ5OWUyOWQ5ZmE4MDBkZDIzOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZWJkM2E5ZTllNGY3NDA3ZDNjZTc3ZGNhNmM0NzhiODIwNWU4YzA1YTUzMDdkNWQ5OWUyOWQ5ZmE4MDBkZDIzOCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiODIwYTU1ZTBhMDlkZGZkYmMzYjU4NDMyYTcwZDdmZDhjMDRkOTMwZWFjMWQ5YWQ2ZTQ2MGYwMTE4ZWUxZTUxMSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMDNlOGU0M2I0ZmQzNjRjY2YxMGM4YmNmYzhkZGZhZWUxMTk0ZTg2NDkzNGIxMDZiNGRmZDhmMjI4MWM2MmJlNiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_e43a7424043f4d2485b96b4fbe0f16b2",
+      "statement": "useTrackAudioExport ensures the track is cached (fetching the job if the track lacks a local path) before invoking shareTrackAudioFile, tracks exportingTrackId to prevent concurrent exports, and shows a localized failure alert on error.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/audioExport/hooks.ts",
+          "version": "repo-file-v1:sha256:2f9d335379059792e6bc42ef0617ca26303720e3b97388a84bd37c8a8d504af0"
+        }
+      ]
+    },
+    {
+      "id": "claim_7cb569f947e44586a21236aef3a82399",
+      "statement": "screenshotDemoMode is enabled when EXPO_PUBLIC_SCREENSHOT_DEMO_MODE is 1, true, or yes (case-insensitive), and the module consists only of config.ts and data.ts.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/demoMode/config.ts",
+          "version": "repo-file-v1:sha256:c9db5c76c71a988e18d88a1b07c6efffb4b4514dafdf104742b42b5b7a347157"
+        }
+      ]
+    },
+    {
+      "id": "claim_d2685e06e37f470aa866920ced7687be",
+      "statement": "The feature modules under /src/features are audioExport, demoMode, discover, jobs, player, playlist, remoteConfig, settings, shareLinks, and youtubeFeed; discover also has an index.ts barrel export.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/discover/index.ts",
+          "version": "repo-file-v1:sha256:cf6e4114f2a3a0778bad1c9c071ebe0c3024a72078336966a97a4be5093ffa22"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.5.0",
+    "at": "2026-09-01T21:28:30.610Z"
+  }
+}

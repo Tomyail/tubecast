@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:d09b71b379c7b264b39c6ae2f57931b7b5079d27594e0ea35f33469fef407076",
+  "claims": [
+    {
+      "id": "claim_baaf228ca0524c859ef6b049b7893ee9",
+      "statement": "screenshotDemoMode in src/features/demoMode/config.ts is a build-time constant derived from EXPO_PUBLIC_SCREENSHOT_DEMO_MODE (truthy values: 1, true, yes, case-insensitive) that gates demo fixtures across playlist/player contexts, discover and feed hooks, Home/Convert screens, and i18n language selection.",
+      "evidence": [
+        {
+          "resource": "repo://package.json#L12-L17",
+          "version": "repo-lines-v1:sha256:c87dbfc047efdbabcb738e10f35741f895be558995e93cce109850da007f8688:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjViMmNlZjlkNTQ5ZTE2M2U2ZGViMmJlYTgyOTc1ZWI1NmU1YWI3MTU0ZmY5OThiYjQ3YzgyMzUwZTUzOTJkOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNmI2NGE4OTg0OWM0YTIxZDZjZjRkMTlmNTI1Zjg5ZjZmOTljYWExODc5ZjM4YTVmYjZjMzhlNTg0ODA0ZDFmNyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNzBmZmJiMGY4YmFiMTE0NzczNWY1NTE1OGFmNThkMThhOGYzYWNiNWFmODcyM2JlOGM2MDY4NTAxNzIyMDYzOSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMzNlMmJkMmIzOTM5ZjgwY2M0YzgwYjMxOWEyNDg1ZTM0M2I2ZjhlNGY0NmNlNDJhOWJmZTU2MjQwZmM3Y2EwZSJ9"
+        },
+        {
+          "resource": "repo://src/features/demoMode/config.ts",
+          "version": "repo-file-v1:sha256:c9db5c76c71a988e18d88a1b07c6efffb4b4514dafdf104742b42b5b7a347157"
+        },
+        {
+          "resource": "repo://src/i18n/index.tsx#L35-L41",
+          "version": "repo-lines-v1:sha256:68a13c4f904cd27be03bab620b24c869fabef0bd38a76379e02350eaf3301ada:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYzBhNTNmMjliY2Q5MDVkYzhlZTM3YTQwYzdlMzk3NmIzYTMzMmNlZTc5ZDUxMWI3YzM3MTRkY2RmODk1MDBmOSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDg5M2Y0MGUzNzgxZWI4OTZjODJkMDQ2YTA4MDY3YTExZTM1Y2RmMmYxZGZhZjI2ZmVhOTBiOGRiNjY3NjQxMyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZGUzZmUyNDlkMjRiOTc4MGQwYWUzMzlhYzZkMTE1Njk2ZDVmYWU5NWNjMGVlY2MxOTliYTJhNGVjMDM4NjEwZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNDA3MGJjNzc3NjMwY2RhMDhjYjU3YzVkYzRmMmJmYjhjNjFjZTFmYjQ0YWU5YjZmNGY3MjUyODNjOGNhODE2OSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_4edd421de5674c2d8080e8694cd04a09",
+      "statement": "Demo cover art is referenced by remote URL (default base https://raw.githubusercontent.com/Tomyail/tubecast/main/mobile/screenshot-assets/demo-covers, overridable via EXPO_PUBLIC_SCREENSHOT_DEMO_ASSET_BASE_URL) rather than bundled, and the PNGs live in screenshot-assets/demo-covers outside the Metro-watched assets/ directory so production builds do not package them.",
+      "evidence": [
+        {
+          "resource": "repo://screenshot-assets/README.md",
+          "version": "repo-file-v1:sha256:7630560c1e145e320fa56aaf35420ba01d4b511a2bb126d3e185cc9a3c0dc412"
+        },
+        {
+          "resource": "repo://src/features/demoMode/data.ts#L6-L14",
+          "version": "repo-lines-v1:sha256:e926bcbffd41aefe67df19ade8a8046709eaa215752d24a898e89451eebf3b80:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYTM2OTYyMTEwY2EyMWRiOThjZjU0MzZlZGQyNjcxNDk0N2FhYjg3NjY3ZmY4YmZkMTZhZGZkZDE0MTI0OTFiYSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMDNjNzcwODQ5YzVjZjE3ZTQyNGYzYzlhMDQxOWRkYWI5MTRiZTRiY2MzZGQ2OGQwN2ZmYTU4ZTIyZmVjOGEwZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYzY5NGU3ZGRmNThiNDU4NTc0NmJjNjUzNWM2OTkxMjVlNTExYzZiNWE3MzVmMGI4YzI4OTA0OTA2YzVhZmI0NSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_c3658ae5bec6494d933f833b720f6677",
+      "statement": "The release:ios script runs scripts/release.mjs assert-no-demo-assets, whose assertNoBundledScreenshotDemoAssets fails the release if mobile/assets/demo-covers exists, enforcing the invariant that demo artwork stays in screenshot-assets/demo-covers and remains URL-referenced.",
+      "evidence": [
+        {
+          "resource": "repo://package.json#L19-L19",
+          "version": "repo-lines-v1:sha256:1d579e7d62076fee7615ac4b345d9fe7d2907273c32e9d5d55fa40c2fab31824:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMWQ1NzllN2Q2MjA3NmZlZTc2MTVhYzRiMzQ1ZDlmZTdkMjkwNzI3M2MzMmU5ZDVkNTVmYTQwYzJmYWIzMTgyNCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMWQ1NzllN2Q2MjA3NmZlZTc2MTVhYzRiMzQ1ZDlmZTdkMjkwNzI3M2MzMmU5ZDVkNTVmYTQwYzJmYWIzMTgyNCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOTY4MTQxOGIwODcwNTMyNGIzMDE0MWVhNDQ0ZjYyNWRjNjc5MGNhMGJlODYyOTFiNzc4YzFhNzc2OWY0NTA3ZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNDg3ZDY4ZDE2YzU1YmNhZTIwY2IxNTRiNWI4YzY5MTk2OTNhNTZhNjNkMzQ5ZDAyNWVhZWRlNmU2MmVmNTY3NyJ9"
+        },
+        {
+          "resource": "repo://scripts/release.mjs#L59-L69",
+          "version": "repo-lines-v1:sha256:02d0d0929b797b3b0fe9ef9cda719d2b9991f95d7126ccf83a34eec0b4f818b3:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRlZTc3OWI3M2VmMjJiMWU4MTliNzM3OTRmZjAwZDMxNmRjN2FiN2NjOTcyYzA0ZWExNDQxMjYyYTUyYTY3OTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE1MTlmOGIwYzY4NDE3ZGQyYmFkYjc4Yzk1MWViNWMzMzRkNmJlODI5ZmM5MjJjZWNlZTQyZmFhNGM0ZDgyY2UiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImJkNGFhYTI0YTVlZDk0Y2YwNTkxNDQ1ZTgxYzAwMjI0YzQ0MWQ2ZWY3OWJkMDZiZDc0YmYzM2VmNzMzMmM4NjAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_f21c8d557edd49afa6b7abbf44dc0886",
+      "statement": "src/features/demoMode/data.ts supplies deterministic fixtures — getDemoTracks (12 demo tracks with mixed cacheStatus/playCount and synthetic channels), getDemoDiscover (recent + reordered popular), and getDemoFeedSources — whose titles/channels match strings used by the screenshot compositor.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/demoMode/data.ts",
+          "version": "repo-file-v1:sha256:505ae17a3f5f5bcdbd435411836b18e2c6553cd4568e01230de8cc4739d874e6"
+        }
+      ]
+    },
+    {
+      "id": "claim_adc4c29750d545f5a7ec01f8a476c726",
+      "statement": "In demo mode i18n forces the app language to EXPO_PUBLIC_SCREENSHOT_DEMO_LANGUAGE (zh-CN maps to zh-CN, anything else to en), bypassing the stored settings_language preference.",
+      "evidence": [
+        {
+          "resource": "repo://src/i18n/index.tsx#L12-L13",
+          "version": "repo-lines-v1:sha256:b2183d9cfcdcfab9e7175c3ee094bd19f7729c84845cc47ede8964b99c3ba898:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOTkxODdjOGIxZjczZTg4N2Y5YzYxYzZiOGY0ZWNhMTBiYzE5Yzk4YTFlNWQzODc1MjYzZDRmNjdkZWEwZTY5YSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZjM0ZWMxYTJmYzM2ZjdjODRhMTYyYTdkYWM3Y2FlMDJkYWQxYTkyNmExN2MwMDZiMzI0ZDA3NDk2MDdlOWM1YyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYmUxMTE5Y2U2NTk2YWRjZTgzNjEzYWM5ZDQ2MzBmYjQ3ZDMyNmNmY2I0MmFiZWY3ZDI0NWE4YTBkNGM0ZWIxZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZWMxYjgyYzJjYmE1MzM2YzYxZmQyNjY0OTIzNDNiN2IxZWVkZjU2N2Y3ZTk2MTFjYmY5NjlmNTZkYmViNDU5ZiJ9"
+        },
+        {
+          "resource": "repo://src/i18n/index.tsx#L35-L41",
+          "version": "repo-lines-v1:sha256:68a13c4f904cd27be03bab620b24c869fabef0bd38a76379e02350eaf3301ada:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYzBhNTNmMjliY2Q5MDVkYzhlZTM3YTQwYzdlMzk3NmIzYTMzMmNlZTc5ZDUxMWI3YzM3MTRkY2RmODk1MDBmOSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDg5M2Y0MGUzNzgxZWI4OTZjODJkMDQ2YTA4MDY3YTExZTM1Y2RmMmYxZGZhZjI2ZmVhOTBiOGRiNjY3NjQxMyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZGUzZmUyNDlkMjRiOTc4MGQwYWUzMzlhYzZkMTE1Njk2ZDVmYWU5NWNjMGVlY2MxOTliYTJhNGVjMDM4NjEwZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNDA3MGJjNzc3NjMwY2RhMDhjYjU3YzVkYzRmMmJmYjhjNjFjZTFmYjQ0YWU5YjZmNGY3MjUyODNjOGNhODE2OSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_b2ea194e2d7940378640299f2800146f",
+      "statement": "App Store captures target two physical devices via npm scripts (iPhone 13 Pro Max and iPad Pro 13-inch (M5)), matching the two compositor device classes APP_IPHONE_65 (1284×2778) and APP_IPAD_PRO_3GEN_129 (2064×2752).",
+      "evidence": [
+        {
+          "resource": "repo://package.json#L16-L17",
+          "version": "repo-lines-v1:sha256:ac0e6cce279e544da28ad6dfff4051cccce5261a8eeba900d909058400cadd7c:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNTAxMTZkMzc5ZTMyMmZkYTUwM2ZiYjA2ZjJiYmQ2ZTYzZDYzZWMwZWFiMmFlZWVkMTQ1ZGZhNzczYjQxZjE1MSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNmI2NGE4OTg0OWM0YTIxZDZjZjRkMTlmNTI1Zjg5ZjZmOTljYWExODc5ZjM4YTVmYjZjMzhlNTg0ODA0ZDFmNyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYzJkZDU3NGYxYzQzNzM1OTkxZThlMGYxODkyMDA2ZGE2ZjA3YjI3Y2NhMTg3OGQyYTdlNTZkZGE5NWE1YWNmMyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMzNlMmJkMmIzOTM5ZjgwY2M0YzgwYjMxOWEyNDg1ZTM0M2I2ZjhlNGY0NmNlNDJhOWJmZTU2MjQwZmM3Y2EwZSJ9"
+        },
+        {
+          "resource": "repo://scripts/generate-store-screenshots.swift#L324-L328",
+          "version": "repo-lines-v1:sha256:723acfdfb3642cc6a86bbc4ff1b840dd06a9ddd22cf904354465250952a36286:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYzI0NTZlNDEyNzhkYjYwMTc5ODc5Zjg2ZTI4YWFjYmY0NjcxOGExZTA4ZDcyMzc3ZDRhOGY4NTI5ZWRkNzU2NSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMzA2NDhmNzdmZDVhOWM2M2IzY2RkMGFmNDlkYWExMjk5MjIwYjc1NDFlODhjYTE3ZWZlMWE2YTExNGI5ZmYyYSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYTE5NDI1NTMzYzk0MmQ1MDc4MzNiYjEyOGJiZTkxZjEwMjYxNzNkM2YyN2M4NzA2OGM4MjhmYzE2MDAxZjRkNCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZDk4NWI1NWU5MTIwNmQwNjVmMTZkOTA2NTIwMWRjNjJkM2Q1YWNhN2JjYTI0MzgxNTAzOTA1NDkxYmYzNjRiYiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_003c8c7cc2e048e6a1f28c8c467f062e",
+      "statement": "scripts/generate-store-screenshots.swift composites raw captures from screenshot-assets/store-ui/<locale>/ into localized marketing frames written to fastlane/screenshots/<locale>/ for three locales (en-US, zh-Hans, zh-Hant where zh-Hant reuses en-US sources), with slide 4 synthesized as a lock-screen using demo-covers/lake-reading.png; missing inputs abort with exit 1.",
+      "evidence": [
+        {
+          "resource": "repo://scripts/generate-store-screenshots.swift#L20-L70",
+          "version": "repo-lines-v1:sha256:1add3b1a49689767f33d14ab784922083d80cb35bd95dc24c559bcac64331403:eyJzZWxlY3RlZExpbmVDb3VudCI6NTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNkNjJmNTdmMzBhNTM1ZjNmZjRlMDFkYjcwMzgyMjQyMjFjNWU1YmM5YTIxNmQzNjliZDg1ODU3YjRiNDZjZTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcyOTM3ZDVkYjRkMzVkZDU3YTg2M2U3NzI4NWNmZDc2MDMxYWIyNzRiNTliMTgxYWJiY2Y4ZDY0MDZjMGUxZmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQyN2U0OGEwNzE4N2VkZmY0N2NiZGE3NzIyMDNiMjc0Mjc0YTUyOTUyYWFmNzE4NmIxYmU5ZGIyMmVjM2YxYjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjlkMGQ5ZDNkNWQ1ZGExZjBkZmNiMGYwMWZiNDA3MWU1NzMxMTU3N2ZmZDM0YWJjMzBjYTY4ZjlmODY1OTM0NGEifQ"
+        },
+        {
+          "resource": "repo://scripts/generate-store-screenshots.swift#L318-L354",
+          "version": "repo-lines-v1:sha256:5d71d2e59e18398df4e71370be28287dba845bcd1c6987e2b447f60d66246770:eyJzZWxlY3RlZExpbmVDb3VudCI6MzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRhYWQ1ZDcyODViZWI4NTJhMTc2ZmIzN2I1NWUxNTBmZGY1OGY1ZDAxMGRiMDBkMTM1ZWM0ZDc2NTYyOTdjNWMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImVkOTRkM2MxODdhNDdiZDkwZGRkM2ZhN2UwYmNlZjExZWVmNzlkYjMzZGNiOWIzZWM2MDhiNWRmM2NiZGYzMzQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjAwNjJmOThjNGE0ZDZiODFhN2RlMjZlZjg3ZmY1MmM3ZDAyMGQwZmJhNTZhNWIxZGU2ODQyNWYzYmIzYmQ2MjEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5a947429d85b46a8aa6c1d44d45d72c5",
+      "statement": "fastlane lanes metadata_push, screenshots_push, and store_assets_push use deliver with skip_binary_upload, submit_for_review=false and force=true to upload localized metadata from fastlane/metadata and screenshots from fastlane/screenshots (screenshot lanes overwrite existing ones) without uploading a binary; authentication prefers an ASC API key from APP_STORE_CONNECT_API_KEY_* env vars.",
+      "evidence": [
+        {
+          "resource": "repo://fastlane/Fastfile#L114-L166",
+          "version": "repo-lines-v1:sha256:c16603173af0bc20b8abd37edecdeb326d7d1fa0682a9269fc8ccec93f5dd131:eyJzZWxlY3RlZExpbmVDb3VudCI6NTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMwNzM2ZWRkNWMzZWNhZDAwY2ZjY2NkMzQzYWZlMjk5Yjk5NmVjMWE5OGEwZjFiZGVlZDg1NzIwNjA2YmZmYTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc3OTgxMWM1ZmJlMjVjM2Q0ZTVmM2QxZmQzNWFiOWRhNmJjZjhhNjhjNWVkZjlkNmJhOTdmNjg2ODZjMzk2ODAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNlYzlhNDNmZTY1NGViMjkyNTljYWQ2OTNiODE1M2Y4NzgzN2I3Yzk5MDBhOGM4OGVlYjU4NTcyOGI3MTI4OWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUifQ"
+        },
+        {
+          "resource": "repo://fastlane/Fastfile#L35-L44",
+          "version": "repo-lines-v1:sha256:6f2f3281b2162a69a6402a293690459328046c265440a5080579575e9b0bd2e6:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVhNmFlNDZjNjg5ZDBjNWQ4NTgzZGM3MTY4NWNlOTdiMWZhOGRlNDM2MTM1ZmE1NDc3M2VkMjFmYzRiNjRhOTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4MzMyZmU2NjdiYzUxYWM0YTUxYmEwZWZlNzM0NDQxYzkwZGVmNTVjNjBhMjZkN2RiMjc1ZWNiYmNmNDJmMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjliMzc5MzZkYzliMWQ5OWU3ZGJhNTk3NTdjNTZlNWJlNjBjOTM5NmJkZGE0ZDJmZDY3MDVkMTU3Mzg2YWZmODAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjAwNThiZmMwMjFlNjgyMzdlMDU1YWZkNGE0NDY2YjQzYTEzMTRjMzBlYTM1M2JiNGVhMzllZmQzNDQ4OGQyNGIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_1fd253aa0e84492c918aeb150cd704d9",
+      "statement": "package.json wraps the fastlane lanes as store:metadata, store:screenshots and store:assets via mise, and provides store:download-metadata / store:download-screenshots using deliver download_metadata / download_screenshots for com.tomyail.tubecast.",
+      "evidence": [
+        {
+          "resource": "repo://package.json#L35-L39",
+          "version": "repo-lines-v1:sha256:9152caec5b118cd86a214fd3049e8cb2d78b429e1c24e9bbd8fad86f382439be:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYTgwMzkwZmQ2M2U0OGVjZWU0MTQzZjY2ODVkODI4ZWQwYmQwM2QzOGIwOTE2MGQ0YWNiZDNiMTgyYTE4NGM2MiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNjY4NWI0OGQxMTRmNWIwYjM1MGQ1M2FhZWYyN2UzOWExNzA1ODJiODAxOGNlMzZmZjI2YzA4YjAwY2VmYmYzZiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZDEyMjNkYjk2ZDdjMTFhNjgzODRjNjk2OGQzZjAzN2UzM2JlZmRkY2FhZTY5ODI5NDMwMGU2OWRjMTBiZTNlNSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOWZkNTgzMmZmODRhOGVjYTdhYzZiNmRmOTFkYjEyYjRhZmJlMDE2ODM0ODgzOWJmZGRhNDE3YjA4OTcxMGI5MSJ9"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.5.0",
+    "at": "2026-09-01T21:28:30.610Z"
+  }
+}

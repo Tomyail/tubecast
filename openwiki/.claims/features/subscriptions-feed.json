@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:c0270e47970ae1dfb939e6375a0dbdcf9ebb4e874ac2a2e6a3219fa2569afc68",
+  "claims": [
+    {
+      "id": "claim_6219265517a04c1195945f7d0ae08c0a",
+      "statement": "Subscribed channels are persisted as a JSON array of FeedSource under AsyncStorage key `youtube_subscriptions`; reads migrate a legacy {id,title,thumbnailUrl,addedAt} shape into FeedSource, filter entries without platformSourceId, and addChannel throws \"already subscribed to this channel\" on a duplicate (platform, platformSourceId) pair.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/youtubeFeed/storage.ts",
+          "version": "repo-file-v1:sha256:dd9022e6f887029d21471c138049af8243eda7473b83f4a838faffbcfaf60436"
+        }
+      ]
+    },
+    {
+      "id": "claim_2ba30471c8614c9088b074e805897a65",
+      "statement": "The feed cache under AsyncStorage key `youtube_feed_query_cache_v1` is rejected on read if the sorted `platform:platformSourceId` sourceKey of the current channel set differs from the stored one, any item fails the isFeedItemWithStatus shape guard, JSON parsing fails, or savedAt is older than 24 hours (YOUTUBE_FEED_CACHE_MAX_AGE_MS).",
+      "evidence": [
+        {
+          "resource": "repo://src/features/youtubeFeed/cache.ts#L42-L64",
+          "version": "repo-lines-v1:sha256:223cecb086c666669b7919f108c0744505ea6a35f44f061ce1f0ee3359a7929d:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc5NGEzYzkzZmRjNWJmODA1MDZjNDVkNzYzODA1YzFhMTFkNmMzZTY1ZDMxM2FhYTEzYzgwYWE5ODhkOWJjOTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA5NGZjMGMxNzNkMWVjM2ZjNTAxZDdkZmE5Mjg1NTAxYzUyN2NmYjQ3MTI1ODNkYTNjYzM2MTgwNTY2YjRiZTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjMxMTJkMGE5ODdiNjQ4MmQ3OGQyNWQ1OWY0YmEzZjQ4YTUyZGE1NDliNTNlYWM4OGI0OTQ4NjM3MjM4NzVhYjYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_7a3909484a0f45a4a6e20fe4452157f1",
+      "statement": "useFeedVideos seeds the ['youtubeFeed'] React Query cache from AsyncStorage on cold start (only if the query cache is still empty) with the stored savedAtMs as updatedAt, then fetches with staleTime 0; with zero subscribed channels it clears the persisted cache to an empty list, otherwise marks all fetched items status 'new' (job matching deferred in v1) and fire-and-forget persists the result.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/youtubeFeed/hooks.ts#L31-L97",
+          "version": "repo-lines-v1:sha256:1ac0b123b4945326eae240e5d0904c0f300a29307b8c19bbd577e7ea8916bc62:eyJzZWxlY3RlZExpbmVDb3VudCI6NjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJmZjYwNjgxMzEwNTliODMxNzFkYjc4NGI0MWRjMzZkMjRiOWQ2YzY4NWY5MGMwM2QxNmFkN2Y4ZDA3NGM2YTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJkMGYyZDNhM2FhZGEyNzU4NjQ1NzhkMGE0MzkxNTYzOGQ1NDNmZWNhMmM5NDg1OGRiOTQxMjExZTg2Y2VmMmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA1MGRlYmU2ZTczM2ZmMzEyMTNiODhlMDc0ZDY2N2RkZThlMTVkMjc3ZThlMTI0NmIyNjY5YjYwYmEwYmQ0MGYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c53eabf736454f26bc55fd4cc3fdd439",
+      "statement": "useAddChannel, useRemoveChannel, and useSubscribeChannel invalidate the ['youtubeSubscriptions'] and ['youtubeFeed'] React Query keys on success, causing the feed to refetch after any subscription change; useAddChannel resolves input via POST /api/feed/resolve-source first.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/youtubeFeed/api.ts#L9-L15",
+          "version": "repo-lines-v1:sha256:f786fe013e84c8cd73f8a31a5cd142fc2944aedae2ca921038ff60507f7d049b:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiM2NlNTdmNzAyNzUwMzAxMGQzNzJhNjRiNjc4ZTg4MjQ5NGE5ZTRlZGM2NGFlM2Y3ZDU0NjU2YmY4OGYzOGE4NyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTg5MjlhMGQzYzUyOTMzYWJlMzY1YTk2MDVjZmQwNDU5ODUxZWM3N2Y2MzYzNmE4YmRiMTJkZjE4NGViMjA0YiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNDQ4ZDViODVhYjM4ZTM3NzJiNTRhNDdiNTQxMWQ4ZGQ4YTg1MTgxZTQ5ZjFjY2IyN2MyZjMzMTNkMWE4MzA5NCJ9"
+        },
+        {
+          "resource": "repo://src/features/youtubeFeed/hooks.ts#L99-L167",
+          "version": "repo-lines-v1:sha256:5e8b611d3be236f6ebca68891a7d82c33af917797992bd1b1934c48f4fc8b9d5:eyJzZWxlY3RlZExpbmVDb3VudCI6NjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNlZTY5YmE0MWE3NDY5YzQxYmNkMTliMzZiMTE4ZTVjY2I4OWEwMzM2YzM3YzNkNzVmZDI5OTE5ZTMyYWE3YmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJmMDU2NGNmOThmNGY2ZTkwZGI0Y2U2YWJkNGE5NTY5M2ZkYTY3NzY0M2MyNjA0YzExNmVjNmJjNDkzOTY4ZDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY4YzRhMzFiYTQ3MDhiMTk0NTQwMjliZjY3YjA2NDQ4YWRiZjI5NzE4ODY5MjY5MjViM2FjN2Y1Y2M4N2M4YTAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c925743bb1df4aa584727c515526ae19",
+      "statement": "In-flight feed conversions are stored per platformItemId under AsyncStorage key `feed_submitted_jobs` as {jobId, sourceUrl, submittedAt} with a 24-hour TTL; getSubmittedFeedJobs re-validates and prunes malformed/expired entries, rewriting storage when anything was dropped.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/youtubeFeed/submittedJobsStorage.ts",
+          "version": "repo-file-v1:sha256:87da118dd77faa1977095bc59e9ead95e1a751e3cc024b86e3377fbdf3ce9eeb"
+        }
+      ]
+    },
+    {
+      "id": "claim_7c1f94592f94471696b3e6087f264225",
+      "statement": "FeedScreen.handleConvert submits video.sourceUrl via useSubmitJob and records the returned jobId in submittedJobsStorage keyed by platformItemId; handleTerminal removes the entry on terminal job state. matchJobStatus maps ready jobs to item status 'ready' with jobId, queued/processing to 'converting', and failed/other back to retryable 'new'.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/youtubeFeed/feed.ts#L21-L39",
+          "version": "repo-lines-v1:sha256:2ad69673439c87507ad95d5b7acf08947acc121dc14082aebb85f16b30468b5d:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFhZTU0YWM1NTA5ZmEzZjJiN2I4ZjA1ZjM0MDU3NTNmOTcwMjg1N2UwNWE3MDcwZGQ3OGQyNjE5ZDI0YTI5YTAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI3MzEyOGZkZTgzNDcwZDBhZTBmN2Q0NTFjZDYzYjg5NGRkNWUyMzQ0NzVkODc2NzgxOGZjZTQwYzI4NzJkNjQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE5M2U4MTg1NTM1MDEwM2YwMzA2NTE5OGVhYmEyMmE3ZGM2Njc0N2E2OWJjNDYzOWVlMmI0ZmYyMmE5OWY2NjQifQ"
+        },
+        {
+          "resource": "repo://src/screens/FeedScreen.tsx#L107-L141",
+          "version": "repo-lines-v1:sha256:d2e5a854eb5d6d42d9e7449e732046d7e3db219dbbcc8e4e6463071cc562c2d8:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI5MmZhNjNhODZiNzY4ZmRiNjA1OWI2ZDRmYzYxZjM1YjQxYWU1ZTliNmFhZjM5ODhlZmNhNjExN2Q0YzRhM2EiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZkYzUyZjA4YjM5YjA4YjAxYzhkMzA4YmY4ODBiMGJlZjAyZmQxZGZjYzlkOWFhOTNhNGQxYjVmNGQ1OGI2Y2IiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjYwZmRiZDE1ZGEwZWM2ZjAwYTRiMzFiZWZiMDZiNWY2ZWNjY2E2NzRiYTI0NGNjNDc0M2Y2OGE4MzE5YmJiMDciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQzMDZlZGZiMzAzYThiMTY2OTUxNWVhNDg0ZjE1NTk3MTY3ZTE4ZDM4ZGE2ZmFlYWQ4NmJkZjlkMzQwODA2ZjgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_4ba2cda70e9d49f5a24d49728a4936a1",
+      "statement": "AddChannelScreen routes supported YouTube video links away from subscription: it offers to navigate to the Convert screen with the sourceUrl (gated by the linkProcessingEnabled remote-config flag), while channel URLs, UC ids, and @handles go through resolve-and-subscribe.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/youtubeFeed/input.ts",
+          "version": "repo-file-v1:sha256:9bb33d7b3866e2107228d718f853e60a8fd2b493688913dd02de32cf1be1bbf5"
+        },
+        {
+          "resource": "repo://src/screens/AddChannelScreen.tsx#L28-L54",
+          "version": "repo-lines-v1:sha256:fd659ad8399bac19a7897e0b058d31ba0c7dd923222ef8ce9a22c7b37a792278:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjlmNmY1OThlNWNlNDdjYjY4NTIwZjJmY2FhZjczNmU1ZWFjZTQ2YWNiNjY3NzI0MGEyNTIwYjI4MGEwNmU5ZmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyYTJjYjI1YTEyMmI0NDIyMWE2MjM0ZWM2NjBhN2I1ZmI3ZjliZGU3YjNiOWUyYjNjNTU5YTBkOTZmYWM3MzkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImY2YjJiNzZhMGJjYWUxZTcxYWYzZmY1ZTNiNDRjMGVmOTljNDUyYmEzY2RhZDYwYWZkZDg5YWVmYzJmMWYzNzciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM2ZWFjYmIxMTdiNWZhYzNjYTcxNzAyZTg3ODFkOGNiNjI3OTA0NGNhNmQ4OTUwNDc3MDBkNGE2ZWNjZDE2ZjUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_9863c20df3534f448c16eb5886f82027",
+      "statement": "PublisherPreviewSheet subscribes/unsubscribes directly with a locally constructed FeedSource (no resolve-source call, offline check via useChannelSubscription), lazily loads fetchFeedItems for that single source, merges local playlist tracks and submitted jobs into a JobLookup for status, and polls getJob every 3 seconds for converting items — adding ready tracks to the playlist, resetting failed/expired to 'new', and pinning live-unsupported jobs.",
+      "evidence": [
+        {
+          "resource": "repo://src/screens/PublisherPreviewSheet.tsx#L95-L206",
+          "version": "repo-lines-v1:sha256:0b2ec2fbc11390066174b8682c993d296eb248dffd7f404bd546d0a1c43b21c8:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEyLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJlMTVkNzgwNGM5ZWVhZGE0OTQyNDM2OGYzMWZmZDM0MDUyNmQyYjEzMWM5YTkyYTc4MGVlZWExZjlkM2E3NTQ1IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJkMzFkZmM5YjI3MTJkNzRjOTNhMjcwZGRlMzgyOTE2ODliODI0NjA3ZDNkNTg5OWY2ZTQ1ZGQyNzI5NTA3ZmRjIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI3ZTI4MDlhNzFlODRhNGFhNmNlMGExN2ZlNWQxMDdjZTdjNDQyMjkzMmZmZjlkNDRiNWNkYzhhMWUxMzZjMDM0IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIyOTExMjA4MjMyZWZmNjJlOGU0YmEwOWNkNGJlMDFhYTg2MzYxM2Q4MjdmYmRmM2QxMmQxNTc5N2YxMzhkNmVjIn0"
+        }
+      ]
+    },
+    {
+      "id": "claim_1edc952c89f94c019024ac14de744d37",
+      "statement": "HomeScreen uses useDiscover (GET /api/discover with no-cache headers, 5-minute staleTime, 24h shape-validated AsyncStorage cache for cold-start restore); DiscoverItem intentionally omits sourceUrl (rebuilt as youtube.com/watch?v=<sourceId>) and card taps do a live getJob check, playing non-expired ready jobs or navigating to Convert / falling back to opening YouTube when link processing is disabled.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/discover/cache.ts",
+          "version": "repo-file-v1:sha256:0880d0384aa406143dbcc5f628ef04c16c5b61211a19035cc9eef3a3f886b42e"
+        },
+        {
+          "resource": "repo://src/features/discover/hooks.ts",
+          "version": "repo-file-v1:sha256:21ead801ce1963c801be36dbdea2320cf657764fe85d143a304151f571db5e2d"
+        },
+        {
+          "resource": "repo://src/features/discover/types.ts",
+          "version": "repo-file-v1:sha256:510b1cba2910fdc2ad4fd6545462cc54e1617dcf26ab0a3d085c0980cb6c7692"
+        },
+        {
+          "resource": "repo://src/screens/HomeScreen.tsx#L41-L77",
+          "version": "repo-lines-v1:sha256:1b586452ba614c0b89b85c3a9b571a08c596715634502c4067bb1feea0cbb319:eyJzZWxlY3RlZExpbmVDb3VudCI6MzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ0NjI0ZWEwMzk0Njc1NGFlMzc1NDJkM2MzMTQyZDM5MmY5NGM2YTA0MzE5ZjkwNDk3MGY5MDZmODRmNTFjMGUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyYTJjYjI1YTEyMmI0NDIyMWE2MjM0ZWM2NjBhN2I1ZmI3ZjliZGU3YjNiOWUyYjNjNTU5YTBkOTZmYWM3MzkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAyMWYyNzg5ZWZhYmNjM2M1Mjk0YmNlY2IwMzI0ZmJjOGYwZmVmNDAyZTE3Y2MyYmY2YmFhNmEwMTYxMThhNDkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjM0ZDJmNmUzMDk2NDI3YTFmODRjMDgyZjQyMDYzZDNmZTk5YjQ3MGFlYmJmNzQ3YzljMmRjOGFiNzU4NDM3MzIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c341c9db387341bcb771449fb55f4bf6",
+      "statement": "The iOS share extension validates YouTube video/channel https URLs (youtu.be ids, /watch?v=, /embed/ and /shorts/ paths, /channel/UC..., /@handle), percent-encodes the source URL into tubecast://open?url=..., mirrors it into the group.com.tomyail.tubecast UserDefaults under TubeCastPendingOpenUrl, and launches the container app by walking the responder chain to the host UIApplication's open(_:options:completionHandler:) before completeRequest, because extensionContext.open(_:) and the deprecated openURL: selector do not work from extensions.",
+      "evidence": [
+        {
+          "resource": "repo://ios-share-extension/ShareViewController.swift#L183-L257",
+          "version": "repo-lines-v1:sha256:67b366c32f5b2eb5d79a6e6abd476b13d97b5347a2ae381d37d494e78fb743d3:eyJzZWxlY3RlZExpbmVDb3VudCI6NzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk2MjRiOGRjMTZlMmYxNjJmMzhhMWM4N2Q0YjFhNGRmMWJhYzk3MjM2NjFiYTc0ZTdiNjI3YTNjMzVmMzk1OWMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI3ZTU3ODhkNWQ5ZDczZDI0YTgxZGJjMGE1YTc0YmZhODJjOWMzYjNhZjk5ZTUyYWY3OTZlOTBiNDY4YThhM2QiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU3Yzk2OTU2YTZmZjIxNDk0NWExNWExNTYzMGEwNzFiMTFmYTAwZGFhZWY0YWNhNWM2NzUxOTMzNTY3Zjg4ZmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjYwNjAzMDhiZTViNGY4YWRmYmQzYTE3YTA4OWZlODQwMDljM2VmM2Y4YjA5ODU3NmRmNTFjY2U4ZjJhMDVlYzQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_ed4e2abc8de743489dedd3d3cdc390a2",
+      "statement": "RootNavigator.handleDeepLink (wired to Linking.getInitialURL and runtime url events once navigation is ready) parses tubecast://open links with parseTubeCastOpenUrl: channel inputs navigate to AddChannel prefilled, URLs matching an existing local track (findTrackForSourceUrl) play immediately in Player, and otherwise navigate to Convert when linkProcessingEnabled or fall back to Linking.openURL of the source; tubecast://listen links behave the same with an added start timestamp.",
+      "evidence": [
+        {
+          "resource": "repo://src/app/navigation/RootNavigator.tsx#L163-L243",
+          "version": "repo-lines-v1:sha256:ecc2cee27b47beddd234ef388937418689ae7736aeed4a99d3865a2cb6ca8718:eyJzZWxlY3RlZExpbmVDb3VudCI6ODEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU3Y2EwMWI3MWU0MmQxMmUyMGY3OGIxN2Q2ODEzZWFiZmQ0NmVlOTE2ODU3OTVkYzU4OTk0YzYwYmFmMmIxMmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU2MDkyYTYyYjg3MjdlM2ZlMjQzNGU3NDFmNjI2YjcwM2NlYzM3Y2U5Yzk1OTc3NWU2YTU0Yjk4M2U2ODAwYmQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc5MTYwOTE3NjE4ZjNhNjM4ZTY4ZWNmZmQ2ZGJlYmMxMGI4M2E5Y2I5YThlMWY3OTNmNDcxZjU5OGU5ZWMwMDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjI1ODdiNjdlMDIwOWQwODgyMDAxYzlhODAxNmMxYTM3M2ZiZGNiMzBlY2JjZjU0NzQxODcyMTYyNzcwYjE0MjcifQ"
+        },
+        {
+          "resource": "repo://src/features/shareLinks/links.ts#L78-L101",
+          "version": "repo-lines-v1:sha256:f0faf8c966c1238489944a6b2266e40ffde08e52abeb006291797fa7630c3b8f:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNmNmYzMmQwNWQ4MWNmM2EwNTFhMDEyMWQ3M2M1MmIxMzFmNzY1ZWEwMGIyMmRlNmYzYzBmYzhmMTYyNjgyYTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM0MzZmNjhiMWMxZWZmYWFkMWJjZTcxYTE2YzY4NjUyOGMwNzY1ODI4MmFiYjUxOGE4NGQ3ZjI3NDllNjcxYjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZiNTgwZTk2NGY4M2E0NzNmNDNkNDQzODQ2Mjk0OWQ2OGI1NjAwZmRhNzg3ZjE2Mzc0NWQwMGRlODljYmYzNmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNiNTVlYTg1NWVmMjVhMGRmNzNmYmEwNGQxZGM1ODA1NmI4ZDMxMGIzZWViM2Y0ZWQyMTY0OTIzYjk4NzRjY2IifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5b26abdbfe0641328f18005eea0851b4",
+      "statement": "All youtubeFeed and discover hooks short-circuit to static demo data when screenshotDemoMode is enabled; focused unit tests for the pure logic live in test/youtubeFeed/ (cache, storage, feed, input, submittedJobsStorage, api) and test/discover/.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/discover/hooks.ts#L11-L22",
+          "version": "repo-lines-v1:sha256:3c11de6f008ed49f966bb33faaacd9b6cb810aebfa537d1c021c1b20c94733c3:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcxY2RlNTI2NjhhMzVlOGZjMzQ1OWFiMDcxYTU4YzdiOTgzYTlmZWRjNjQzYzU3MDliMGFmZjk0ZDdjNDU1MGUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI3ZTU3ODhkNWQ5ZDczZDI0YTgxZGJjMGE1YTc0YmZhODJjOWMzYjNhZjk5ZTUyYWY3OTZlOTBiNDY4YThhM2QiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjViMDcyYmVjMjFiYThjN2Y2NTYwNjY5NmM2MzgwZDM5YTg4YzhjOGMyOWJlY2Q5MmYyYjJiYjVkYzg2MjdlNjYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhhNzMxNDgzOGU5ZWU4YTUxYjE3NWVmZjJhMzc4OGZkMWFkYzcxNWFlNmVkZjRkYWMxMDJiYzg1NzEwNzRmZGQifQ"
+        },
+        {
+          "resource": "repo://src/features/youtubeFeed/hooks.ts#L13-L29",
+          "version": "repo-lines-v1:sha256:0287d390135670cccb3cfe7bad9ac350ba6203e3b8eacae085dd132d69b38b32:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRiZDUwZjYxMDBlNGRjN2M5MDliNzg3MDgzZDBjNjA1N2ExZjU2ODU2N2IxM2M4ZTAyZjJhNWVlMDU4ZjY0ZjMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM3ODVkMDA0ZTM0OTM0MTFjYmQzODcwOGY1Y2Y0ODdhOGEzZjA3YTI0Njg1YzYwZDA5YWNiYjAwMWI0NDA1ZmYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjY3MDk1MDMyNGIxYjY3MjJlMjU5NWI5MTk4YThlODUxMjdlZTZiODcyZTE4YTc4NDA2NjlkNGY3YzNmY2NkMWIifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.5.0",
+    "at": "2026-09-01T21:28:30.610Z"
+  }
+}

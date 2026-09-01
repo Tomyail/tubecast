@@ -1,0 +1,170 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:8707f8b5f002ac17d3ce5f9fb7c85b615a1e8853bbadd9ddcd4daf2dfdf0ac4f",
+  "claims": [
+    {
+      "id": "claim_63399ea69c3c407889da257c4b2c1ff2",
+      "statement": "App.tsx mounts exactly AppProviders wrapping RootNavigator; index.ts registers the root component and enables react-native-screens freeze for hidden tabs.",
+      "evidence": [
+        {
+          "resource": "repo://App.tsx",
+          "version": "repo-file-v1:sha256:c5ee1681098eb87f9e0868de08752e09dc1d2926c850b9cda69bb9d82f6d487d"
+        },
+        {
+          "resource": "repo://index.ts",
+          "version": "repo-file-v1:sha256:58df78a688b862096df974728e25fca8c284e7fdab012682d9cf9ef2fd408d2a"
+        }
+      ]
+    },
+    {
+      "id": "claim_1aa784c22e3d4854ae994f80deeb157f",
+      "statement": "AppProviders nests GestureHandlerRootView > SafeAreaProvider > QueryClientProvider > AppThemeProvider > I18nProvider > RemoteConfigProvider > SettingsProvider > PlaylistProvider > PlayerProvider, with PlayerProvider innermost because playback depends on playlist state.",
+      "evidence": [
+        {
+          "resource": "repo://src/app/providers/AppProviders.tsx#L25-L43",
+          "version": "repo-lines-v1:sha256:84aac223323aebad05c0ebbad6c4948fc6cdeeda5378d9d81e6289b066fe1171:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU3MjE2ZThlOWMwYTFhNjhkMDZjMmZiYWE1ZmQyMTM5NDgyYjhlZmQwYTE5MzE1YjkxNWU2Y2NlODQ5ZDg5ZGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk1ZWYwMWJjMDhkYmMzYjYzZTRlNzVlYTNkMjZhNWI5NDE4OTE4NzdlMjdhZDg5MTMyOWM4NDExZDdkOGRjNGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhiMGMxN2M3ZDc2Y2I4OTQ2ZmNhOGI2OGQ3YmQ1NmU4MDE2ZjUxNDVlYmJlNTg1ZmJhNDJlNjBhMGM3ZmY5OTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0e3a5d2b54c44d1580beb6d0eb865ab5",
+      "statement": "The React Query client is created once with defaultOptions.queries.retry = 1, chosen so hung requests (15s API timeout) don't keep spinners up ~45s+.",
+      "evidence": [
+        {
+          "resource": "repo://src/app/providers/AppProviders.tsx#L14-L23",
+          "version": "repo-lines-v1:sha256:0c0cd1b7fd1f5ff4f6eb7bf9b9eabbbe829cc16dc32cb938e8bbdcb20c28087c:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI4Y2E5ZmNkNWQxMjAxOTk0NmYyZjQ2MTEzNmE2ZDk1N2I5NDg2ZGEyNTQ3NDI2Y2RhMzIwMGVkZjM1M2M3MzYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk1ZWYwMWJjMDhkYmMzYjYzZTRlNzVlYTNkMjZhNWI5NDE4OTE4NzdlMjdhZDg5MTMyOWM4NDExZDdkOGRjNGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIzYjBmMjViMGFkYzAxNTM0MjlkM2U5ZGE1MWFhMGU5ZjQwMjJjN2RhNWNiNTRkNzY2NzVlZDliZjJlNDJjNjYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjY0Y2FhZDE5NGFiMzM5Y2ZmNjA2NmUwNWJmMTkzMTM4YTg2YWRmZTNkZTMwNjVmNTEzY2NlMDgwNTkzNjM3MDYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_57ab0089dbc6456c99873c40e4994884",
+      "statement": "RemoteConfigProvider starts from defaults (linkProcessingEnabled and audioExportEnabled true) and on mount tries EXPO_PUBLIC_MOBILE_CONFIG_URL then ${SERVER_URL}/api/mobile-config with cache-busting; if all fetches fail the built-in defaults persist for the session.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/remoteConfig/context.tsx#L9-L55",
+          "version": "repo-lines-v1:sha256:77ddd544c71ff6e053613312ccc86252792a2969d0f5df5af7a48f0e0081829d:eyJzZWxlY3RlZExpbmVDb3VudCI6NDcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY0MzU5MTQxZjQ1MzE0MmNkYzhlNmRmYzY1NDg3N2VhY2VmNWZkZmM5NDNlMGQ5ZGExZDNlNjQ3ZTlmMTI3NDYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImRmMGNmNDVmOTYxNGI4NmNjZjNkZWZhNDdmZThiNzIxNGJmZDc3MmRlNTYyMjc5OTk5YjkxNDQ0NDA2MzA5MGUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZkZWM3ZGU5ZGRjZjU0ODJmODNjZDRkYjE4ZTVhNTI0OWNlNDRmMmQ5NDlmZThmMGY3NzhlZmQxYjI3YTJhZGIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_e43a14e679db4052b80b108ce55cdcdb",
+      "statement": "AppThemeProvider defaults the preference to \"system\" optimistically, corrects it from AsyncStorage key settings_theme after mount, tracks useColorScheme live in system mode, and persists changes via setTheme; static typography/spacing/radii tokens are exported as constants outside context.",
+      "evidence": [
+        {
+          "resource": "repo://src/app/theme.tsx#L35-L101",
+          "version": "repo-lines-v1:sha256:89234fae4e83cc8a08ff0ef8ece7b419f8c74d6e893c72a59ab782322dee46a3:eyJzZWxlY3RlZExpbmVDb3VudCI6NjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVmYTU4ODhlMTkwOTQwMTAxNTA5ZjYzZDIyNmY3ZTY0ZmRmZmM5NmIyMzc0M2NhOGQ2MGExODg2MTViYTI3ODQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjEyOWYzMmM3MTg4NTMxYTIxZDE2NzUzMzk0OWVmZjE0OGJiNTI3MjYyMTE3ZmYwNzFhNWE3MmI1YjJlZDNmMzYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjAxNTMwMjIyYzM5MWY0ZjY2MTU5NDgzOWM5OWE5MzNkNmQ3ZjEyYWM2NTQ0MWE3ZWI3MDNiZjUxZDY3MTZiYTEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5caa1827d70c4be5b329a07fe617d7e2",
+      "statement": "The navigation tree is a root native stack whose first screen is a bottom-tab navigator (Home, Feed, Playlist, Settings), each tab wrapping its screen in a one-screen native stack, plus root-level modal/formSheet screens Player, AddChannel, ManageChannels, Convert, and PublisherPreview; MiniPlayer is rendered inside Tabs above the tab bar rather than being a route.",
+      "evidence": [
+        {
+          "resource": "repo://src/app/navigation/RootNavigator.tsx#L115-L152",
+          "version": "repo-lines-v1:sha256:9ec73b70229f372b8f62e68b7e5023a6c3bd9912b9d21fc14f73dbf3f6e1bb74:eyJzZWxlY3RlZExpbmVDb3VudCI6MzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVhNjgzZGE5NDI1MzY2ZWMzZWQ0NDAwMzcyMmJmNDNiZjI2NTJiOWRmMmFlYzgyN2JhNzNhOTAwOTI3NGJmNmEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA5NGZjMGMxNzNkMWVjM2ZjNTAxZDdkZmE5Mjg1NTAxYzUyN2NmYjQ3MTI1ODNkYTNjYzM2MTgwNTY2YjRiZTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImExN2I4M2YzNjdjM2IyZWVhOGU3MmQxNTJhZGU3YTFlNWNiYTIyYTk5NTdhMTFhYmVmOTI1ODViOTU5MjcwZDcifQ"
+        },
+        {
+          "resource": "repo://src/app/navigation/RootNavigator.tsx#L262-L316",
+          "version": "repo-lines-v1:sha256:376e599407a57aa8afbcb1490cacb58b7842a0804ca1b685f801aa93336350ab:eyJzZWxlY3RlZExpbmVDb3VudCI6NTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc0ZWY3YTI0N2Y2YmVlZDAwNTNjODcyNGJkMjhlYTM3MDhlOTZlYzc4YjFkYWViZWUwMDc3MzhhNDVlMjgxMGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRjZWI3Mzk1ZWIxM2FkYjc0NmUwYTI4NTg0NjQwYTE5MTdjMzczYzEwYjRiNzc0OGJmNTE3ZWJjZjA0NmY1MTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ0YjE5YzgyMDVkYjFmNzZhMzI1YjU1ZDJiYTFkZDBhMjEzNzMyM2E5OTcxOGNiYTUyODc5ZGNiNjIxYzBmNDIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVkYTYxOGI4ODk3NTI4MjY5ZjMxMWRlYmI1NTVmMGQ3ZjhiNWE5N2Y2YzI3YjE4OTE3YjE0NDQ5MTZhMDQ2NjQifQ"
+        },
+        {
+          "resource": "repo://src/app/navigation/RootNavigator.tsx#L31-L36",
+          "version": "repo-lines-v1:sha256:e4bed4c82e5dfe6a23c9734ea3584db82096f6173ad01447cf21c2c30fdfda43:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMjJjZGIxMDRkNGI4ZjJmNDEyYzBhYjc3NTgwZjgwMzcwZWU3NDE4OWE4NWNmZGIzMDBlM2NmZmQwOWRkMzU3OSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjQ5MjNkZDFiNGFkMjQ1ZTM4ZGJjYTBhMzBjYmY1NzBhZjAyMGNmY2MxOWYyODI3NDFjMmI2NDM3ZDFiYjgxMSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNDA4OWRjNjYyMjhhZTlhZDc2YzdiYjI2ODU3ZjQyZjE3MjRkZmZkZGU2ODUzMTMxYTA1ZTgyMmMyMmNkYTgwYiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMGZhODEwZTIwMzk5Njk5NDFiYjMzODNjMGUzNzMwYjNjNmZjMWI4NDIxMDMzZWFiZjM4MTc2OTY4YjkzZTAzNCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_8b91f596737f4ccaac58309eca77f851",
+      "statement": "Deep links use the tubecast scheme registered in app.json and are parsed by features/shareLinks/links.ts into tubecast://listen?url=...&t=... (timestamped moment) and tubecast://open?url=... formats; handling is imperative in RootNavigator with no linking config.",
+      "evidence": [
+        {
+          "resource": "repo://app.json#L1-L7",
+          "version": "repo-lines-v1:sha256:4927d53aecf71e4866350f6b4e49b98fe58aab1d295b576d00de2a15b0cff436:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYTZmYjA4ZmRhMWFjYjk1N2I2MTE2YmQzNzgxMWExZmU0MWEwMTYxMWMwNjMxZWRiZjc4NmQ2ODg5YTI3YTU1YyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOWQzNWYyNGY5ODFhNDQzYzA1Mjg2MjhkMzllNzQ2MTJjNzI1NTFhN2ExNDc5NWJiMjEzNjIwNjU3YTM3MmVjZSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOTQzYmE0OWNjYmYwYzVmMmE0ZjU0M2FmMjcyNmUxMDk0MmE5ZjdkZGMyMTFiOGY3ODc3YTFlNmI4ZmFlMDg5NyJ9"
+        },
+        {
+          "resource": "repo://src/app/navigation/RootNavigator.tsx#L163-L227",
+          "version": "repo-lines-v1:sha256:a509d0c47e1b142b4b1653b14f6c723cb817e14d206d5fc62547eebfe5a51b54:eyJzZWxlY3RlZExpbmVDb3VudCI6NjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU3Y2EwMWI3MWU0MmQxMmUyMGY3OGIxN2Q2ODEzZWFiZmQ0NmVlOTE2ODU3OTVkYzU4OTk0YzYwYmFmMmIxMmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk0NjczMDM3ODA4OGVkZGU3ZTIzM2MwZmNkNTA1MmZhMTliNjEyM2EzOThmNDBjZjMzMjI3ZjgwNjhmMDFlMDAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc5MTYwOTE3NjE4ZjNhNjM4ZTY4ZWNmZmQ2ZGJlYmMxMGI4M2E5Y2I5YThlMWY3OTNmNDcxZjU5OGU5ZWMwMDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc0YWFmMGQyOTg2YTVmNTAxY2FjMTJhOGQyNGYwMTAwOTUzZjZiMDMxNDgwYzkwNzIzZTgxOWJiYmI5OWVhNzAifQ"
+        },
+        {
+          "resource": "repo://src/features/shareLinks/links.ts#L26-L37",
+          "version": "repo-lines-v1:sha256:70d3581d5e417c1acb7f40de2fa4df48b5518f2f3483000ba66ca999ea56595c:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE4MzM1MWE1ZWQzMzY0MjEyM2U5NTQxYTViMzg5OTRkMGQ4Y2JkZjc5MGYwOTRjMzM4ZmQ1MTQyMWJhN2Y1YjAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAxMmI1NWFjMTJkYmViNzk0MWM2MWYyNTQ4ZjNjOWM1ZjA5YWU4NDBlOGY0MDA0N2MwMWIxYzZhYmM1YTgwZDEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVlYmE4M2M3Zjc2YjFiYTU2MTAxNDUxYTEzMzQ1NTZjMDc1ZWMwYjM2ZjJlZjQxZmNlNThjOTViYWZhZTlkMjAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a3444194ac5e498588dc51407d68f544",
+      "statement": "handleDeepLink resolution order: ignore until NavigationContainer is ready (initial URL processed once via a ref guard after onReady, then url event subscription); supported channel inputs go to AddChannel; otherwise a matching playlist track plays and opens Player; otherwise, if remoteConfig.linkProcessingEnabled is false the URL is opened externally via Linking.openURL, else navigate to Convert (listen links pass startAtSeconds).",
+      "evidence": [
+        {
+          "resource": "repo://src/app/navigation/RootNavigator.tsx#L163-L243",
+          "version": "repo-lines-v1:sha256:ecc2cee27b47beddd234ef388937418689ae7736aeed4a99d3865a2cb6ca8718:eyJzZWxlY3RlZExpbmVDb3VudCI6ODEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU3Y2EwMWI3MWU0MmQxMmUyMGY3OGIxN2Q2ODEzZWFiZmQ0NmVlOTE2ODU3OTVkYzU4OTk0YzYwYmFmMmIxMmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU2MDkyYTYyYjg3MjdlM2ZlMjQzNGU3NDFmNjI2YjcwM2NlYzM3Y2U5Yzk1OTc3NWU2YTU0Yjk4M2U2ODAwYmQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc5MTYwOTE3NjE4ZjNhNjM4ZTY4ZWNmZmQ2ZGJlYmMxMGI4M2E5Y2I5YThlMWY3OTNmNDcxZjU5OGU5ZWMwMDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjI1ODdiNjdlMDIwOWQwODgyMDAxYzlhODAxNmMxYTM3M2ZiZGNiMzBlY2JjZjU0NzQxODcyMTYyNzcwYjE0MjcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_adf6ab6b474d44a2a119c45d8541f4d5",
+      "statement": "Server data (feeds, channels, discover, job polling) is fetched through @tanstack/react-query v5 hooks in feature modules, with AsyncStorage-backed cache layers (youtubeFeed/cache.ts, discover/cache.ts) restoring data on cold start within a freshness window.",
+      "evidence": [
+        {
+          "resource": "repo://package.json#L43-L71",
+          "version": "repo-lines-v1:sha256:ce07ac5681e5ea0bb59702f3b17aa7cb4c0b64b6b7ce30043420bf38d4df0eee:eyJzZWxlY3RlZExpbmVDb3VudCI6MjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJhM2I0NjlkOWUwOTc1NzIyNDY2NjczNGM5ZWY3YjI1NGQ4ODUzNGY1ZDViYjcwOTg5NjA4MDVjNTUzZGMzMDciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY2YWJkZjZkYmQzODlmYTMyNmYyNDY3OTg1YWVkMWUyNWNjNTA3MjI2NDZlYWVjODhhZTQ5NjI3ZWU1M2I1ZGUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlmZDU4MzJmZjg0YThlY2E3YWM2YjZkZjkxZGIxMmI0YWZiZTAxNjgzNDg4MzliZmRkYTQxN2IwODk3MTBiOTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE0ZDQxMDQ3OTQwYmFhYmI4ZTk2NTg1NTA2M2VhNWEyMGQ1OWVlZGQ4YmZjMGE5ZjM3NDFmZWNmNWY5MGI5YTYifQ"
+        },
+        {
+          "resource": "repo://src/features/discover/hooks.ts",
+          "version": "repo-file-v1:sha256:21ead801ce1963c801be36dbdea2320cf657764fe85d143a304151f571db5e2d"
+        },
+        {
+          "resource": "repo://src/features/youtubeFeed/cache.ts",
+          "version": "repo-file-v1:sha256:31b6c01279d5596e810c8954e75b61070fae9bc5a4bc5cb2d86ee4cc09aade44"
+        }
+      ]
+    },
+    {
+      "id": "claim_6359e2644af74df2a4a16adf79e953eb",
+      "statement": "src/types.ts defines the central Job entity with status queued/processing/ready/failed, parallel summaryStatus, audio location fields, and an idempotencyKey.",
+      "evidence": [
+        {
+          "resource": "repo://src/types.ts",
+          "version": "repo-file-v1:sha256:99ec1c84ee351367190459a76e437f96c8fe7787c49996ac2213a3aa21ce31b6"
+        }
+      ]
+    },
+    {
+      "id": "claim_5b753825d5d74318bf887b06b2609c82",
+      "statement": "AsyncStorage is the on-device store with feature-owned namespaced keys: theme (settings_theme), language, tracks and playlists (features/playlist/storage.ts), channels, feed/discover caches, per-track playback progress written during playback and removed on completion, and a pending job id in ConvertScreen.",
+      "evidence": [
+        {
+          "resource": "repo://src/app/theme.tsx#L60-L98",
+          "version": "repo-lines-v1:sha256:896f910a0abd036bf5c545b029b637fe0de7796b719624f6b721ea8319e565f6:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEzZmJkODRhZWQ1NmU4M2M0ZTFlNjJhZmI1MmYxNDVmNWVkMjdlZWYzZWViZjFhNjZmNmE4YTExYTdjNzU2YTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNiY2E2YWFjZGFmZjhiMzg4MTBkNzcxNWM0NjUzZWUxZjkxNmEyOWMzZGQwNTZmNTZiYmQyOWVhMWYwNWRkNmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjUzODZiN2EzZmM1OTExNDAxNDUwMDUwZDViYWNmYjY2NTllMzlhN2FhMThhOTQ1M2MwMDRhNzM2MzI4Mzc3MDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjI2OGNiNTg2ZjNkMzM3YzdkNWQzM2E4NjZhMzljYWIyYmZmMmU4N2UxZjQzOTY2NzZmZDY5YzAwNTc2M2M5ZGUifQ"
+        },
+        {
+          "resource": "repo://src/features/player/context.tsx",
+          "version": "repo-file-v1:sha256:843c32c5ea40e61b521c2a513a9f1f69d2347e857b0d8b50ea4f4ca941ccdd5a"
+        },
+        {
+          "resource": "repo://src/features/playlist/storage.ts",
+          "version": "repo-file-v1:sha256:d8b2468bafcb0224077b79386ec5c4104f35dae6691548ceca8a56acaf824d54"
+        },
+        {
+          "resource": "repo://src/screens/ConvertScreen.tsx#L47-L104",
+          "version": "repo-lines-v1:sha256:c178d8cb9bd9e6fe415de970edcb83d3c87b2bb529186f7bf3f0c7a203458762:eyJzZWxlY3RlZExpbmVDb3VudCI6NTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZhMTM1MGE0NWNkZjVkOWM3ODQ3YWVhN2YwYWY2YmE1MDM2OTVhZDFiNDg2ODMwMzk4ODc2ZTA5YWFlNmFjY2IiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA3MThlODU4Y2Q1ZDFiNTc2NzkzMjNjY2U4N2Q0YTFkZmQyM2JjN2NhMGYyNjY3OGUzOTAyZGY2YjJhYzFmYWYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZiMGUxNTAyMGE0YTZlY2NjNWI5MjU5MjNlNDBjNWZmY2M3ZjE2YWNjOGU0Y2YzMmE2ODczMDMzZTI2OTU2MGUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjY0ODQ0OTVhODgwMGZiOGE4NzUzY2UwMjk0YWE4NDczYTRlMmRlNmNmZmJmOTc4MzU0OWI4OWRkOTRkNTQxN2EifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_6c0ee79839c14c1886456c523a0cf115",
+      "statement": "app.json enables background audio via the expo-audio plugin, declares Android media-playback foreground-service permissions, and wires an iOS share extension (TubeCastShareExtension, app group group.com.tomyail.tubecast) via plugins/withShareExtension.cjs.",
+      "evidence": [
+        {
+          "resource": "repo://app.json#L25-L76",
+          "version": "repo-lines-v1:sha256:fbcb740c9a6d4fbb4a1cd2257ab6cdf6ebaf0bd209f7d03d1ac507974fe55a88:eyJzZWxlY3RlZExpbmVDb3VudCI6NTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI1NDlkYmQ3YWI3MDE5NTExMjBmZmM2NWQ0NDljZGRjMDcwZmNhYzg5NjliNjAxMmEzOTU1ZmM0MjE0ZDljZjAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4OTNmNDBlMzc4MWViODk2YzgyZDA0NmEwODA2N2ExMWUzNWNkZjJmMWRmYWYyNmZlYTkwYjhkYjY2NzY0MTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkwOTg5YWJkOWUwZWVmMzQ0MDNkOWJiNTI5NTE1ZjQ2ZjYxYTkxZDBjNTZkYzg2MWY3ZWQyOTc0ODFmMjRlNDQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoyLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRmNzM5YTA2YzFjYmIxMjQ0ZTMzNjNkMzhiY2Y5ZmE1MGNlODRmZWQzOTljMjE5M2EzYzdmMDhkNTk5MThiMmEifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.5.0",
+    "at": "2026-09-01T21:28:30.610Z"
+  }
+}

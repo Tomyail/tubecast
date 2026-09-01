@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:9b692641322a88fdc1e682ea893259d71e70e5a2a4ab3dcf162ad0226356c89f",
+  "claims": [
+    {
+      "id": "claim_e66fee25e1b04c6bab8740b0f29147e4",
+      "statement": "Vitest configuration is a single minimal config whose only setting is include: [\"test/**/*.test.ts\"], and package.json's test script runs the suite via `vitest run`.",
+      "evidence": [
+        {
+          "resource": "repo://package.json#L40-L40",
+          "version": "repo-lines-v1:sha256:241fc249efa71b0e7a97f7f4eb8b89494a59cb3f87d71be6aad63aa3ba5e3d3c:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMjQxZmMyNDllZmE3MWIwZTdhOTdmN2Y0ZWI4Yjg5NDk0YTU5Y2IzZjg3ZDcxYmU2YWFkNjNhYTNiYTVlM2QzYyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjQxZmMyNDllZmE3MWIwZTdhOTdmN2Y0ZWI4Yjg5NDk0YTU5Y2IzZjg3ZDcxYmU2YWFkNjNhYTNiYTVlM2QzYyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiODIxYmVjMWFhZWYzZjI2NGM5MDllMTAyNDkyNWIzODI1MzczM2Y4MjcyZTM0YjUzZTk2NmZjZDlkNGE4ZDg1YyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiN2Y3OTkzYmZjMmU1NmVjNGM4OGQ1YTNhMjE1MjUyNWIyYjM1NDExNzEzNDBkYTI2MTFhMTdlOGI2OTdiMDJjMSJ9"
+        },
+        {
+          "resource": "repo://vitest.config.ts",
+          "version": "repo-file-v1:sha256:d3f713bf444d5606c1e46d9740aaf2adab61c9a6af71e1b0d234cc8e7389fa5d"
+        }
+      ]
+    },
+    {
+      "id": "claim_6886d74ecbb24583b549adee5955b36e",
+      "statement": "The test/ tree mirrors src/ feature areas (youtubeFeed, jobs, player, playlist, audioExport, discover, shareLinks, settings, remoteConfig, plus app, screens, components, i18n directories), with each test file importing directly from the corresponding src/features/<feature> module by relative path.",
+      "evidence": [
+        {
+          "resource": "repo://test/i18n/formatters.test.ts#L2-L2",
+          "version": "repo-lines-v1:sha256:f05b1871ad185efe8e0c0b219e7454d4f0ff2110e6a52de32979512963f6c1d0:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjA1YjE4NzFhZDE4NWVmZThlMGMwYjIxOWU3NDU0ZDRmMGZmMjExMGU2YTUyZGUzMjk3OTUxMjk2M2Y2YzFkMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZjA1YjE4NzFhZDE4NWVmZThlMGMwYjIxOWU3NDU0ZDRmMGZmMjExMGU2YTUyZGUzMjk3OTUxMjk2M2Y2YzFkMCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjEsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYWI5NTA2YjIxZjQ4M2RjOTVkZjJmMmIzNWY3MGMwYTQ0M2IwNTNhN2I5NjQ5Zjc3NDY3ZTY4OGEzMzIwMDQwNCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZjA0ODEwNGEwZDdlNGZiYWM2Y2U0OTM2NGUwYzcxZWNmNDZmMmI2MjZmZjU5NWY3OTExNjU1YTYyYzZmMDllNyJ9"
+        },
+        {
+          "resource": "repo://test/jobs/track.test.ts#L2-L4",
+          "version": "repo-lines-v1:sha256:5119b38c971632f516524757a021eec0b38ce3e1d3c4f0c1f89bb689011217fa:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjdkZjlmMTY4ZjJhZTdiMTFkYzQ2NzZhYzFlN2FiODViOWM5NzBiYzkxNzFjNTIzOGU1ZmE3ZTEzM2I5MWVmZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiY2FmOWE1OWRhZjIxZjlkM2QyMWJlMGMxOWI3NDE5OTJmNmI2ZTA5YjlkNWIyNDY4YTE4OGFmYzZkMjYzYjZiNyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjEsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYWI5NTA2YjIxZjQ4M2RjOTVkZjJmMmIzNWY3MGMwYTQ0M2IwNTNhN2I5NjQ5Zjc3NDY3ZTY4OGEzMzIwMDQwNCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTU5NDY2NDVjMTlmYjU4NzBiZmU5NjMyZmYzNWE4ZDZlMWM1MzRkMWIyY2EyYmFmOGRmODY0YmM2ZTBjMjc3NSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_5f1d3762d7ac4610b2cecd7118a88ab4",
+      "statement": "Tests run in plain Node against TypeScript imports from src/ and mock React Native modules such as @react-native-async-storage/async-storage with vi.mock plus dynamic import, so the suite never boots the Expo runtime and has no component-rendering coverage.",
+      "evidence": [
+        {
+          "resource": "repo://test/youtubeFeed/cache.test.ts#L4-L23",
+          "version": "repo-lines-v1:sha256:6c09483d3d4dc5ded8cf3650dcf747fdf35a263374e2db4e2f0504cc7ea08d4f:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNiMzg5NjRkZmMyZGE5OWE2YTc1NzkxOTQyMzQ4MzY4NjJhNjYwM2ExMmQ4Y2QyODFkYzJmN2ViMGIyMjc0M2MiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjcwOTA0M2NhZjllM2YzYmI0ODBlNDhlMGFkMGVkMTczZDI5MDc4YTUyMjRiOTgwMTczMGRmY2QzNDg2OWIwY2UiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI3Yjk4Y2UwODU0N2VmOGU3YzQ1ZjhkODVjNzBmNjJhZjBlZmJmYWU1MTc0ZDRkOGU1ODMzMTU2ZmYzZmY1NzcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0cbe0c37a85a4b659e1b51e6e87918f0",
+      "statement": "test/setup.test.ts is a harness canary that only asserts 1 + 1 === 2; it is not a Vitest setup file.",
+      "evidence": [
+        {
+          "resource": "repo://test/setup.test.ts",
+          "version": "repo-file-v1:sha256:436812554e4797a9b1429695393b7b7eec4cbb05ae2a03ee5977ad1ab3336a4a"
+        }
+      ]
+    },
+    {
+      "id": "claim_c6da03e828304f5096824b2401a1dc61",
+      "statement": "src/features/jobs/track.ts maps ready conversion jobs to playlist Track objects, so changes to that boundary require running both test/jobs/ and test/playlist/.",
+      "evidence": [
+        {
+          "resource": "repo://test/jobs/track.test.ts#L1-L4",
+          "version": "repo-lines-v1:sha256:4d546da3025f1da930b1e32c6b8baed1f65105d0b3183292bfd762ab795b4a5e:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYWI5NTA2YjIxZjQ4M2RjOTVkZjJmMmIzNWY3MGMwYTQ0M2IwNTNhN2I5NjQ5Zjc3NDY3ZTY4OGEzMzIwMDQwNCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiY2FmOWE1OWRhZjIxZjlkM2QyMWJlMGMxOWI3NDE5OTJmNmI2ZTA5YjlkNWIyNDY4YTE4OGFmYzZkMjYzYjZiNyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTU5NDY2NDVjMTlmYjU4NzBiZmU5NjMyZmYzNWE4ZDZlMWM1MzRkMWIyY2EyYmFmOGRmODY0YmM2ZTBjMjc3NSJ9"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.5.0",
+    "at": "2026-09-01T21:28:30.610Z"
+  }
+}

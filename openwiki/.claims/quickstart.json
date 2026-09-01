@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:2ec6a1c766cf70e00f823cb8f403452b8e555cf691451e59467d2756cc43b28c",
+  "claims": [
+    {
+      "id": "claim_05bcf4c14acd468f812c524be362bf66",
+      "statement": "The openwiki/ directory is an optional just-in-time evidence index; source code and tests are authoritative, and narrow quiet validation is preferred over repo-wide sweeps.",
+      "evidence": [
+        {
+          "resource": "repo://AGENTS.md#L71-L80",
+          "version": "repo-lines-v1:sha256:a319ed9ec4cad54b0f94f84000c54d8088f8865b051f43dee476fcff15e7b5ac:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVmMTgwZjljMTI2OTAzYmNjMzMxYWE5NTQ1NmU0OTQ0NGE3ZDRkMDExZThhMmE4M2Y1ZGM4NzAyMzkxODEyZDAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFiNTM5NTNiZmI3MmMxMjYyYmJhZTJlYWNhNzJjYWJmMWFmNDk5MjdhMGJiYTExNTdiMmQ1YmRiMjg1YzRiZDIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImEyZGRkMzQwOWQxMTc5ZTgyZjQ1Y2VmZjM3MmY0Nzg3MzhmOWZkZjFkNmViOTgyNDA2Y2FiNDY3N2JlNTk1NzAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoyLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjMwODlkZjkzZjhiYTU3YTRkZGJmZDhmMDEzOTYyYzM5NzhjZTRkYjY4MTk5YzRkYTY2NjY0OWIwOTk2Y2VkYTkifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_cb1e6af6a89643099b22cfb90219b5c3",
+      "statement": "Commit message type determines the automatic version bump via commit-and-tag-version (feat→minor, fix/perf→patch, BREAKING→major; build/ci/chore/docs/refactor/style/test bump nothing), and the husky commit-type-guard hook rejects feat/fix commits containing only toolchain files.",
+      "evidence": [
+        {
+          "resource": "repo://AGENTS.md#L46-L59",
+          "version": "repo-lines-v1:sha256:5f97c8cb1e250780dbdf13f5a2fdc1d8a62b6d3a8369b403782c47b23eecfb87:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYwYWM3Nzk3N2FjNDE4M2FlZDk0Y2YzYTQ1MDcyZjkzYzQ2MDJkY2RhYjA5MzE5ZmVmNjdiMjk4NDBlZDYyMTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM1MzhhZWM2MjdmYTI4ODczMDVhOTlhMjgxNTFiMjExNGFjMDA3MjQzYmVjMGJkMTI1MjE3MzhhN2ZlODE3Y2EiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA5NzM1NzE0OTkzYTRlMGVlMjU4NjIzOTUwZmViYWY3MGM2MDhlZmE0NmY5YmIwOTYzMWIyMmM1NzYzZmMzN2IiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ2NTlhYjE5NGJkNzU0ODU3YzBjM2I2NTZhMWE3ZmExMzg0NmQ1MTNmYjlkNzE3NjJmYjEwNTI5NjVkZTViMzIifQ"
+        },
+        {
+          "resource": "repo://AGENTS.md#L7-L16",
+          "version": "repo-lines-v1:sha256:1bde3d0b4de828762b034c10560f45b2394cf546bf533772ac662fc7d3ce2fa8:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM3M2NhNGU3MGIyMjM3MTRiZjg0MjczNmY3YzQ4Y2RiYzUwOTQ2OWFlNjEwMTRkNzQwZTQ5NjQ1OTU1NzBmNzAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJmZmNmN2M2ZTcyMzU5ZmZjMGFkZjhmMjNhMWFiMWFkYzgyNjk3YzAyYTNhZDg5OGRiZDE2ZjI3YzE5Y2NlY2UiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImVmODAzYjYxNGUxNGI4NWJiNTYyMTFjNDUwYTQ4NTg1MjdiNzFiZGM3NjM0NDQzNjA0MTRiNjdmMmUwOWJlZDkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU2MjYxOTFkYTRjMjBlNWQ3NDM2ZjkyNDc0OTFkOTI5NTEzNGJkODYyMjFlOTZmODlmZThjNjIzNzhmMzM2NzIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_185dd0f350f14679ab168167c1e26d31",
+      "statement": "Development runs use pnpm with Expo: `pnpm install`, `pnpm start` (Expo dev server), `pnpm ios` / `pnpm android` for native dev builds; requirements are Node.js 20+ and pnpm 10.",
+      "evidence": [
+        {
+          "resource": "repo://README.md#L35-L55",
+          "version": "repo-lines-v1:sha256:7a5abecff05437044ca595fec72169a8b8263157a6b8b8f6be578df159ec34c5:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMzMmZkZGNmMjFiZGQ2ZTk0NTkwOWMwYzdlOTQxYjI3OWY2NjMxNWU1MjMxMTIyNjMwMGYwMWNmNjYxNTZhZTAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ3YzA2YzU2MWQ1YzMyNzM0MzY4NTI2OGE0NmIzMzkxZjM5OThlZWU4OTBkMmJlNTFmMGQyMWNjNGE1M2FlNmQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImMyZmEzMWMzN2JhNDNmN2ZkYzRhYTc4OWUwMjcyYmY1YWQ0MjZmOWM5NTRiYjcwYWZhZDNjYmY0OWU0NmVkMzYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjllOTY2YTFkMDExZmMxMDUwOGU5YjE4NDNiMGY4NTU4ODYwZmJhMDllY2UyNDQ0MzE1Zjg3NzZmZTZlNDk0ZTgifQ"
+        },
+        {
+          "resource": "repo://package.json#L11-L18",
+          "version": "repo-lines-v1:sha256:881ea564c52dc2cbbd186fcc4b68747a089d948684a22f3acc37da4783bfa575:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNDBjNWE4MzM0MTYzODE1M2U2YzQ0Mjc0ZDJmM2I1NDQyMDM2ZWRhMjRmMTY4YTU0YjE1ZjA1NTRkNTFkMDMyYSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMTYwNmRmMDMyZmU5ZjI0MGMyOTEzMjY5MzJjY2E0MTFkNmRkOTlkZTc4NDliOGQwNGFlZjk1OWRmMmFlMzczNyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYzdmMThmZGYwZDU3NDNjZTE3YTQ1YWQ2NmU0OTYyM2FmNjQwZTc1NmZjNzI4ZTdjZjI5MGRmMWUxMmQ0MTQzMyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiM2UzOTExM2M4ODY4ZWMxZDBkZjFmZDAwOGM3ZWUwNTBjMTdlZWJkNTExMzFkNjFlODJjNGMyOTAzMWMwM2IyMiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_26aebf6ffbd241bd9da8a884b333004e",
+      "statement": "Screenshot demo mode activates only when EXPO_PUBLIC_SCREENSHOT_DEMO_MODE=1 is set (via pnpm start:screenshots and ios:screenshots variants); normal dev, TestFlight, and App Store builds use real user data.",
+      "evidence": [
+        {
+          "resource": "repo://README.md#L59-L76",
+          "version": "repo-lines-v1:sha256:5ec339135ebe09e2c08a76792ee0ac119bdff2ac40512107304579910771e298:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU2NzJhZWIwNDM5M2FkMmEyM2FiYWU2ODJmMjE1NGI2OWI2OWVlNDQ3YWNmNDVhZjliMTJlOWRiZDE0MjljYTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE0MmJmZDcxYTY1YTA0OTU3YzZlZjc5NDk4YzEyODM2N2Q4ODg3ZTIyNjU0ZjAxZGIzNmE5NjBiYTkxZWYxMWYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjllOTY2YTFkMDExZmMxMDUwOGU5YjE4NDNiMGY4NTU4ODYwZmJhMDllY2UyNDQ0MzE1Zjg3NzZmZTZlNDk0ZTgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNlZTU1MTljMzcxN2JlMGVhNGUzMWRjNGI0ZGE3MGVkMGZiMjA2MGFmMDkxODcwYjIxMGVjZmE3ODM5OTcyZDUifQ"
+        },
+        {
+          "resource": "repo://package.json#L12-L12",
+          "version": "repo-lines-v1:sha256:f5b2cef9d549e163e6deb2bea82975eb56e5ab7154ff998bb47c82350e5392d8:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjViMmNlZjlkNTQ5ZTE2M2U2ZGViMmJlYTgyOTc1ZWI1NmU1YWI3MTU0ZmY5OThiYjQ3YzgyMzUwZTUzOTJkOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZjViMmNlZjlkNTQ5ZTE2M2U2ZGViMmJlYTgyOTc1ZWI1NmU1YWI3MTU0ZmY5OThiYjQ3YzgyMzUwZTUzOTJkOCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNzBmZmJiMGY4YmFiMTE0NzczNWY1NTE1OGFmNThkMThhOGYzYWNiNWFmODcyM2JlOGM2MDY4NTAxNzIyMDYzOSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYzJkZDU3NGYxYzQzNzM1OTkxZThlMGYxODkyMDA2ZGE2ZjA3YjI3Y2NhMTg3OGQyYTdlNTZkZGE5NWE1YWNmMyJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_9ae90cfdab284be6b49cbf82849811f8",
+      "statement": "`pnpm test` runs vitest, the repo's test runner.",
+      "evidence": [
+        {
+          "resource": "repo://package.json#L40-L40",
+          "version": "repo-lines-v1:sha256:241fc249efa71b0e7a97f7f4eb8b89494a59cb3f87d71be6aad63aa3ba5e3d3c:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMjQxZmMyNDllZmE3MWIwZTdhOTdmN2Y0ZWI4Yjg5NDk0YTU5Y2IzZjg3ZDcxYmU2YWFkNjNhYTNiYTVlM2QzYyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjQxZmMyNDllZmE3MWIwZTdhOTdmN2Y0ZWI4Yjg5NDk0YTU5Y2IzZjg3ZDcxYmU2YWFkNjNhYTNiYTVlM2QzYyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiODIxYmVjMWFhZWYzZjI2NGM5MDllMTAyNDkyNWIzODI1MzczM2Y4MjcyZTM0YjUzZTk2NmZjZDlkNGE4ZDg1YyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiN2Y3OTkzYmZjMmU1NmVjNGM4OGQ1YTNhMjE1MjUyNWIyYjM1NDExNzEzNDBkYTI2MTFhMTdlOGI2OTdiMDJjMSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_96a4092e2f724a3e8617a4dd37765b1e",
+      "statement": "Releasing to TestFlight is CI-driven: `pnpm release:version` bumps version/buildNumber and tags, and `pnpm release:ios` builds a local Release build for on-device testing rather than the CI release path.",
+      "evidence": [
+        {
+          "resource": "repo://package.json#L19-L20",
+          "version": "repo-lines-v1:sha256:b1ed0b4af6839f824b3054c453aa790d3d4e1b3ec9d32b468780eee72074ebe5:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMWQ1NzllN2Q2MjA3NmZlZTc2MTVhYzRiMzQ1ZDlmZTdkMjkwNzI3M2MzMmU5ZDVkNTVmYTQwYzJmYWIzMTgyNCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOTU0Yjc4OTBmMDQ3MmVkNzNlOGZhNGVhMjFlMDM2NTFkZjQ0MDk4MjFhZmNkZTc2YjJlNWE4MzIzYmNjMWY0YSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOTY4MTQxOGIwODcwNTMyNGIzMDE0MWVhNDQ0ZjYyNWRjNjc5MGNhMGJlODYyOTFiNzc4YzFhNzc2OWY0NTA3ZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNzE5ZmJjMmU2YWQ4Y2RkMjY4YWZhY2UzMDE0ZGQ4OWZmZmIzMDg1ZGZhN2E5ZTQ1ZTZiZmFiYjc5M2VmM2FhNiJ9"
+        },
+        {
+          "resource": "repo://package.json#L40-L40",
+          "version": "repo-lines-v1:sha256:241fc249efa71b0e7a97f7f4eb8b89494a59cb3f87d71be6aad63aa3ba5e3d3c:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMjQxZmMyNDllZmE3MWIwZTdhOTdmN2Y0ZWI4Yjg5NDk0YTU5Y2IzZjg3ZDcxYmU2YWFkNjNhYTNiYTVlM2QzYyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjQxZmMyNDllZmE3MWIwZTdhOTdmN2Y0ZWI4Yjg5NDk0YTU5Y2IzZjg3ZDcxYmU2YWFkNjNhYTNiYTVlM2QzYyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiODIxYmVjMWFhZWYzZjI2NGM5MDllMTAyNDkyNWIzODI1MzczM2Y4MjcyZTM0YjUzZTk2NmZjZDlkNGE4ZDg1YyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiN2Y3OTkzYmZjMmU1NmVjNGM4OGQ1YTNhMjE1MjUyNWIyYjM1NDExNzEzNDBkYTI2MTFhMTdlOGI2OTdiMDJjMSJ9"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.5.0",
+    "at": "2026-09-01T21:28:30.610Z"
+  }
+}

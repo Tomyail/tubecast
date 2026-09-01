@@ -3,6 +3,17 @@ type: Documentation Hub
 title: TubeCast Documentation
 description: TubeCast is an independent Expo / React Native client for iOS and Android that turns YouTube channels into a personal, audio-first listening library.
 tags: [tubecast, expo, react-native, mobile-app, documentation]
+verified:
+  - by: openwiki/0.5.0
+    at: 2026-09-01T21:28:30.610Z
+sources:
+  - id: openwiki-source-8037e2358a2c4f9b2c722a11
+    resource: repo://AGENTS.md
+  - id: openwiki-source-5b54a58d1b51cd490b0e7162
+    resource: repo://package.json
+  - id: openwiki-source-23775c3de52f3ab95a13cb8b
+    resource: repo://README.md
+generated: { by: "openwiki/0.5.0", at: "2026-09-01T21:28:30.610Z" }
 ---
 
 # TubeCast Documentation
@@ -20,16 +31,37 @@ This wiki is an optional **just-in-time evidence index**, not required startup r
 
 This documentation covers the TubeCast mobile app implementation across:
 - **Architecture** - Expo/React Native app structure, navigation, and core systems
-- **Features** - Audio conversion, YouTube feeds, playlist management, player, and demo mode
-- **Release Workflows** - CI-driven TestFlight pipeline (EAS Build/Submit + fastlane distribute), App Store metadata, and versioning
-- **Development Practices** - Commit conventions (AGENTS.md), testing, and AI agent guidance
+- **Features** - Audio conversion pipeline, playback & library, subscriptions & feed, and feature survey
+- **Operations** - CI-driven TestFlight pipeline, versioning, demo mode, and App Store assets
+- **Development** - Commit conventions (AGENTS.md), testing guide, and AI agent guidance
 
 ## Quick Navigation
 
+### By Task
+
+| If you're working on... | Start here |
+|---|---|
+| App structure, navigation, providers/theme, data layer | [Architecture Overview](architecture/overview.md) |
+| Any feature module under `src/features/` | [Feature Modules Overview](features/overview.md) |
+| URL → audio conversion, job states, caching, export | [Conversion Pipeline](features/conversion-pipeline.md) |
+| Player, playlists, background audio, track lifecycle | [Playback & Library](features/playback-library.md) |
+| Subscriptions, feed, publisher previews, share extension | [Subscriptions & Feed](features/subscriptions-feed.md) |
+| TestFlight releases, versioning, hotfixes, store metadata | [Release & Distribution](operations/release.md) |
+| Screenshot demo mode, App Store asset pipeline | [Demo Mode & Store Screenshots](operations/demo-mode-screenshots.md) |
+| Commit conventions, version-bump rules, i18n, code organization | [Development Conventions](development/conventions.md) |
+| Vitest setup, choosing the narrowest focused test | [Testing Guide](development/testing.md) |
+
+### By Area
+
 - **[Architecture Overview](architecture/overview.md)** - App structure, navigation, and state management
 - **[Feature Modules](features/overview.md)** - Player, playlist, YouTube feed, discover, and demo mode
+- **[Conversion Pipeline](features/conversion-pipeline.md)** - YouTube-to-audio conversion flow and job lifecycle
+- **[Playback & Library](features/playback-library.md)** - Player state machine, playlists, and offline caching
+- **[Subscriptions & Feed](features/subscriptions-feed.md)** - Channel subscriptions and podcast-style feed
 - **[Release & Distribution](operations/release.md)** - TestFlight builds, App Store metadata, and versioning
-- **[Development Guide](development/conventions.md)** - Commit message conventions and AI agent guidance
+- **[Demo Mode & Store Screenshots](operations/demo-mode-screenshots.md)** - Screenshot demo mode and store asset pipeline
+- **[Development Conventions](development/conventions.md)** - Commit message conventions and AI agent guidance
+- **[Testing Guide](development/testing.md)** - Vitest setup and focused validation commands
 
 ## Project Structure
 

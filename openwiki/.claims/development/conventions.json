@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:66dfa3eb31f3a0317054549b24c4de67560c2c02ebd33d11c6530856441259eb",
+  "claims": [
+    {
+      "id": "claim_17f4948a5c8845cbb0240c75badc314e",
+      "statement": "The .husky/commit-msg hook runs commitlint (format validation via commitlint.config.cjs) followed by scripts/commit-type-guard.mjs (file-path-based type validation), while .husky/pre-commit is intentionally empty with only a commented-out `pnpm test`.",
+      "evidence": [
+        {
+          "resource": "repo://.husky/commit-msg",
+          "version": "repo-file-v1:sha256:535f22c28bb61a03991e2efdb6338fe52db855903c3cbd9a8f8e787e66e02e06"
+        },
+        {
+          "resource": "repo://.husky/pre-commit",
+          "version": "repo-file-v1:sha256:a9821a4ba0fd06cb8b8af8090f011cb09e4801624a489dcf8ef2f5a4076a091c"
+        }
+      ]
+    },
+    {
+      "id": "claim_b02838fddaf749849c5deea84f6f4218",
+      "statement": "commitlint.config.cjs extends @commitlint/config-conventional and pins type-enum to feat/fix/perf/refactor/revert/docs/style/test/build/ci/chore, disables subject-case (allowing Chinese/capitalized subjects), enforces header-max-length 100, and ignores Merge/Revert/Initial-commit messages.",
+      "evidence": [
+        {
+          "resource": "repo://commitlint.config.cjs",
+          "version": "repo-file-v1:sha256:3c76ffbb005b1a8d169d47cb6391c1548a800609ad2d7b2948ba305cc6942196"
+        }
+      ]
+    },
+    {
+      "id": "claim_2bb404b25b5040bdb0372a00372293d8",
+      "statement": "scripts/commit-type-guard.mjs only inspects feat/fix commits: it lists staged files (git diff --cached --name-only --diff-filter=ACM) and classifies each as tooling (scripts/, fastlane/, .github/, .husky/, docs/, ios/, android/, root configs, and md/mjs/cjs/yml/yaml/toml/rb/lock/snap/plist extensions) or app source; it rejects the commit (exit 1 with corrective suggestions) only when every staged file is tooling, and passes when any app-source file is staged or the staged list is unreadable/empty.",
+      "evidence": [
+        {
+          "resource": "repo://scripts/commit-type-guard.mjs#L29-L79",
+          "version": "repo-lines-v1:sha256:8378d6a481e88b16870dc26f6d7c98862892f7a4350af4ef57815c4ce74142ba:eyJzZWxlY3RlZExpbmVDb3VudCI6NTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIwNzk3ZjBjYWJiNWYzM2RiZWJmODRmZDcwMmM3ZjhmZWY4ZTRkZTE3MGY2NzFlYzM1OWQ1YzM3Mzc1OTQwNjIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA5NjUwNDgzZWQyMWE2YTkyNzllZWE1NDBkNjU3ZjNlY2IyNTdiZWM5YTliYzE2YWQ5ZmM3MDQ4YjBkNGY3ZTIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjcxMjM4NzcyZGJhZmVlNDlkMGFjMDg5M2E0YTYyNTk5NTI2MzhkNzBlMDdiYjQwNTQ4MjRmMGYwZGFmYjRhMzAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_87f986c392f34ea9b1ed61979d30c206",
+      "statement": "commit-and-tag-version (pnpm release:version, configured via .versionrc) bumps minor for feat, patch for fix/perf, major for BREAKING CHANGE or `!`, and no bump for all other types; RELEASE_AS forces a specific version. This is why the type guard blocks feat/fix on toolchain-only commits.",
+      "evidence": [
+        {
+          "resource": "repo://AGENTS.md#L46-L59",
+          "version": "repo-lines-v1:sha256:5f97c8cb1e250780dbdf13f5a2fdc1d8a62b6d3a8369b403782c47b23eecfb87:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYwYWM3Nzk3N2FjNDE4M2FlZDk0Y2YzYTQ1MDcyZjkzYzQ2MDJkY2RhYjA5MzE5ZmVmNjdiMjk4NDBlZDYyMTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM1MzhhZWM2MjdmYTI4ODczMDVhOTlhMjgxNTFiMjExNGFjMDA3MjQzYmVjMGJkMTI1MjE3MzhhN2ZlODE3Y2EiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA5NzM1NzE0OTkzYTRlMGVlMjU4NjIzOTUwZmViYWY3MGM2MDhlZmE0NmY5YmIwOTYzMWIyMmM1NzYzZmMzN2IiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ2NTlhYjE5NGJkNzU0ODU3YzBjM2I2NTZhMWE3ZmExMzg0NmQ1MTNmYjlkNzE3NjJmYjEwNTI5NjVkZTViMzIifQ"
+        },
+        {
+          "resource": "repo://commitlint.config.cjs#L1-L15",
+          "version": "repo-lines-v1:sha256:a4ac920dafdc55be8b402777afe451a76c95f7d03c635b6ca18d9c264322f45e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVhZjIyY2YwNzMyNTkyYzI0NzE0MWNiZTYxZWZhMTEwMTI2MTJmNWEzMTIyYjlhZjliYmFmNTJmNTcyNGQxOTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk3MmE0MjkzODJiMmUxNDcxOGUwZTM3YjA1NzBhOGExNzAyOTkxZmNkODQ5OGNkODQwNjBhOGJmNGYwNTAxN2IiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImJjYTNhYjBhMDM4NzI4OWU0NTIwZDVmYzBhNDFiMzhiYjkxMWVjMTJkYzFjNTU1ZmU2OGU0MjUzOGQxODUzZTQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_2f48aeb00af3425eb7d27f3ef484d70d",
+      "statement": "AGENTS.md is the canonical agent/collaborator brief restating the commit format, file-based type table, version bump table, and pre-commit self-check; CLAUDE.md only points to AGENTS.md.",
+      "evidence": [
+        {
+          "resource": "repo://AGENTS.md",
+          "version": "repo-file-v1:sha256:e88a3df85974f521a1de4f759b82de767f4ee2aec3dee204fbf18534ddb813f6"
+        },
+        {
+          "resource": "repo://CLAUDE.md",
+          "version": "repo-file-v1:sha256:31060379798cd019458c941e0c10846d7b7ad856616f025414ea67f326bfe1d6"
+        }
+      ]
+    },
+    {
+      "id": "claim_08404700798a49dba8341abd76ac5b2e",
+      "statement": "release.mjs's assert-no-demo-assets command fails the release if assets/demo-covers exists (to avoid bundling demo material in the IPA); demo covers must live in screenshot-assets/demo-covers and are referenced by remote URL in src/features/demoMode/data.ts, with the base URL overridable via EXPO_PUBLIC_SCREENSHOT_DEMO_ASSET_BASE_URL and demo mode gated by EXPO_PUBLIC_SCREENSHOT_DEMO_MODE.",
+      "evidence": [
+        {
+          "resource": "repo://scripts/release.mjs#L44-L69",
+          "version": "repo-lines-v1:sha256:a591fc16d2fe5a83979252d6cc2308d29a6a6545ad759dcd7af34f4edb0d1323:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA0OGQ4MDEwMmUxZDU0NDU3MWJkOGNjMTNjYWJjY2E1Mjk0MDcyNDJkZDQ4MDAwYzk0YmM0NTA5YzQxMjc4YTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhiNjBiM2E0NWQ1ODM1OTg2NzE0ZTI5NTMxNjg4MWUzNzRlM2M3MTUyOWYxOTliODM4NWEwYTc1OWJiMDNkOGMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImJkNGFhYTI0YTVlZDk0Y2YwNTkxNDQ1ZTgxYzAwMjI0YzQ0MWQ2ZWY3OWJkMDZiZDc0YmYzM2VmNzMzMmM4NjAifQ"
+        },
+        {
+          "resource": "repo://src/features/demoMode/config.ts",
+          "version": "repo-file-v1:sha256:c9db5c76c71a988e18d88a1b07c6efffb4b4514dafdf104742b42b5b7a347157"
+        },
+        {
+          "resource": "repo://src/features/demoMode/data.ts#L1-L20",
+          "version": "repo-lines-v1:sha256:0ededfadc8b834646bbe5d098ebea404f45f97b67aa7687bd663aa7098807d55:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY3NzMwZTRlNDdkNTZjMGYxMTFmNWM1NmQyNzRlMzAwM2M1OGU3NDhjMjBlNDdjMDkwNjc2ZjIyNWJiZmJmMmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFjMGUzNTJlYmE4NjY1ZDVjYTY2OTc1N2MyYTc4MTk0OTExOGUwZDU2NGM0YTMxMDUxZDkzNzVkY2YyNTZkNDQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE3NzNhMGYwZDAzN2ZlNjk4MzRlM2JkYjA4ZTQyYTdhMzJlNjY3OWJlYmFhMmNiYTVjYmE4YTJkMTgwZDI5YmIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c2b4820686f74053825f9984959396ee",
+      "statement": "src/i18n supports only English (en) and Simplified Chinese (zh-CN); resolveLanguage collapses any zh-* system tag to zh-CN; Traditional Chinese is not a locale, so adding it would require a new resource block and an AppLanguage extension.",
+      "evidence": [
+        {
+          "resource": "repo://src/i18n/index.tsx#L9-L19",
+          "version": "repo-lines-v1:sha256:cd4638170f6f198c2b37431eb05f09d0acdb0632a41b1b6fe11c69fee8c83294:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM1MDFmNDE1ZjEwNjgwYmQxNzgwNDkyMTcxZmI4NWU3OTU1MDk2N2IzNjlhYjU3NWE2MmJiZTVmNzFlM2EyYjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE2ZGJiZTFjZDRhNDk4ZjZmZTk5ZjhhNTlmMGYxYjZlOWQwYjk0MTE4ODBjMmExMmQwMTQ0NGZkMTM0MTU2NDIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjkwMWZkNmYyMTYxNTVlN2RlNzBiNmIzYzdlODJjNzAwOGE0ZTdhOWMwYzdhZTk4ZjdkYTA4MWQ1YTNjNDhmOTYifQ"
+        },
+        {
+          "resource": "repo://src/i18n/translations.ts#L1-L37",
+          "version": "repo-lines-v1:sha256:28d5319713ea05214d6fa9df9cdf822d47a82846498cd58a8aa5787594e05258:eyJzZWxlY3RlZExpbmVDb3VudCI6MzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBkZDhkNDYzNmM0MWQwZDhhNDExOTEzYzcyNTQyZjg0NGFjYzMzNGIwM2YxNzMwYTcxODEyMGE3Yzg2MzYxMzAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRkNWNkMmZiNGYzZGY4ODQ1MTUyNTViMzk1MjNmMmY4YjU0NzJiZWVhOWY1NjZmZmNhMjA0ZGI4MDI1NjEwNDEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE3NGVlOGE4ZDFhYTg0NTM5MWJjNjc5ZWI3MGNlN2Y0NmEzY2Q2ZmIyZDE2ZmNjYTY3ZmExNzhmNGY4YzFlMGUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_92ee4b4759b1498394e6a3aa1e603f0a",
+      "statement": "I18nProvider persists the language preference in AsyncStorage under settings_language (system/en/zh-CN), resolves the device locale via expo-localization when preference is system, forces EXPO_PUBLIC_SCREENSHOT_DEMO_LANGUAGE in screenshot demo mode, and renders nothing until i18n is ready; i18next initializes with fallbackLng en.",
+      "evidence": [
+        {
+          "resource": "repo://src/i18n/index.tsx#L21-L62",
+          "version": "repo-lines-v1:sha256:53674ab06a6b061624106d6769f5f76cc8c87a19d4d6c9b5044a4abe49c41753:eyJzZWxlY3RlZExpbmVDb3VudCI6NDIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdmOTc2ZTg0NGFkZjVhOTFmNTZiNmUyNWM2NmJjYjFlMzI4ZjYxNmFhODM1N2M2YjQ4YmI3NDU5Mzk0MDY2OWMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA2ZGVkYTU0MjFlYzdiNThkZDk0MTUxZjMxNTI2NDA3YjYyYzI1ZDUyYzUxNjZmNDJkMGZjMzc3YTZkOGQ3NGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjgxNzc1YjBkYmYwZjU2NWU3OWJkZjNlMDA5YWQ5ZDg4ODJiNGVjMjRkMzA1MTZlMjNjYzZiNGU2NDNmYTRjYTAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_84aacdf8bb2a4ea2882f81df2bd197f2",
+      "statement": "src/i18n/formatters.ts provides locale-aware formatFileSize (Intl.NumberFormat with the resolved locale) and formatDuration (m:ss / h:mm:ss), and user-facing strings use i18next {{placeholder}} interpolation with pluralized keys defined in translations.ts for every locale.",
+      "evidence": [
+        {
+          "resource": "repo://src/i18n/formatters.ts",
+          "version": "repo-file-v1:sha256:d68a9f8cfb1972cf04c0cff4a7614751bf932953f1b70c28b51abd32184348f9"
+        }
+      ]
+    },
+    {
+      "id": "claim_03630d2eb1644f979b2339623730264a",
+      "statement": "The app is organized into feature modules under src/features/ (e.g., player, playlist, youtubeFeed, jobs with context/state/hooks/api/storage files), shared utilities in src/shared/, screens named <Name>Screen.tsx in src/screens/, and components in src/components/, with i18n as a top-level src/i18n/ module.",
+      "evidence": [
+        {
+          "resource": "repo://src/i18n/index.tsx#L60-L70",
+          "version": "repo-lines-v1:sha256:d67541d98b5f8db95604c35793061e916ba47a1d7908b8d5d524b7243564d73d:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgzZGZkZWU4NjI2NTIxYzA2MGQ1ODk1ZTQ4NDdlYWI2ZDBjNTUzZjM4ODgyODU4YTRkYzg1MjlhN2MzYjc1MWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU5MWYyY2U2ZjM5YThiZGZmY2Q2MDkwYzdjYzBiNzNhOWJiZGRmNTgzZjEwN2IwNmM5M2ExZjJhZTcxZDFjMzAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM5OTY4NGZkNmI1NzkwZjMwZDZiNmYwNTJmNDNiYjQ1MmU5NTcwNzQyOTAzZmE5NDI1OTJjZDA0MzQ4NjVkYmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://src/types.ts",
+          "version": "repo-file-v1:sha256:99ec1c84ee351367190459a76e437f96c8fe7787c49996ac2213a3aa21ce31b6"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.5.0",
+    "at": "2026-09-01T21:28:30.610Z"
+  }
+}

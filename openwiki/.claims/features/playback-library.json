@@ -1,0 +1,318 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:877ed582c108ffc8dd35e8d7512bc08f97d5a625052dda0f0431ec11f86042cd",
+  "claims": [
+    {
+      "id": "claim_1a64cf625afb44feb3a6b277b6cddee9",
+      "statement": "PlayerProvider drives a reducer-based state machine with phases idle/resolving/loading/buffering/playing/paused/error; play-request enters resolving, source-ready moves to loading, and status-derived phases complete the transitions.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/player/context.tsx#L120-L180",
+          "version": "repo-lines-v1:sha256:48800f2b76192a8aa08a691055eaafdc66fc3bc7735624caf0a38af767684a48:eyJzZWxlY3RlZExpbmVDb3VudCI6NjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBlNzViODhmZWNhZWJlYjdhMWYxZDM2MTUxY2YyYzgxYTc2N2ExOTc2MzMyZmM5N2U5ZmM5NGQ5OWY1N2M0NWMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZiMWY1MWM3NDVlMGQ5NjY1OGM0MTM0YzI3ZWM5MTIwYjdmZjkzNTNmYmNhMmZkNTM5Y2Y4YWMzYmYyYTk5MTQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFiYzNhMTMzMjA5NThiN2E0M2NiZmRkMzljMmQ1NDgwNjBlYWVjYWNiODhkNWE3OTliMzkzYzRjODIyMDNjYzQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYxNmRkZmU4ZjkyMGZiZjkzZmE4YWQyMDA1MGQyYmQ0MDE5OThlNDVkNDM2Njk5ZjA2NDAxZTc1YjA5MzRhODkifQ"
+        },
+        {
+          "resource": "repo://src/features/player/state.ts#L43-L102",
+          "version": "repo-lines-v1:sha256:6c875a5cd7a0c63934f16eb15d0f75e3dd3f4d65832145bd825a091defba2c6b:eyJzZWxlY3RlZExpbmVDb3VudCI6NjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJmYzhmMTE4NzhhMDE3YjBlYzdhMmJiZGZjN2U4ODU0YzdlZGU3NzQ1ODI5ZmEwNDdlMzg4ZGJkMDQ2ZmE3MGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImY0NmExMjYyMGFlNjNiMmFjY2YyMzMyY2Q5MGJiZDM2ODBiMTIzY2ZjYjMyYWQ0M2M1MjgyYTFlNzU5Y2QwNmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijk1Y2FjYzdmNzMyNDgyYjliMTE3YWNjMGVjNGIyNmFiOTNhYTBlMzAzMmNkMDFkMzkxOGNmM2QxYjZlOWM3NTMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_fbd52230790a45e3bc9279cdbc5d263d",
+      "statement": "All player actions carry a requestId that the reducer and the async playTrack flow check, so results of superseded playback requests (source-ready, play-issued, error) are ignored.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/player/context.tsx#L218-L262",
+          "version": "repo-lines-v1:sha256:e99fcb1292e88e9e791e2bf57cfa237a350773e4342eed530d66b50df430c985:eyJzZWxlY3RlZExpbmVDb3VudCI6NDUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA0NzRjZjU5MDZiZWQwNjY5NjZlMjY1NmI2MTc1NTA4ZGU3OWRhNmZmNTFlYzE5MDExZWYyY2UyMTZiZDIzOTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg1NjRjYzRkYTk3NTFlYzg0ZGI2ZTc2ZjY0OWRhZjNhNjI0OTg0YzYxY2RiZjM4OGM5YWZkYjkzODM0MTY3NWQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjViNzhjZTYyM2E5MTJjMGY3OWM1OGI2ZGQwM2ViNTk3MzllMjFkZDljNjEyZWNkMDIzYzlhNTBkZTFlZWQwNzkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBmZjhkNjg0OWQ5ZTI2YWNhYmFkNWYzYzQxMmMyOTExNmIzNzYxNTIzOTUxODM5YTU3NWM3ZDk5MGUwNDRjOWIifQ"
+        },
+        {
+          "resource": "repo://src/features/player/state.ts#L56-L93",
+          "version": "repo-lines-v1:sha256:437afa690d608dec7d6ca89abfc9c7095fb38e59b1c03fd7d86d1d2101dc2e62:eyJzZWxlY3RlZExpbmVDb3VudCI6MzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFlNmI5ZTk5MWQ5ZDE1Njg5OGRlZGRlN2Q5NTZkZWExM2U2YTcyNzg5NTMyYWZlZTdmZDRlYjBiOTE5MWVhZDkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgzNDViZjcyYTE3Y2Y2NDFlZThhOTA0MWVmNGI2OWMyOTQxYzliOWEwNTYyOGQ3ZmUxMmYwY2E1OWMxMjYyZTciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNhZThjZThlNzg0ZjY1YWU1YTRlMWNlZWQ3MjllNmE2YmM2ZjJhNTViZDc2YWEzNWZkMWUxMTA1MTA0MDFjMTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZlM2Q5ZmUwNDBmZWM0Y2Y4YjUyNjE1OWU5NDMzMDE4NzJkMDAwN2U5OGVkY2M4MDI3NWEzODM2YzEyNDVlZmYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_9debe296d43b434d83f87d4e2299cc57",
+      "statement": "resume-issued optimistically sets phase to playing to skip a loading flash, and a status-driven playing→paused transition within an 800ms grace period after resume is suppressed to avoid toggle flicker.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/player/context.tsx#L166-L179",
+          "version": "repo-lines-v1:sha256:98052645dfc8d2e699bc1b5a8d43be01a6c4ea80f77ce495d81de5576494ad5c:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjViMTgyOWM1OTVhOWY4YjVjMDFhMGFjMTVmMDZlZWI3MjI5YWIwYzRlMWE5ZjM5ZGRkMGYwMjQxZDE5NDYxNzciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4OTNmNDBlMzc4MWViODk2YzgyZDA0NmEwODA2N2ExMWUzNWNkZjJmMWRmYWYyNmZlYTkwYjhkYjY2NzY0MTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJhZTU5MWEyZGYzYjg0Nzc1YWExOTAzOWExYTJlMDJkNjRiM2M2ZGViMDFiMmVhZGRiN2UzOWNiYzVkZDBkMGMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjAxOTkxMDk0ZTliZGFjZWM0Nzg2MTNkZmU4ODI0MWE1Njc0YzE1MGE5NDYxYTU4ZjlmMDA2MjkyNDBkNzBiYTMifQ"
+        },
+        {
+          "resource": "repo://src/features/player/state.ts#L74-L84",
+          "version": "repo-lines-v1:sha256:013b4600c03df81e99c868fdfb245166e1921f7dcfca8e6abcb50f0a9a719aa8:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJjMTExMmUxNzZkMDgwNDA5MzJmNjJlZGVhNDUxYjQwNzc4MmYxZmI0NDUwY2VhMTU3MWUyNjdkYzAxYTAxMjUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZlMzNkYzczMWU3ZDA3YjFmMGMwNWNmZWJkN2UxOTIyMDIzZTYwNzdiYzBhZTdiYTMwMTQ4ZjUwODMzYTI1YTkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjcwZGU2Yzg3NTQ1NjM5MDljZTEzMjVlYTI4ZmQwZWMwOTUxMGFkOTU4NGIwNjQyYTUyNWI5Mjg2OTUyMTg3ZjAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImJiZTkwZjY2Y2I5MzdjNWIwZjFmYTYxNTQ2NzczNGZiOGFhYjQ1N2Q4YTkyNDQwOWNjYzk1YzFhZWEyNjFkODIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a7924544a11e495a8361c4e95bd71128",
+      "statement": "Status-derived promotion to playing requires currentTime within startPosition+0.25 to startPosition+5 seconds (isPlaybackStartConfirmed), distinguishing real playback progress from stale status.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/player/state.ts#L108-L113",
+          "version": "repo-lines-v1:sha256:e9904035d03f9b4f8451027dff91b9210a6bf98ab5145df650f3b36aee3be37e:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMDNkNjkwYTA2MjJiODk1NjBmOGI3YzUxZGE4MGVjYTVhMjZiYTFhNmI3ZWExZTJjNTk1MmRkOGFiYWJlOWM1ZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiODk1YTVjNzY0YjY1NWM5MTVlOGFiZjQwZGY2ZGViMjUyYjM5ZTljMThhMjM0OWU4MDUyZTJjYWVmZDI5Nzg4MSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMDEwNDg0YjVjNDA3ZTY4Njk1NzE2YzYxMzg1YmMzOWJjMjdmZDhmMTgzNzE3Y2VkNzgxODZmMTU1ODc0MGJiMCJ9"
+        },
+        {
+          "resource": "repo://src/features/player/state.ts#L29-L30",
+          "version": "repo-lines-v1:sha256:284d04092cae06bdb3454ebb6c4cc584b42a5fe58481df8fc762d98fa0ecafb3:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOTlhZDQ1NzZjOTFjOWVjZjRjZjZiYzFiMWJjNjQ5ZGE5Y2U2NWQyZjVlMjM1Zjc4YzY1M2VmYmUwNTg0YzU5NyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjVkMDMwNzZhNWU3MDRmM2FkMDMyOTFjODcyYzY4ZGY2ZGQ0ODRlY2UwMGVkM2I4MjJiNDQ4MjFjNDUxZWE4NCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNWM2ZDIyNTI0YmRiMjA1MGRmYTk4YzBjZTJlYjZiNTU1MDY0NTIzZTFiODRlODkxM2IyMDBkN2Q1MWM2MWE0OCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZGFlODFmNjBjYWE2NmJlNDIwOTkzOGQ1OGJlMDVkYWI4NTUyMzNjYzcwZDIwMGJjMmY3YjAwOTk1NTRjM2NmNyJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_bad84ba3fca04b11937d561919c374fa",
+      "statement": "Auto-advance fires on the false→true edge of status.didJustFinish only once per track; on completion the saved progress key is removed and play count incremented, then playNext advances within the queue.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/player/context.tsx#L327-L343",
+          "version": "repo-lines-v1:sha256:fb182fe2ec580ca517f59cc60fb034be94f20f4983e7b3a216e13a894c12b01d:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhjNDgwMWZhZWJjNTg1YWI2Njk1ZWY1ZmUxODcxNDcyNzcwMjI3OTQ1Zjc5OGUyZTMwODU1MGJhOTEwODI0MjEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFmOWM0YmViMjg0Yzc2ZmU3MWUxYzI3MTkxYzA1N2VlMDRkMjE1NDZlMDE0YzM5MjgxMjQwYjBjMDg4ZGNiMjEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhhNjFlYzNmYTM1NTdlOTQ2ZjgxN2JhM2ZkZDA0ZjZlZDY5ODY2NGQwMWM3Mzc1M2YxZGJlOWZmNzM0OTQ3NmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjUwZWMzMDk4NzY4OTZhMTc5Y2ExMzcyMjI0ZmIyNmFiNDM5OGJkZmZkOTFmZDJlODI0N2U2ZDdjNzZjYmQyY2UifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_4af6e9aa58084ea98d92fa1dbd58fe5a",
+      "statement": "Playback source precedence: a cached file in document/audio wins (source local), otherwise a presigned remote URL from getDownloadUrl (source remote), and in screenshotDemoMode a DemoPlayerProvider serves demo tracks with no real audio player.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/player/context.tsx#L120-L123",
+          "version": "repo-lines-v1:sha256:827d3f9fcfd5daddb389324dffbbb8059f34e66e19ea396b9bd190074e41bf17:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMGU3NWI4OGZlY2FlYmViN2ExZjFkMzYxNTFjZjJjODFhNzY3YTE5NzYzMzJmYzk3ZTlmYzk0ZDk5ZjU3YzQ1YyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjdlNTc4OGQ1ZDlkNzNkMjRhODFkYmMwYTVhNzRiZmE4MmM5YzNiM2FmOTllNTJhZjc5NmU5MGI0NjhhOGEzZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMWJjM2ExMzMyMDk1OGI3YTQzY2JmZGQzOWMyZDU0ODA2MGVhZWNhY2I4OGQ1YTc5OWIzOTNjNGM4MjIwM2NjNCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNjYyYTQ4MmFiMWRhOGQ0NjVlZjIwOTZkNDdjODQ2MzlhMGI4YmEzZDk3NjA1NDY2MTRlMWM5MDU0MTM0YTg4NSJ9"
+        },
+        {
+          "resource": "repo://src/features/player/context.tsx#L366-L429",
+          "version": "repo-lines-v1:sha256:ce43fc8d564cf29f358cd349f21e16e0a5184b898b5ba58b9c6a2831c702a236:eyJzZWxlY3RlZExpbmVDb3VudCI6NjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdkMjNkM2RmZGY4YWQxNTAxZmM0YzdiNGY1MmU0ODMwZDg4MTEwNmU1OGI0ZDFjZTQwOGMxZTY2ZTY4ZTExNWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA5NGZjMGMxNzNkMWVjM2ZjNTAxZDdkZmE5Mjg1NTAxYzUyN2NmYjQ3MTI1ODNkYTNjYzM2MTgwNTY2YjRiZTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBmNzkyNThmMmViYjZlOWUxODU1YzliYWFjNTFhODNiMjU0ZTFiMGNlYzIyNWZkY2Y3YjRkZTY5OTNiYzYyYTUifQ"
+        },
+        {
+          "resource": "repo://src/features/player/context.tsx#L54-L69",
+          "version": "repo-lines-v1:sha256:a95da1b2c5b1398071c449b01fa34fc5c071d9e7a14af40489dc50cc7cac49ba:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxNTMxY2NkZTYyNDU5MzZhMTQ0Y2VkOWI5MjJkMjUyNTM3OGNiMDQ0YTRjYzJmM2I5MjhhNWNiNDM0YjI1YzUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ0NTg0NWY3YjMwMzdhZDM5OWJjMzFjOTJmYmY1OGE3OTY0N2NjZTI2ODlhYTU4ZDhhZWZiOGE4YzllMWY2NmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU4ZTViZWI0ZjM1OGZhZmFlMDRiNDRlMDEzODZlMDNhYTEwZDA3NDE1MDc0ZDY2YTgxMWNjYTc4YzBkN2RjY2YifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_d81170a859194ebc99171ca4f1ad559d",
+      "statement": "When resuming a track whose playbackSource is remote, togglePlayback re-checks for a newly cached local file and if found replaces the player source with it and seeks back to the current position.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/player/context.tsx#L264-L302",
+          "version": "repo-lines-v1:sha256:bf6a4dae90e49a000f329a7378dd281d92d808a3b503516d23ba15cef50f1b05:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE5NWI3YzZlMDMyNGM1MzBkOTI3YmI1ZmVjNjJmNjIzZWIxNWRhMDk3OTAxYmFkNDYwZjE1YjQ4OTY1ZTZiNjgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEyNWQ2NDYxMTQwYTU2ZGU1ZDAyMjg1MDk0MGYzOTMzMDRhMzZjOGUxNjIzM2Q2ZWIwN2ZhNTdmNzYwNjY0MDkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ3NTkzODY1MDc2ZDYxYzdhZWJhZmYwNmFiZTUyZjk0OTVlZGVkMTU1Y2Y3MmJiYjc3ZGEyMmM2OGU2NTNkODkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjYxMzdlZWY2OWMxMGI3MGIyNmU2M2U5OGY4YmQ1MDBlOTA1ODMyMzhlNzZhYzQ0MTFlNGMxYTY5Yzk3MjY4YTMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_9acb4a40c3e349a2be12648ce161ff85",
+      "statement": "playTrack triggers ensureCacheForTrack, which fetches the job and (if ready) downloads the audio cache in the background; on cache failure the track is persisted with cacheStatus failed and a cacheError message.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/jobs/cache.ts#L31-L81",
+          "version": "repo-lines-v1:sha256:50a99c01aff7c4fa9a25d6cc2a9f912c70cf660e19e25e55e918fbd0bc9401ad:eyJzZWxlY3RlZExpbmVDb3VudCI6NTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRhZmQ5NTg1OTlhYWFjMjU1YmVlMTZiYTk1YmI3Mjg3M2JiMWVmOWE0M2NmOWI3M2M5MzRkNzA0MjNhMDU4OTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBmNzIzOTBkY2Q3YWVlNWVjNGQ4MGE3Zjg0ZTk0MmUxNzM0ZjM4NTBiMDRjN2UxNmQyNTEzYWM3Y2FhNThhYzMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkyMDQwZTA5NWE5NGUyYWRhNzRlNDIxZjM3MTg3NTFhOTFhODEwYmZkNjZmNDhmNGU5MzljN2I3NDgwZWI2NzAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA5YTFkYjgxOWEyN2U3ODI5NmUyZjgzMjI0ZjU5MzZkMmQyOGU3ZDhlZGFjYzU5N2Y4MzYzNzdhYjRhYWM2NjgifQ"
+        },
+        {
+          "resource": "repo://src/features/player/context.tsx#L200-L221",
+          "version": "repo-lines-v1:sha256:4c19b756ad22d7f77515e136b95822c224e7681b6466a41987420afe52a3e361:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFiMTE1NTEyYjVjMGNiMDlmNGNmZjc4NWEzOTIyOWVjOGI5M2JhODc1NjVhZjc4YWU4ZmFkMzdiODU3NjgzOWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY0ODUxYTczZjEzOWMzZDUwZjVlZGQwNjRiYjVlMzY0NTQ1ZTI3ZTA5ZjMyNmEyZTYyMWE5MWRkMGM1M2Y4OGEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIwYWUwMWQxMGMzMzEzZjEzOWFkOWYyOGUwMWM0Zjc3ZjU0Njg4OGZlZDQ1OGY1MTdhZWY0NGIwYzhmYWQzNGYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVkNTI3YWJmMjI3NjgxN2EwZjI4Y2MzZjU0MGJjYWQzYjViZjVmYTk0OWE0ZmY2Mjc2NzczNTRiZjI1NjdmMzgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_46051f5364ab43b28772413c27d095c4",
+      "statement": "Playback position is persisted to AsyncStorage under player_progress_<trackId> at most every 5 seconds while playing, restored on playTrack (unless within 1s of the end, which restarts from 0), and deleted when the track finishes.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/player/context.tsx#L182-L190",
+          "version": "repo-lines-v1:sha256:c7e743455c0112e063ffb77700f681438cc7931ab6d9dc9571f860bcc2f0d1b7:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZDM5Yjk5N2QyNjM1YTQyZjAwY2IzZDg2NTI2MDFjMzE4YzQ3YzA2ZjkwMmU3ZTViYWUyNDYyNjlkYmE4Yzg0OCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZTViZWU0NmI0MTcyY2IxMDYxZmFmYmJiZDk0NGIyNTc4ZmQyZWZkMjliZDAxNDE2NmVlYWQ2MzdjNWZkMTYyYiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYWQxNjhlOTZmNzBiOGVjMmMwNTEzZDBiNzg3ZjIyMzdhZTYzYjVkYTAzOTdlNDI1ODlhNGEyMzU4ZmNkMDFjNCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMGNjYTU0ZDBjMTZmMGM0NmMxMDAzM2YyYTEzNzNhNDU5ODkzMjJhYTZhZmQ5ODIxN2E4NTA1OTg3ZDViZjU1MiJ9"
+        },
+        {
+          "resource": "repo://src/features/player/context.tsx#L223-L235",
+          "version": "repo-lines-v1:sha256:f23f6b068f06a0533fc1fc3cf76ad6f1192f7f3174ef85631b4e400841295eb7:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImExNDRjYjYyOWI3NDRlZWY2NmQ1MzQ0NmY5MjYyMTQ5NWZhZjg5Yjk2YzkzOGM0NDA2OTU2YjkyYWYxOWIzMmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4OTNmNDBlMzc4MWViODk2YzgyZDA0NmEwODA2N2ExMWUzNWNkZjJmMWRmYWYyNmZlYTkwYjhkYjY2NzY0MTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI1MWJhYzI2NWYwNGVlODRmZWI1ZjBkMjc2NzgzNmE2Yjk2ZjI5OGFhYjgwN2EzMzM1MTNkYzBjZmEyMWM2NGQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdiYjZlZDA1NzQ4OWM0ZmNjNDU5NTAyODU4MTE1NjlkNDVkNTJmY2Y5NGYxNzBlYTZiOTdhOGU2MDU0YTIyYTAifQ"
+        },
+        {
+          "resource": "repo://src/features/player/context.tsx#L338-L343",
+          "version": "repo-lines-v1:sha256:3f3909ed6da4c9684553f5328205bb6b519c903c2953f6a52eade62df59630a0:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMDZiZDA4MGEwMmRiNGFjNTBkYTMxMzg5ZjIyMTE4YjI5ZWJhMzJjZDRlNWM3MzVjZmUyOWFkNzczNjg2MzBjMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMWY5YzRiZWIyODRjNzZmZTcxZTFjMjcxOTFjMDU3ZWUwNGQyMTU0NmUwMTRjMzkyODEyNDBiMGMwODhkY2IyMSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOTk4ZjEyMWVlZjhkYjVjNDBjN2E2OGEyZjliNzk0Y2YxYjc3NDc1ZTFmYWEwYWI4NmI3ZTFjZjMxZTc0MzUxNiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNTBlYzMwOTg3Njg5NmExNzljYTEzNzIyMjRmYjI2YWI0Mzk4YmRmZmQ5MWZkMmU4MjQ3ZTZkN2M3NmNiZDJjZSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_c29489a2b416445f8d7f9e041faeff7a",
+      "statement": "The provider enables background playback (shouldPlayInBackground, playsInSilentMode, doNotMix) and manages lock-screen metadata: activation once via setActiveForLockScreen, then metadata-only updates per track; stopPlayback clears controls and resets to idle.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/player/context.tsx#L151-L157",
+          "version": "repo-lines-v1:sha256:ae8ca8d84a9dbfb7a40d1d535e1ba41587feb883f3b860b4455ab9a4983ac76d:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNTk2NmZiZmE4ODk5OGRhNzQ2NTZjNTAxOTQ5NTZjMjVmMDg0OTQ1NzY2MGMwMDlmZTYzZDFlOWZhOWRjOTMxYyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZmRjNTJmMDhiMzliMDhiMDFjOGQzMDhiZjg4MGIwYmVmMDJmZDFkZmNjOWQ5YWE5M2E0ZDFiNWY0ZDU4YjZjYiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZDFjYmY5ODBjYmQ3MGRhZjM0ODhhZDk5ZWRlZWMyNDBlNDdhNjBmODk0ZjAwNWI0MmZhY2E4ODRhMjg1Y2U2OCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOWZkYTU4YjQ2YWMyMzU2NGZjZDI0ZjdlOTU2MDhlOWZjMmM2ZTI4Y2Y5ZTY2OGRkMjA4MGQyZjZiZmZkMWI4NiJ9"
+        },
+        {
+          "resource": "repo://src/features/player/context.tsx#L308-L314",
+          "version": "repo-lines-v1:sha256:972359ad2b728c27262bacc740474ccd4a1664f2cae6be085625fc9f6435825a:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZGQ1MWNhNjJkZmM0YWUwMDIyNjkwMTMyMGY3MWY0MzI0MWQwN2M1YzM1YTE2MGVlNjgyN2Q4NjNmZmYzNjA1YiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNGU2ZDcxNmZmOWQyYzU2YTZlMGU4OTJmNDRmZjJjM2U2YjZiNTUyOThmZjg1ZDNhMGFhY2Q0MTExNDFlZTc5NiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYmM4MWNkZDY5Njk0NzcyYWZiZWI5YjUyMTVkNmNjY2FjYTIyNzViMmMxZDliNjkzZWZlNDYwODk5OGRmNGZjZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNThhN2I4NDI3YjgzODk1ZGQwMzM4ZGY3ODZlN2E3MzYzM2Q3ODU1NmE0NzFiYTMyNTIxNWE0ODMwNTZkYmViZCJ9"
+        },
+        {
+          "resource": "repo://src/features/player/context.tsx#L91-L112",
+          "version": "repo-lines-v1:sha256:7a2b6806bf0545886b973c788d9e911aeee3941de86a43a3726451eeb79ca1e4:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEyZTNiYmFhODIxZWZlMTI1Mzk2M2E0MTQ2NmVhNmFlZTBlN2Q1N2JhNzZkNmY3NzI0NjkzNzJjYzg1MTc0NDEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU4ZGExODAxYTM4ODMxYmRiYTU4MzlkNDUxOGQ4YTIxZmRlZjMwYmRjNjljM2I5ZTNhZjMxZDUxZDMyYmFkOGYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRiZWUxODc0ODc4NDIwMzQzNjU2NjNkMmZjZDJjOWJjYmJjNmY2MzUyZTBjMzA4ZTY0MGJmMDBhM2NlMWRlMzEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_d45b54d42dbb4a6db803a825d5048df9",
+      "statement": "High-frequency playback position is exposed via a separate PlaybackProgressContext and usePlaybackProgress hook so action-only consumers of usePlayer are not re-rendered on each progress tick.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/player/context.tsx#L353-L362",
+          "version": "repo-lines-v1:sha256:42853b95c626e0ed0636f52c7766a5b80e2d533871e65719f34b907bbecff850:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVlNmZlMjc1MTcwODcxNzYxZDBhODM0MDEzYzQ1MmRkNTkyNTk0ZmMwNDFhMWY2YzM4ZDg1NTNjNjRkYTNkOWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdjMTdjNTMzNjkyZjU5MzM5MmZmOWJlYWYxODZjNzUwZDc3N2FmZTIwY2YwZjFlNmVkYzkyNzAwZDEyYWQ4N2MiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU4MDA3NDZiMzI1NzUwYTRiOTQzYzk0NDJhNTBhY2Q3MzY1NTBmYmI3YjJhMTdiZjJmODdjODI4MjM2NTRkNjYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA5NGZjMGMxNzNkMWVjM2ZjNTAxZDdkZmE5Mjg1NTAxYzUyN2NmYjQ3MTI1ODNkYTNjYzM2MTgwNTY2YjRiZTMifQ"
+        },
+        {
+          "resource": "repo://src/features/player/context.tsx#L437-L440",
+          "version": "repo-lines-v1:sha256:85bbd1b2053682368edbfceca5b628ac37f63e230c84a87d95ab27bca09fd7e3:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMmY4MzYxYWRlZWI3ZjU0MWE5NDZmNzM1MWVlMmQ5YzhkMjhmMzEzYThiYjRmOWIyMGM2ZWZiMDAxY2MyNjVkMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYWFhZGJhMDllYTYzMjlkNzY4ZmQ3ZjI5OTUxMTE3ZGI2MWIyYjhmZDUxMDNmNGFhODQzNmNjOGY1ZTcwOWMwYSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        },
+        {
+          "resource": "repo://src/features/player/context.tsx#L44-L46",
+          "version": "repo-lines-v1:sha256:04bacb732a1147a9241b0c59f97d689bf8b7fc2e770515d1cafe803c689f8011:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMjRkOGI0NWNjNTJjNTNkNmI3NTE5YzM3MmQxNTFkYWQyNDA4OTU5ODYxOTJmY2NjYjBjN2FmNGU4NGJlN2VhYiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZDYxNTdiMTBjZTg3ZGQ5Zjc0OWY4ZmFjNzdjZTZkZTdhYzViODY4MjE0MmUzYjZhZTlmZTg0ZTkyMzM2ODVlMyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZWVlZjVlZmQ5Nzk1NDM5MzViZTA3ZmIzNmQ4ZTQxOTlmOGFhNDE5MDk5YWZiMDk3YjBkZThhNWEyYjU2NTExMiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiM2Y2ZTljN2E3OTNhNmNmMzJjMTRjOTJlOWE4MjNiMDVkNzY1MmZiZWJjODA5MDA2NzkyMmExMjZkNzNkNmFiMCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_ce9fa6ce3cae4e268013ba3d4ef1e863",
+      "statement": "The Track model (AsyncStorage key playlist_tracks) carries identity/jobId, metadata, playback stats (playCount, lastPlayedAt), and cache fields including cacheStatus of none/caching/cached/failed; Playlist (key playlists) stores authoritative ordering via trackIds, with a default 'My Music' playlist of id 'default'.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/playlist/storage.ts#L157-L181",
+          "version": "repo-lines-v1:sha256:9df925d2865e2517242879400ecdea22285500b547c34e51694047262d203d00:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjljNjAxN2YyNDEzNDM5M2QxZmI3N2IzZmFiMWI2ZDY0ZjVlN2IxM2I5NzdiMTU4OGYxMDJmNTFjNmYwMGMyODkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEwMWI1MDY1ZTk4MjhkMzc4YTk2NGIzMzRiYmQ2MzQ5MWVmY2EwOGYyODUzMDY3OTk0ZjNkMzc2OGFiOWEzOTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk2YzgzZGI2NjE2ZmVlNDc1YmE1OWNlMjE5ZWMxZDc1ODU3OTZiZDZmYWM1ODYxNzc3MmIzYTU4OWI4MzI2ZDciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjUwMTVjYjM5OGJlNTgzZmJlOTk2MzRmYzBiZDY2ODViNDRlZGJkYmEyNzYwMzg4OGRiZTIwYTJmZjlkZjllZDIifQ"
+        },
+        {
+          "resource": "repo://src/features/playlist/storage.ts#L5-L35",
+          "version": "repo-lines-v1:sha256:c52c2a8b9ee23ef8c91254b932301ed9f804b07302ec8bbc5444abaf0ab7aac3:eyJzZWxlY3RlZExpbmVDb3VudCI6MzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg4MjM5YjJlZGE1ZDUxNDMxMWNmMTAyMzA3YTRjYTkyZmVkMjA5MzYyZTVlNzg5ZGJhNTBjY2FmYTg3ZjM1ZTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk5NDQzMDA3MjFiZTczNjk4M2RmYTQ5NzRkMjk5MWFmNzJiNGZhYWI5Y2RjMjEzN2NiOWY5YzUwMjJmYTUzNGYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjUxNTFiMDgzNGRjODVjZmZmYTQ2NmNiNzMwYjYyNGQ2NGQ2YWE3MzVkOTgwOWNmODkxMjUyMTFmYzRmYTYxZjQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNjYTkzMWZhOTY4ODcyYjNkMDc5ZTNjY2M4MWJjZDljZTZkNjEzMzJiYTM3MDFjYzI2ZWJhZTgwODFiN2E1NWEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_28e908b60cb94ae4a5fd46ae5dc87856",
+      "statement": "normalizeTrack defensively defaults missing fields, demotes stale 'caching' to 'none', and verifies cached tracks still have an on-disk file under document/audio, downgrading to none otherwise.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/playlist/storage.ts#L39-L92",
+          "version": "repo-lines-v1:sha256:7da8131e618337dba24862bd5c19933606c9fce8d1878fe59b7ebf515c6a7ff3:eyJzZWxlY3RlZExpbmVDb3VudCI6NTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFhZjExYjE4NzJjZmIxN2U4ZGIzNmQ5ZWU5N2EwMjIxNDc3ZmRlOGU3NzhjY2ZiMzlmMmE2OGU3Y2QyZmI3NjQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNjYTkzMWZhOTY4ODcyYjNkMDc5ZTNjY2M4MWJjZDljZTZkNjEzMzJiYTM3MDFjYzI2ZWJhZTgwODFiN2E1NWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjUzNWYzZjgyMjM0ZDFiMGZmZDU0OGQ0MjI2MDI0MDk2YTMyM2U3MGUxZmNiZDUzMWM4MWJjOWVlNDQ1MzMxZjIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_fb758027d0ca4ff2a1ed49a6f52dce05",
+      "statement": "ensureTrackCached downloads to a .tmp file, verifies the size against job.audioFileSize, atomically moves it to the final filename, and deduplicates concurrent downloads per job id via an in-flight map.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/jobs/cache.ts#L31-L81",
+          "version": "repo-lines-v1:sha256:50a99c01aff7c4fa9a25d6cc2a9f912c70cf660e19e25e55e918fbd0bc9401ad:eyJzZWxlY3RlZExpbmVDb3VudCI6NTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRhZmQ5NTg1OTlhYWFjMjU1YmVlMTZiYTk1YmI3Mjg3M2JiMWVmOWE0M2NmOWI3M2M5MzRkNzA0MjNhMDU4OTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBmNzIzOTBkY2Q3YWVlNWVjNGQ4MGE3Zjg0ZTk0MmUxNzM0ZjM4NTBiMDRjN2UxNmQyNTEzYWM3Y2FhNThhYzMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkyMDQwZTA5NWE5NGUyYWRhNzRlNDIxZjM3MTg3NTFhOTFhODEwYmZkNjZmNDhmNGU5MzljN2I3NDgwZWI2NzAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA5YTFkYjgxOWEyN2U3ODI5NmUyZjgzMjI0ZjU5MzZkMmQyOGU3ZDhlZGFjYzU5N2Y4MzYzNzdhYjRhYWM2NjgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_7653bb00083c41278e0b51d44b9d0cf3",
+      "statement": "addTrack merges via mergeTrack: incoming fields win but an existing cached state (localPath, downloadedAt, cacheStatus, cacheError) is preserved when the incoming track is not cached, and playCount takes the max — making re-adding a track non-destructive.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/playlist/context.tsx#L24-L41",
+          "version": "repo-lines-v1:sha256:c5f923ad4500bd1fdbde690d8bef57634aed41138a0cd41b144214b8361d1891:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU2MDRkMmU1ODY3NTNiMmJhOTZkOTdiN2IwNDVhMzdiMGIyNzNjYTQ4ZWExMzM0ZGU2NWQ0NTNkYTFiZGNhMDkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk3MmU5NzBhZTZiZmZhNWFkZGZmZDgxMDA2YjQyYTE2MDVhNDc3NjhiMDE2MTBhMjc5MjdmNmIzZGYyNDBiOTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjJkNWVmYWU5YzI2MjIzMzY2NTY4YTFhMWRkOGJhZjk0NjBmZmE0ZmFhYmVlMjZhN2FjNWQwNTcwZGY4MjAwNzIifQ"
+        },
+        {
+          "resource": "repo://src/features/playlist/context.tsx#L84-L98",
+          "version": "repo-lines-v1:sha256:dfcea47bee9976349e0b9271a50446b9a363eb090e07bc3237588496fc711147:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk4MDFkMzgyNTRhZWFiM2YxNjQzNWM3MTIwOTJmYjE5MGY1NGViY2Y3YWRiZTJmOTlmOWY0YTMwNTUwZDU2NDQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIzZjE4ODEzNjdjNzY4MmRlYzU3MTdhMjdlYTUwMmMyNDI5ZjdkMGYyNDM5NDI3NTk2OThiMzBjZGY3OTM2ZjkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjJhYzUzMWFiM2FlMzFiMmI1ODA0M2MyMDI1N2Q1MDJmMDczNDI0NmM2OTEyMzNmZTMwMjA4ZTBkODhkZjA3OTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjM0MjI3NjI5NTIzYTUyMTc2ZTVlOTY3NWVmN2I3NzkwNDRiYzQzZWE2NjdhMjU5MmQyZmM4ZjU3MGVjYTExMWUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_505dbe68c1cd4ed3b92fe93c012883e2",
+      "statement": "PlaylistProvider orders loaded tracks by playlist.trackIds and exposes addTrack/deleteTrack/deleteTracks/incrementPlayCount/reorderTracks; reorderTracks persists new order via savePlaylistOrder.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/playlist/context.tsx#L107-L129",
+          "version": "repo-lines-v1:sha256:73aea6fd1ba88222d1f713e301e5b717af12f22da2a37554db1b0d368f38a702:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc0NWY4OThhNzhlNWY0ZmU4YzFiZjhkODM3ZmJmNDA5NDQ3NDRlMzAxOTQ1NzQxMDQ0MjFjOTM3MmU5NGE2OTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZkYzUyZjA4YjM5YjA4YjAxYzhkMzA4YmY4ODBiMGJlZjAyZmQxZGZjYzlkOWFhOTNhNGQxYjVmNGQ1OGI2Y2IiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg3MjgyYzI2NGFjMjliMDNjMDBhNmEyMGEwMTc2YzkwNzcwNjQwMDEzMjA0Y2E1MmQyY2ZjYzM4YWY1NzY2NDEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU3MWNkOTBlZjBhYWM4OTY5ZjNjZTZkMzFkNmE3ZDFlMDZhZTg3MGI1MTRiZWQzNDYyY2JlZmE2OWQwNTFiOWUifQ"
+        },
+        {
+          "resource": "repo://src/features/playlist/context.tsx#L68-L82",
+          "version": "repo-lines-v1:sha256:5282e9439c1aac186c8ddc3e850d8564e637e5df63be82b169b32489c09e4bc6:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU5NjZmYmZhODg5OThkYTc0NjU2YzUwMTk0OTU2YzI1ZjA4NDk0NTc2NjBjMDA5ZmU2M2QxZTlmYTlkYzkzMWMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZkYzUyZjA4YjM5YjA4YjAxYzhkMzA4YmY4ODBiMGJlZjAyZmQxZGZjYzlkOWFhOTNhNGQxYjVmNGQ1OGI2Y2IiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImVkYThmOTNlZTAxOWMyOTU3NWFmNDc2YjQxODc3ZDZkYjI0N2RjMzc0YzdhNmJlZDhhZTY1NmY2NDY4OGRiZmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI4NjFhNjQ1YTY0NjNmZjdjNGI4MGVmNWE1YjZhZjM3ZTBkMmM5NTY3ZWI0YmFjOWI3ZWQ2NjBjM2Y3NWM0YzkifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_f49f9750b6b64662ac12068363ce5075",
+      "statement": "When the playlist's copy of the active track changes, the player dispatches track-updated so activeTrack reflects the merged record, enabling the remote-to-local source swap on resume.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/player/context.tsx#L192-L198",
+          "version": "repo-lines-v1:sha256:34d3dee9d1d62858aa08d1cbc2a26b51fbd4ef3291884cd566b5be49b9bdd46c:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNTk2NmZiZmE4ODk5OGRhNzQ2NTZjNTAxOTQ5NTZjMjVmMDg0OTQ1NzY2MGMwMDlmZTYzZDFlOWZhOWRjOTMxYyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiY2ExNDFkMTk2MjNjZmY1MWRhNjJlYjg4NDNkZDgxMGYyOGFkOTM3ZTEwM2FiZjk0ZjUyZTBkMjdhYWI1OGViNiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZWEyMGFlZWVhMWIyZDVjNTBjYzEwN2ExMjU3YWQxMzE5NzA0YzBlNDkxZGI0ODI0YTJmZThmMmUwNjBmY2NlYyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZWQ1MWY3YTcyNWZhOTdhYzYxODZkZGFjYWZhMzBiNGY4N2FlNjI3ZjE2NzY1MTE0Y2EyMzcwNTU3MDJiN2Q5OCJ9"
+        },
+        {
+          "resource": "repo://src/features/player/state.ts#L96-L98",
+          "version": "repo-lines-v1:sha256:0f56b936f1f6406731436140445340f0c088ac550537fe5eca108e8ffbf57bd0:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMDFkNTEyNDU4Mzc2YzM2OWYxMjcyOGJhZmU2ODA5YWY5YTg0MGQwZmRjYjQ0ZTAyZDVjM2MxMjM5MWUzOTAwOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjhlY2JhNTZmZjY2MWM3NGRmNzE0YmE5ZjgyYWFmMmFkZmM0YTM2MDBhOGJmNWYzZGI4ZTM2NjdlMWM5NDE4NCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZGZlYzNhMWJlOTVhNTFhNmFjMmFhMDY0OWZmOTMwMGI4Yjk0NDQ4YjM5ZDA4ZmI2Yjk0YmUxNmFmMzhlNjkwMSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMmMyNDQzMWExNWQ2NmJmMTA0ZWRmYmFiZTczNWE5MTFmM2ZjM2ZiZWMyNDhlNjhhZTllYzgzODMzMmRjNGUyYyJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_ffc2bb6bdfb04c6294690e2e0afcbaf8",
+      "statement": "The library offers an all/unplayed segmented filter where unplayed means playCount === 0 (playlistFilter.ts); playing a row uses the filtered list as the queue, and tapping the active track toggles playback instead of re-resolving.",
+      "evidence": [
+        {
+          "resource": "repo://src/screens/PlaylistScreen.tsx#L118-L126",
+          "version": "repo-lines-v1:sha256:3ab98675d7e13af56e6ced636b23584d74ffb413195443eb2f9a7e240b4446f2:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNWFhMzE2NGE5ZDFkOTg1MTZkNjkzMmNlZTM5Mjg3MmYxMjJjNjQ1ZTg4NjZiNzBmMDkyNWM0MjAzODFmYzZkZiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDJhMmNiMjVhMTIyYjQ0MjIxYTYyMzRlYzY2MGE3YjVmYjdmOWJkZTdiM2I5ZTJiM2M1NTlhMGQ5NmZhYzczOSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiN2UwNWUzMmIzMzgyMTVhMWFmMjEwMWExZDQzYjBkNWEzMTE1OTY5ZmFkOTQzOWEwNjY1MmM2MDE0ZTU1MjE0ZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYmE0MzI1ZmYwYjcxMGVkZjBkMjg5OTgyNDExOTM3OWMwMWM3ZTM5MGMxZTE2ZDMyMGJmZWEyYTMwNjI1MWE4ZiJ9"
+        },
+        {
+          "resource": "repo://src/screens/playlistFilter.ts#L3-L24",
+          "version": "repo-lines-v1:sha256:a8082d43d2e3a8f27ff7f945ec226bf7214a3f1d7dc8a460c2627a2d6390cbca:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE1MTk2OGE2NDA3OGNmMzRjOTVlMDZmNTQ2ZjMwYTNiMGYxYTgzMDNjYzVlOGFmNzc2ZjFlY2RkZjAyZmE5OGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyYTJjYjI1YTEyMmI0NDIyMWE2MjM0ZWM2NjBhN2I1ZmI3ZjliZGU3YjNiOWUyYjNjNTU5YTBkOTZmYWM3MzkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjoyLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjUwNjFmMTRjM2ZhYzc4MzBkODkxMzVjODViNTUyYTdjZDUyNjcyYWFjMmNmZGVjMjZmZDJiNDFhOThkNDQ4NzYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_3f0144a0d0cb4ae2a9cae67066aa2ac2",
+      "statement": "Drag-and-drop reorder is enabled only when filter is 'all' and edit mode is off; bulk edit selects tracks with checkboxes and bulk delete stops playback if the active track is selected, deletes each cached audio file, then removes track records and playlist entries.",
+      "evidence": [
+        {
+          "resource": "repo://src/screens/PlaylistScreen.tsx#L240-L248",
+          "version": "repo-lines-v1:sha256:1e57ba6b08ff97c9341009241a87e059bd5b6cfbeb7a64b2dfc6de7894f47649:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZWNiMzA5MjQzNDAwYzVmOWEyNjJhZDg2NmZjNzc2YmRiNDdiYmFhNjBkZmIyOWVhMzM3OWJmZTI0ODg0YWJlZiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMmE0MTQzNjc2NmIyZjhjNGZkNzA3NmU5YTdiZTJmYjNjMjQ1NzI4MjI4YmNiOWRjM2E3NmY1MWE1YTQwYzFkOCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOTg2MGZmYzFhZTRhNTcyNDc4NGM2NDQ4YTk4NWU2ZWY2Nzg5MTc4MDJmYWFmYzRmMTQzOTZmZGFmMmIzMDFhMiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiN2VlMjRkMDk3YjcxNWVhYTk2MzBhNmE1NWJiMzc3MjBiNDYwNzc2NWQ3OTYxNjJkMmE1NWExYjYzOThmMTY5YSJ9"
+        },
+        {
+          "resource": "repo://src/screens/PlaylistScreen.tsx#L36-L44",
+          "version": "repo-lines-v1:sha256:6d3f226e09f13519608aeb65a793163ca61458ae46bcf1575aa4ea93a9c93f3e:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMWM1NjJlNzJiMDY5YmIyYmNkMmYyNWY0NGNlMGNhZjM4ZTBkYTY3MWVlYmNkYTBhNmM4ZThlNmMzMDdkZmU0YiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYTU1MmU2NDg0MGEwMjc0ODgyM2E3ZjhkNzhkNzdhOTYyM2Y1N2VmNmMwZGM3ZWY1MTgwOTgwNTNlMGVlNWViNiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiODJjM2YxNzIwMjAwOGY3YjM4OWIzOThiY2IzOTJkMjJhMDk5YjE0OWJhMzhiYzkwOWQyZmMzYjZkOGE0ODQ5NiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMDgxZTZhODA1N2FhYmJlYWRkNTZlNzk4YjVlNWQyMGNlNjhiMmE1NjlhYmJkMmZhMmM4NjQ4YWRkYWMyNzAyZCJ9"
+        },
+        {
+          "resource": "repo://src/screens/PlaylistScreen.tsx#L86-L116",
+          "version": "repo-lines-v1:sha256:dcec4050a17d0f3043a952388364d850fa3cf89a516c32f3549f8456de5675e2:eyJzZWxlY3RlZExpbmVDb3VudCI6MzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJjMzIzZWQ3ODcwZDlhMjRlYzE5MmM0OWU0NWZkOWQ4MmE3ZmU0MGYwMTMxMjg0OTVlN2NhZjZhNTkyNjU2OWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyYTJjYjI1YTEyMmI0NDIyMWE2MjM0ZWM2NjBhN2I1ZmI3ZjliZGU3YjNiOWUyYjNjNTU5YTBkOTZmYWM3MzkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU4NTgxNjM4MjBmZDM5NGU1YThlNTQ4OTc5ZTQwN2IyN2M3YWU1N2ExODkxMDQzOGQ2MTYxNmE0MjM5NjcxMTgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjUwMTk4ZjIxNGFkM2Y2OGQ2NzcwOGVhNTFkMmM1ZWRiZGViNzY3MzE4NTAwZjM0NTAxMDM1YWE3ZmExZmE5YjEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0755232a13914ef5ac195b42002abafd",
+      "statement": "MiniPlayer renders above the tab bar whenever a track is active, subscribes to usePlaybackProgress for time and progress bar, disables its button with a spinner while playbackLoading, and navigates to the Player screen by jobId on tap.",
+      "evidence": [
+        {
+          "resource": "repo://src/app/navigation/RootNavigator.tsx#L149-L149",
+          "version": "repo-lines-v1:sha256:f8a5e71720c93c2f876831215d1005aa66523328ce87382861ced6992c18b979:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjhhNWU3MTcyMGM5M2MyZjg3NjgzMTIxNWQxMDA1YWE2NjUyMzMyOGNlODczODI4NjFjZWQ2OTkyYzE4Yjk3OSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZjhhNWU3MTcyMGM5M2MyZjg3NjgzMTIxNWQxMDA1YWE2NjUyMzMyOGNlODczODI4NjFjZWQ2OTkyYzE4Yjk3OSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTgxNWY3MmIwOTQ4YTgwYmYzMmI1YThhYTU3ODhhNzYxZWJkMTYzZmJiZWMxOTE2OTVmMTA3OWRkYmFlZGIzZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOTI4YmQ1MDExZmVkOWVmOGYyZWMwNjkxM2VjZjM3ZDM3YjRjNjkzNDYzNzFlZWVhNmI0NTlkOWE5YTcyOWYxMyJ9"
+        },
+        {
+          "resource": "repo://src/components/MiniPlayer.tsx#L15-L75",
+          "version": "repo-lines-v1:sha256:b1eabf0b9bbef3c1c8d1ae910367996ec683639d3c1c0f7651498c167c13b28f:eyJzZWxlY3RlZExpbmVDb3VudCI6NjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk4MjUxN2U3YzUzOWY1OWJmZDU3ZmY4NzVhNmQ5OTRlNjJmNGMxNTE1YTI2MDQ5OWFkODk4OWIwNTM3YWU3ZTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk1ZWYwMWJjMDhkYmMzYjYzZTRlNzVlYTNkMjZhNWI5NDE4OTE4NzdlMjdhZDg5MTMyOWM4NDExZDdkOGRjNGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjUzNzJkMTM5MmFjNmIxMjRhNDdmZjcyZTg4ZTEwYWFhMmM4ODMyYzA3YzdmYjJmYjMxY2Y1M2EwOTAyYzE4YWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI2YjA2ZTZiNWMzZGQyZTAzOGFlNDE2MmU2NTYwYjlmMzRhNGRkODdmM2Q4OTI1YjlhMjIxNTlmN2IwNDFhMjgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_bb96e1897ffb476db0b274c84674d3e9",
+      "statement": "PlayerProvider and PlaylistProvider are mounted app-globally in AppProviders, making usePlayer and usePlaylist available across screens.",
+      "evidence": [
+        {
+          "resource": "repo://src/app/providers/AppProviders.tsx#L8-L34",
+          "version": "repo-lines-v1:sha256:2a6409cefc811f92c6676d89ce78f7fc08bbf96bc69d103f99d28845c3c50fee:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM0NmY4YWY0NDgzM2I2ZjE5NzkxYjljZjczNTI2Yzc5ZGY0ZTg3ZGFmMGJhMzQxYjk2NTIzNTRhMmNlYWViNGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIwNmE4YzYwYjk0ZjcwMGY1ODhlNmQ1MWM1MDZlZjJmMjA0MzM5MzE3ODA4YWNjY2I4NDIyNzkyZWVkODQwM2QiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE5ODY0OTFiNDk2NDE3YTViYmYxMThiNzI5OThmYTczMGIyNjNlNWZiYmZhNWE0ZTEzODhlZjMyMDM0YzQxZmUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxNDhiMjU0MzkyZTA5MGVkZWIwNzNjZWU3ZTQ5M2UwMjc3YmVjNWU3NzAzNjFkMWViYjAxMjM2NTkwODMwNzYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_bc6f27a2d6df48dc841b3b1095f4674a",
+      "statement": "test/player/state.test.ts covers reducer stale-request rejection and optimistic resume; test/player/source.test.ts covers source-resolution precedence and lock-screen metadata update behavior.",
+      "evidence": [
+        {
+          "resource": "repo://test/player/source.test.ts#L84-L166",
+          "version": "repo-lines-v1:sha256:db131d3a2ae9a1230065d6f82398f78fb04a99815f10b4be1f6ecfebd0b0cf3c:eyJzZWxlY3RlZExpbmVDb3VudCI6ODMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ2ZWZlNGZkNDIxNmVkNDgyYjg2ZTRlOWJjNzJhODJmMDI2ZDk3MDFlNmM2ZWY5MDM2NTk0YWJhZTI4MmQwM2YiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAwN2ViMmU3MTRjNDNhYWVhYzg3YjZjMjg1ZDIyNTgwYmRmNGE3NGUyZDcyNTZjNDFmMDRlMzM4Y2U4Njk1Y2YiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjVjMjFjNDU1OGQ4MGRmYTA3OWU3MTJkNDQ3M2VlOWJjMTliNTMxMDk4NGViMjdlZmNjYjkyMmM1MzdmODAzODYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImJhMjk4MzBlNmY3YzQ5MTNkODQzZmQ0NmE4NzRhYzQwZjY3ZGQ0ODIyYjg0MDEyNTU4YzcyYjcyZDEzMDAzN2IifQ"
+        },
+        {
+          "resource": "repo://test/player/state.test.ts#L53-L143",
+          "version": "repo-lines-v1:sha256:bf3d224eb710215a4c0cabf71bb2c15d5392cda04e5d25f833642e97e2599102:eyJzZWxlY3RlZExpbmVDb3VudCI6OTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVlNzk1NDgwZjUwYzE4Y2U4N2ZjNDA2MzRjZWI1OGUzMTNjMzFiN2FiZGRjN2VkZTdhM2NlM2I1MjRmNmM3NTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU3ZTBkYTllMTgxY2U2NDNmNDg5OWI5NzFkYTVlOGFhMzYwOWIzY2ViYzFhOGZiMjVlMzQ5MDM3ZGY1MGI2NmEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjVjMjFjNDU1OGQ4MGRmYTA3OWU3MTJkNDQ3M2VlOWJjMTliNTMxMDk4NGViMjdlZmNjYjkyMmM1MzdmODAzODYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoyLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ4MTdmYmI3M2M5MmIzNmQ1ZTQ4OTZmZjUxYzFiNThlZWMzMzBiYmU5NjFiYTA1ZmM2MjA1Zjg2N2VhMWJjZjYifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.5.0",
+    "at": "2026-09-01T21:28:30.610Z"
+  }
+}
