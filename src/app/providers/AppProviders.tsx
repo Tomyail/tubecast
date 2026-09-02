@@ -6,6 +6,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SettingsProvider } from "../../features/settings/context";
 import { PlaylistProvider } from "../../features/playlist/context";
 import { PlayerProvider } from "../../features/player/context";
+import AppReviewPrompt from "../../features/appReview/AppReviewPrompt";
 import { RemoteConfigProvider } from "../../features/remoteConfig/context";
 import { I18nProvider } from "../../i18n";
 import { AppThemeProvider } from "../theme";
@@ -31,7 +32,10 @@ export default function AppProviders({ children }: { children: ReactNode }) {
               <RemoteConfigProvider>
                 <SettingsProvider>
                   <PlaylistProvider>
-                    <PlayerProvider>{children}</PlayerProvider>
+                    <PlayerProvider>
+                      {children}
+                      <AppReviewPrompt />
+                    </PlayerProvider>
                   </PlaylistProvider>
                 </SettingsProvider>
               </RemoteConfigProvider>

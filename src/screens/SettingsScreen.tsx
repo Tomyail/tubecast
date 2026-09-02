@@ -1,6 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
 import Constants from "expo-constants";
-import * as StoreReview from "expo-store-review";
 import type { ComponentProps } from "react";
 import { useEffect, useState } from "react";
 import { Linking, StyleSheet, Text, View } from "react-native";
@@ -8,6 +7,7 @@ import appConfig from "../../app.json";
 import Screen from "../components/Screen";
 import KickstartBanner from "../features/kickstartExchange/KickstartBanner";
 import Touchable from "../components/Touchable";
+import { requestAppReview, SUPPORT_URL } from "../features/appReview/requestReview";
 import { getAllTracks } from "../features/playlist/storage";
 import { formatFileSize } from "../i18n/formatters";
 import { useAppLanguage, useTranslation } from "../i18n";
@@ -31,7 +31,6 @@ const sourceUrl =
     : `https://github.com/Tomyail/tubecast/commit/${buildCommit}`;
 const privacyPolicyUrl = "https://yt-audio.tomyail.com/privacy";
 const termsUrl = "https://yt-audio.tomyail.com/terms";
-const supportUrl = "https://yt-audio.tomyail.com/support";
 
 export default function SettingsScreen() {
   const [storageInfo, setStorageInfo] = useState<string>("");
@@ -128,24 +127,10 @@ export default function SettingsScreen() {
         <View style={[styles.separator, { backgroundColor: colors.border }]} />
         <LinkRow icon="document-text-outline" label={t("settings.terms")} url={termsUrl} colors={colors} />
         <View style={[styles.separator, { backgroundColor: colors.border }]} />
-        <LinkRow icon="help-circle-outline" label={t("settings.support")} url={supportUrl} colors={colors} />
+        <LinkRow icon="help-circle-outline" label={t("settings.support")} url={SUPPORT_URL} colors={colors} />
       </Section>
     </Screen>
   );
-}
-
-async function requestAppReview() {
-  try {
-    if (await StoreReview.isAvailableAsync()) {
-      await StoreReview.requestReview();
-      return;
-    }
-
-    const url = StoreReview.storeUrl();
-    if (url) await Linking.openURL(url);
-  } catch {
-    // Apple's review prompt is best-effort; a failed prompt must not interrupt Settings.
-  }
 }
 
 function ActionRow({ icon, label, onPress, colors }: { icon: IoniconName; label: string; onPress: () => void; colors: ReturnType<typeof useAppTheme>["colors"] }) {
