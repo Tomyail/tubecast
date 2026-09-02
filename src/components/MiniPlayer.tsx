@@ -11,6 +11,9 @@ import { useAppTheme } from "../app/theme";
 import { toExpoImageSource } from "../shared/imageSource";
 import Touchable from "./Touchable";
 import MarqueeText from "./MarqueeText";
+import { MINI_PLAYER_HEIGHT } from "../shared/layoutConstants";
+
+export { MINI_PLAYER_HEIGHT };
 
 export default function MiniPlayer({ tabBarHeight }: { tabBarHeight: number }) {
   const { t } = useTranslation();
@@ -88,7 +91,7 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     flexDirection: "row",
     gap: 12,
-    minHeight: 64,
+    minHeight: MINI_PLAYER_HEIGHT,
     paddingHorizontal: 16,
     paddingVertical: 10,
   },

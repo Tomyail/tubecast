@@ -18,7 +18,10 @@ import { usePlaylist } from "../features/playlist/context";
 import { useRemoteConfig } from "../features/remoteConfig/context";
 import { useTranslation } from "../i18n";
 import { useAppTheme } from "../app/theme";
-import HomeKickstartBanner from "../features/kickstartExchange/HomeKickstartBanner";
+import {
+  KICKSTART_BANNER_TOTAL_HEIGHT,
+  useKickstartExchangeApiKey,
+} from "../features/kickstartExchange/KickstartBanner";
 import { screenshotDemoMode } from "../features/demoMode/config";
 import { getDemoTrackByJobId, getDemoTracks } from "../features/demoMode/data";
 
@@ -31,6 +34,7 @@ export default function HomeScreen() {
   const { tracks } = usePlaylist();
   const { playTrack } = usePlayer();
   const { linkProcessingEnabled } = useRemoteConfig();
+  const kickstartApiKey = useKickstartExchangeApiKey();
 
   // 点击卡片兜底：实时查 job，未过期直接播；否则预填 Add Link 让用户确认。
   // pendingJobId 给点击后到跳转前的即时反馈（getJob() 期间无其他视觉变化）。
@@ -145,20 +149,23 @@ export default function HomeScreen() {
                   <DiscoverShelf title="" items={secondaryRecentItems} onPressItem={handlePressItem} pendingJobId={pendingJobId} />
                 ) : null}
                 <DiscoverShelf title={t("discover.popular")} items={secondaryPopularItems} onPressItem={handlePressItem} pendingJobId={pendingJobId} />
-                {/* 广告位：内容流末尾，非阻塞；空/错误/截图模式下不渲染 */}
-                <HomeKickstartBanner />
               </>
             )}
           </ScrollView>
         )}
 
         {/* FAB：相对 root 的 absolute 子元素。Screen 在 MiniPlayer 显示时自动增大
-            paddingBottom，root（flex:1）随之收缩，FAB 自动上抬避让，无需额外分支。 */}
+            paddingBottom，root（flex:1）随之收缩，FAB 自动上抬避让，无需额外分支。
+            全局 Kickstart banner 显示时再额外抬高，避免被其遮挡。 */}
         {linkProcessingEnabled ? (
           <Touchable
             accessibilityRole="button"
             accessibilityLabel={t("home.pasteUrl")}
-            style={[styles.fab, { backgroundColor: colors.surface, borderColor: colors.border }]}
+            style={[
+              styles.fab,
+              { backgroundColor: colors.surface, borderColor: colors.border },
+              !!kickstartApiKey && styles.fabAboveBanner,
+            ]}
             onPress={() => navigation.navigate("Convert", {})}
           >
             <Ionicons name="add" size={30} color={colors.tint} />
@@ -180,6 +187,9 @@ const styles = StyleSheet.create({
   errorText: { fontSize: 15, textAlign: "center" },
   retryButton: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8 },
   retryText: { fontWeight: "600" },
+  fabAboveBanner: {
+    bottom: KICKSTART_BANNER_TOTAL_HEIGHT + 16,
+  },
   fab: {
     position: "absolute",
     right: 20,
