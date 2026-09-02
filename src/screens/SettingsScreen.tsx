@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import Constants from "expo-constants";
+import * as StoreReview from "expo-store-review";
 import type { ComponentProps } from "react";
 import { useEffect, useState } from "react";
 import { Linking, StyleSheet, Text, View } from "react-native";
@@ -121,6 +122,8 @@ export default function SettingsScreen() {
           <Ionicons name="arrow-up-right-box" size={18} color={colors.tint} />
         </Touchable>
         <View style={[styles.separator, { backgroundColor: colors.border }]} />
+        <ActionRow icon="star-outline" label={t("settings.rateApp")} onPress={requestAppReview} colors={colors} />
+        <View style={[styles.separator, { backgroundColor: colors.border }]} />
         <LinkRow icon="shield-checkmark-outline" label={t("settings.privacyPolicy")} url={privacyPolicyUrl} colors={colors} />
         <View style={[styles.separator, { backgroundColor: colors.border }]} />
         <LinkRow icon="document-text-outline" label={t("settings.terms")} url={termsUrl} colors={colors} />
@@ -128,6 +131,34 @@ export default function SettingsScreen() {
         <LinkRow icon="help-circle-outline" label={t("settings.support")} url={supportUrl} colors={colors} />
       </Section>
     </Screen>
+  );
+}
+
+async function requestAppReview() {
+  try {
+    if (await StoreReview.isAvailableAsync()) {
+      await StoreReview.requestReview();
+      return;
+    }
+
+    const url = StoreReview.storeUrl();
+    if (url) await Linking.openURL(url);
+  } catch {
+    // Apple's review prompt is best-effort; a failed prompt must not interrupt Settings.
+  }
+}
+
+function ActionRow({ icon, label, onPress, colors }: { icon: IoniconName; label: string; onPress: () => void; colors: ReturnType<typeof useAppTheme>["colors"] }) {
+  return (
+    <Touchable accessibilityRole="button" onPress={() => void onPress()} style={styles.settingRow}>
+      <View style={[styles.rowIcon, { backgroundColor: colors.elevatedSurface }]}>
+        <Ionicons name={icon} size={20} color={colors.tint} />
+      </View>
+      <View style={styles.rowContent}>
+        <Text style={[styles.rowTitle, { color: colors.primaryText }]}>{label}</Text>
+      </View>
+      <Ionicons name="chevron-forward" size={18} color={colors.tint} />
+    </Touchable>
   );
 }
 

@@ -16,6 +16,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.tomyail.tubecast",
+      "appStoreUrl": "https://apps.apple.com/app/id6783834717",
       "buildNumber": "13",
       "deploymentTarget": "18.0",
       "infoPlist": {
