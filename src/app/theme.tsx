@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createContext, type ReactNode, useContext, useEffect, useMemo, useState } from "react";
-import { useColorScheme } from "react-native";
+import { useColorScheme, Appearance, type ColorSchemeName } from "react-native";
 import { resolveTheme, type AppThemePreference } from "./theme-preference";
 
 export type AppColors = {
@@ -86,6 +86,17 @@ export function AppThemeProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const isDark = resolveTheme(preference, systemScheme);
+
+  // 将原生宿主（iOS SwiftUI UIHostingController 等）的 colorScheme 同步为 App 的
+  // 主题偏好：light/dark 时强制对应方案，system 时传 null 还原跟随系统。这样
+  // Kickstart 等原生视图能跟随 TubeCast 自己的明暗主题。依赖只有 preference，
+  // setColorScheme 引起的 useColorScheme() 变化不会触发本 effect，避免循环。
+  // Appearance.setColorScheme 仅在原生平台存在（Web 上跳过），Android 同样生效。
+  useEffect(() => {
+    if (typeof Appearance?.setColorScheme !== "function") return;
+    // RN 运行时用 null 还原跟随系统，但类型声明只接受 ColorSchemeName，这里断言。
+    Appearance.setColorScheme((preference === "system" ? null : preference) as ColorSchemeName);
+  }, [preference]);
 
   const value = useMemo<ThemeContextValue>(() => ({
     colors: isDark ? dark : light,

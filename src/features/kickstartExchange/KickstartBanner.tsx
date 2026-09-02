@@ -34,7 +34,7 @@ export default function KickstartBanner({ colors }: { colors: { border: string }
 }
 
 const styles = StyleSheet.create({
-  // 与 Settings 的 section group 一致的圆角/描边；高度为 SDK 原生固定 164pt。
+  // 与 Settings 的 section group 一致的圆角/描边；高度为紧凑常量（见 layout.ts）。
   banner: {
     height: KICKSTART_BANNER_NATIVE_HEIGHT,
     borderRadius: 16,
