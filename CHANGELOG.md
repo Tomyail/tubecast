@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.3.0](https://github.com/Tomyail/tubecast/compare/v1.2.0...v1.3.0) (2026-09-02)
+
+
+### Features
+
+* **ads:** Home 底部接入 Kickstart Exchange banner（iOS 18+） ([2c94206](https://github.com/Tomyail/tubecast/commit/2c94206bdc53e3d88a826b53d86abb40df774b98))
+* **ads:** Kickstart banner 从全局悬浮层移入 Settings 页面 ([5ae5481](https://github.com/Tomyail/tubecast/commit/5ae54816f3004eebb64483ebbbce152ad97092c6))
+* **ads:** Kickstart banner 移至全局层，固定悬浮在 MiniPlayer/tab bar 上方 ([87c55a0](https://github.com/Tomyail/tubecast/commit/87c55a0b0ae08b4bd27004d5fdf3de79d36aa9fc))
+* **appReview:** 播放 3 个不同内容且跨 2 次会话后弹出中性评分引导 ([f7dd884](https://github.com/Tomyail/tubecast/commit/f7dd884a9732f9728db611f320b851236689dd69))
+* **settings:** add app rating shortcut ([bb62a30](https://github.com/Tomyail/tubecast/commit/bb62a30003de249a910d4904a95ac7792c66bc23))
+* **settings:** Kickstart banner 改为紧凑高度并跟随 App 主题 ([c46a2ee](https://github.com/Tomyail/tubecast/commit/c46a2eeb30c0ffcbadbd06b952520c665269c2ec))
+* **settings:** Kickstart banner 跟随 App 主题定制样式 ([60e25c1](https://github.com/Tomyail/tubecast/commit/60e25c147e4e48264e80f77046ca7e54858798b7))
+
 ## [1.2.0](https://github.com/Tomyail/tubecast/compare/v1.1.0...v1.2.0) (2026-07-29)
 
 
