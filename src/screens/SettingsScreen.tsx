@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Linking, StyleSheet, Text, View } from "react-native";
 import appConfig from "../../app.json";
 import Screen from "../components/Screen";
+import KickstartBanner from "../features/kickstartExchange/KickstartBanner";
 import Touchable from "../components/Touchable";
 import { getAllTracks } from "../features/playlist/storage";
 import { formatFileSize } from "../i18n/formatters";
@@ -99,6 +100,8 @@ export default function SettingsScreen() {
           </View>
         </Touchable>
       </Section>
+
+      <KickstartBanner colors={colors} />
 
       <Section title={t("settings.about")} colors={colors}>
         <View style={styles.aboutHeader}>

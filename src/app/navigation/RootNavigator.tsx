@@ -17,7 +17,6 @@ import AddChannelScreen from "../../screens/AddChannelScreen";
 import ManageChannelsScreen from "../../screens/ManageChannelsScreen";
 import PublisherPreviewSheet from "../../screens/PublisherPreviewSheet";
 import MiniPlayer from "../../components/MiniPlayer";
-import KickstartBanner, { kickstartBannerBottom } from "../../features/kickstartExchange/KickstartBanner";
 import Touchable from "../../components/Touchable";
 import { Linking, Text, View } from "react-native";
 import { useTranslation } from "../../i18n";
@@ -148,12 +147,6 @@ function Tabs() {
         <Tab.Screen name="Playlist" component={PlaylistNavigator} options={{ title: t("nav.playlist") }} />
         <Tab.Screen name="Settings" component={SettingsNavigator} options={{ title: t("nav.settings") }} />
       </Tab.Navigator>
-      <KickstartBanner
-        bottom={kickstartBannerBottom({
-          tabBarHeight,
-          miniPlayerVisible: !!activeTrack,
-        })}
-      />
       <MiniPlayer tabBarHeight={tabBarHeight} />
     </View>
   );

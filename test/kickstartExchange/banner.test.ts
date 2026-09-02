@@ -1,16 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { kickstartBannerBottom } from "../../src/features/kickstartExchange/layout";
-import { MINI_PLAYER_HEIGHT } from "../../src/shared/layoutConstants";
+import { KICKSTART_BANNER_NATIVE_HEIGHT } from "../../src/features/kickstartExchange/layout";
 
-// Kickstart banner 的全局定位：MiniPlayer 显示时叠在其上方，否则贴着 tab bar。
-describe("kickstartBannerBottom", () => {
-  it("sits directly above the tab bar when MiniPlayer is hidden", () => {
-    expect(kickstartBannerBottom({ tabBarHeight: 83, miniPlayerVisible: false })).toBe(83);
-  });
-
-  it("stacks on top of the MiniPlayer when visible", () => {
-    expect(kickstartBannerBottom({ tabBarHeight: 83, miniPlayerVisible: true })).toBe(
-      83 + MINI_PLAYER_HEIGHT,
-    );
+// Kickstart banner 现以 inline 形式渲染在 Settings 的 ScrollView 中，
+// 唯一的布局 seam 是 SDK 原生固定高度，不再有全局 bottom 定位计算。
+describe("kickstart banner inline layout", () => {
+  it("reserves the SDK's fixed native height", () => {
+    expect(KICKSTART_BANNER_NATIVE_HEIGHT).toBe(164);
   });
 });
