@@ -1,3 +1,5 @@
-Improved channel management:
+Small refinements for a smoother listening experience:
 
-• Fixed an issue where the full list could not be reached when managing many subscribed channels.
+• Refined Settings and About for easier access to storage, support, and app information.
+• Added more helpful feedback and guidance throughout the listening experience.
+• Improved channel browsing and playback details.
