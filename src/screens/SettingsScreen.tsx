@@ -7,7 +7,7 @@ import appConfig from "../../app.json";
 import Screen from "../components/Screen";
 import KickstartBanner from "../features/kickstartExchange/KickstartBanner";
 import Touchable from "../components/Touchable";
-import { requestAppReview, SUPPORT_URL } from "../features/appReview/requestReview";
+import { openAppStoreReview, SUPPORT_URL } from "../features/appReview/requestReview";
 import { getAllTracks } from "../features/playlist/storage";
 import { formatFileSize } from "../i18n/formatters";
 import { useAppLanguage, useTranslation } from "../i18n";
@@ -121,7 +121,7 @@ export default function SettingsScreen() {
           <Ionicons name="arrow-up-right-box" size={18} color={colors.tint} />
         </Touchable>
         <View style={[styles.separator, { backgroundColor: colors.border }]} />
-        <ActionRow icon="star-outline" label={t("settings.rateApp")} onPress={requestAppReview} colors={colors} />
+        <ActionRow icon="star-outline" label={t("settings.rateApp")} onPress={openAppStoreReview} colors={colors} />
         <View style={[styles.separator, { backgroundColor: colors.border }]} />
         <LinkRow icon="shield-checkmark-outline" label={t("settings.privacyPolicy")} url={privacyPolicyUrl} colors={colors} />
         <View style={[styles.separator, { backgroundColor: colors.border }]} />
