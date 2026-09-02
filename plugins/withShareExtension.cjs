@@ -2,6 +2,9 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { IOSConfig, withDangerousMod, withXcodeProject } = require("@expo/config-plugins");
 
+// 主 App 最低系统 iOS 18.0（Kickstart Exchange SDK 要求）；扩展 target 跟随主 App，
+// 否则 App Store 校验会拒绝 deployment target 低于宿主 App 的扩展。
+const EXTENSION_DEPLOYMENT_TARGET = "18.0";
 const TARGET_NAME = "TubeCastShareExtension";
 const TEMPLATE_DIR = "ios-share-extension";
 const EXTENSION_DIR = TARGET_NAME;
@@ -199,7 +202,7 @@ function ensureShareExtensionTarget(project, bundleIdentifier, appVersion, build
   setTargetBuildProperty(project, targetUuid, "CODE_SIGN_ENTITLEMENTS", `${EXTENSION_DIR}/${TARGET_NAME}.entitlements`);
   setTargetBuildProperty(project, targetUuid, "CODE_SIGN_STYLE", "Automatic");
   setTargetBuildProperty(project, targetUuid, "INFOPLIST_FILE", `${EXTENSION_DIR}/${TARGET_NAME}-Info.plist`);
-  setTargetBuildProperty(project, targetUuid, "IPHONEOS_DEPLOYMENT_TARGET", "16.4");
+  setTargetBuildProperty(project, targetUuid, "IPHONEOS_DEPLOYMENT_TARGET", EXTENSION_DEPLOYMENT_TARGET);
   setTargetBuildProperty(project, targetUuid, "LD_RUNPATH_SEARCH_PATHS", [
     '"$(inherited)"',
     '"@executable_path/Frameworks"',

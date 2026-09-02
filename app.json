@@ -17,7 +17,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.tomyail.tubecast",
       "buildNumber": "13",
-      "deploymentTarget": "16.4",
+      "deploymentTarget": "18.0",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -50,6 +50,14 @@
       ],
       "expo-localization",
       "expo-secure-store",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "deploymentTarget": "18.0"
+          }
+        }
+      ],
       "./plugins/withShareExtension.cjs"
     ],
     "extra": {

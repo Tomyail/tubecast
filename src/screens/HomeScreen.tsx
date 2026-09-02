@@ -18,6 +18,7 @@ import { usePlaylist } from "../features/playlist/context";
 import { useRemoteConfig } from "../features/remoteConfig/context";
 import { useTranslation } from "../i18n";
 import { useAppTheme } from "../app/theme";
+import HomeKickstartBanner from "../features/kickstartExchange/HomeKickstartBanner";
 import { screenshotDemoMode } from "../features/demoMode/config";
 import { getDemoTrackByJobId, getDemoTracks } from "../features/demoMode/data";
 
@@ -144,6 +145,8 @@ export default function HomeScreen() {
                   <DiscoverShelf title="" items={secondaryRecentItems} onPressItem={handlePressItem} pendingJobId={pendingJobId} />
                 ) : null}
                 <DiscoverShelf title={t("discover.popular")} items={secondaryPopularItems} onPressItem={handlePressItem} pendingJobId={pendingJobId} />
+                {/* 广告位：内容流末尾，非阻塞；空/错误/截图模式下不渲染 */}
+                <HomeKickstartBanner />
               </>
             )}
           </ScrollView>
