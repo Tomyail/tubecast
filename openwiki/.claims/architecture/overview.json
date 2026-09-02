@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:8707f8b5f002ac17d3ce5f9fb7c85b615a1e8853bbadd9ddcd4daf2dfdf0ac4f",
+  "pageVersion": "sha256:c4c157cd03e2bea5b380a8e89ca8770cffc2949310b40eb9a84fe4c9e8189b4a",
   "claims": [
     {
       "id": "claim_63399ea69c3c407889da257c4b2c1ff2",
@@ -18,11 +18,11 @@
     },
     {
       "id": "claim_1aa784c22e3d4854ae994f80deeb157f",
-      "statement": "AppProviders nests GestureHandlerRootView > SafeAreaProvider > QueryClientProvider > AppThemeProvider > I18nProvider > RemoteConfigProvider > SettingsProvider > PlaylistProvider > PlayerProvider, with PlayerProvider innermost because playback depends on playlist state.",
+      "statement": "AppProviders nests GestureHandlerRootView > SafeAreaProvider > QueryClientProvider > AppThemeProvider > I18nProvider > RemoteConfigProvider > SettingsProvider > PlaylistProvider > PlayerProvider, with PlayerProvider innermost because playback depends on playlist state; AppReviewPrompt is mounted inside PlayerProvider alongside the children.",
       "evidence": [
         {
-          "resource": "repo://src/app/providers/AppProviders.tsx#L25-L43",
-          "version": "repo-lines-v1:sha256:84aac223323aebad05c0ebbad6c4948fc6cdeeda5378d9d81e6289b066fe1171:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU3MjE2ZThlOWMwYTFhNjhkMDZjMmZiYWE1ZmQyMTM5NDgyYjhlZmQwYTE5MzE1YjkxNWU2Y2NlODQ5ZDg5ZGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk1ZWYwMWJjMDhkYmMzYjYzZTRlNzVlYTNkMjZhNWI5NDE4OTE4NzdlMjdhZDg5MTMyOWM4NDExZDdkOGRjNGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhiMGMxN2M3ZDc2Y2I4OTQ2ZmNhOGI2OGQ3YmQ1NmU4MDE2ZjUxNDVlYmJlNTg1ZmJhNDJlNjBhMGM3ZmY5OTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEifQ"
+          "resource": "repo://src/app/providers/AppProviders.tsx#L25-L47",
+          "version": "repo-lines-v1:sha256:9ed22aea8d8077067914af9df3cc7f6a9c03ffc17fc79f1dec20b42f97f14316:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk1ZWYwMWJjMDhkYmMzYjYzZTRlNzVlYTNkMjZhNWI5NDE4OTE4NzdlMjdhZDg5MTMyOWM4NDExZDdkOGRjNGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFkNTE0YWU0ZDkyYzVjY2RhZTQzMDg2ZmM2ZDlmMjg1MWI5MzIxN2E3YzhjYjk0MjczZDJkY2MyZTZkMDYyZDciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEifQ"
         }
       ]
     },
@@ -48,11 +48,11 @@
     },
     {
       "id": "claim_e43a14e679db4052b80b108ce55cdcdb",
-      "statement": "AppThemeProvider defaults the preference to \"system\" optimistically, corrects it from AsyncStorage key settings_theme after mount, tracks useColorScheme live in system mode, and persists changes via setTheme; static typography/spacing/radii tokens are exported as constants outside context.",
+      "statement": "AppThemeProvider defaults the preference to \"system\" optimistically, corrects it from AsyncStorage key settings_theme after mount, tracks useColorScheme live in system mode, persists changes via setTheme, and syncs the native host via Appearance.setColorScheme on each preference change (null restores system tracking); static typography/spacing/radii tokens are exported as constants outside context.",
       "evidence": [
         {
-          "resource": "repo://src/app/theme.tsx#L35-L101",
-          "version": "repo-lines-v1:sha256:89234fae4e83cc8a08ff0ef8ece7b419f8c74d6e893c72a59ab782322dee46a3:eyJzZWxlY3RlZExpbmVDb3VudCI6NjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVmYTU4ODhlMTkwOTQwMTAxNTA5ZjYzZDIyNmY3ZTY0ZmRmZmM5NmIyMzc0M2NhOGQ2MGExODg2MTViYTI3ODQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjEyOWYzMmM3MTg4NTMxYTIxZDE2NzUzMzk0OWVmZjE0OGJiNTI3MjYyMTE3ZmYwNzFhNWE3MmI1YjJlZDNmMzYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjAxNTMwMjIyYzM5MWY0ZjY2MTU5NDgzOWM5OWE5MzNkNmQ3ZjEyYWM2NTQ0MWE3ZWI3MDNiZjUxZDY3MTZiYTEifQ"
+          "resource": "repo://src/app/theme.tsx#L78-L111",
+          "version": "repo-lines-v1:sha256:6ae8fd0f07e19ae9aebb849145b96b61cc15642af74f25b0a9b861aad384f99b:eyJzZWxlY3RlZExpbmVDb3VudCI6MzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcwMTE2NGUxNTQ4OGY0NjI2MmM2YjhlMTA3Y2Q4Zjg0NmZiMjFlM2ViMDc1NTJhODk2MTZlOGE0ZTg3ZGIyMmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYwOWIwNGRlMzk1OTEwMzcxYWQyMzEzNGFlZjIxOGM4ZjdjNGU4NTI5ZDVjZGE3NTI5NTVjYmFiZDhiZTk3YTAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI5OTlkMGU4NDc4ZGQ1Y2VmM2M1YTNiOWM3MTM3ZjQ0NWZmODMzMGJlOWNmYTdkMTBiZTRlZmJhODg0NmNlNGYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFjZmUzZjgxNmQ2ZWNkNzUxMTU3MzQwMmUxZjY5YzQ1NzNkNTc0ZmMxODBkN2JmY2Y4MWQ3ZTdmNWIxNGE1YjgifQ"
         }
       ]
     },
@@ -61,16 +61,16 @@
       "statement": "The navigation tree is a root native stack whose first screen is a bottom-tab navigator (Home, Feed, Playlist, Settings), each tab wrapping its screen in a one-screen native stack, plus root-level modal/formSheet screens Player, AddChannel, ManageChannels, Convert, and PublisherPreview; MiniPlayer is rendered inside Tabs above the tab bar rather than being a route.",
       "evidence": [
         {
-          "resource": "repo://src/app/navigation/RootNavigator.tsx#L115-L152",
-          "version": "repo-lines-v1:sha256:9ec73b70229f372b8f62e68b7e5023a6c3bd9912b9d21fc14f73dbf3f6e1bb74:eyJzZWxlY3RlZExpbmVDb3VudCI6MzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVhNjgzZGE5NDI1MzY2ZWMzZWQ0NDAwMzcyMmJmNDNiZjI2NTJiOWRmMmFlYzgyN2JhNzNhOTAwOTI3NGJmNmEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA5NGZjMGMxNzNkMWVjM2ZjNTAxZDdkZmE5Mjg1NTAxYzUyN2NmYjQ3MTI1ODNkYTNjYzM2MTgwNTY2YjRiZTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImExN2I4M2YzNjdjM2IyZWVhOGU3MmQxNTJhZGU3YTFlNWNiYTIyYTk5NTdhMTFhYmVmOTI1ODViOTU5MjcwZDcifQ"
+          "resource": "repo://src/app/navigation/RootNavigator.tsx#L115-L153",
+          "version": "repo-lines-v1:sha256:de2f5e1d6052360fe24400beae5e5679d732735d16d069b3267d1b1a908f3772:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVhNjgzZGE5NDI1MzY2ZWMzZWQ0NDAwMzcyMmJmNDNiZjI2NTJiOWRmMmFlYzgyN2JhNzNhOTAwOTI3NGJmNmEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA5NGZjMGMxNzNkMWVjM2ZjNTAxZDdkZmE5Mjg1NTAxYzUyN2NmYjQ3MTI1ODNkYTNjYzM2MTgwNTY2YjRiZTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImExN2I4M2YzNjdjM2IyZWVhOGU3MmQxNTJhZGU3YTFlNWNiYTIyYTk5NTdhMTFhYmVmOTI1ODViOTU5MjcwZDcifQ"
         },
         {
-          "resource": "repo://src/app/navigation/RootNavigator.tsx#L262-L316",
+          "resource": "repo://src/app/navigation/RootNavigator.tsx#L263-L317",
           "version": "repo-lines-v1:sha256:376e599407a57aa8afbcb1490cacb58b7842a0804ca1b685f801aa93336350ab:eyJzZWxlY3RlZExpbmVDb3VudCI6NTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc0ZWY3YTI0N2Y2YmVlZDAwNTNjODcyNGJkMjhlYTM3MDhlOTZlYzc4YjFkYWViZWUwMDc3MzhhNDVlMjgxMGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRjZWI3Mzk1ZWIxM2FkYjc0NmUwYTI4NTg0NjQwYTE5MTdjMzczYzEwYjRiNzc0OGJmNTE3ZWJjZjA0NmY1MTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ0YjE5YzgyMDVkYjFmNzZhMzI1YjU1ZDJiYTFkZDBhMjEzNzMyM2E5OTcxOGNiYTUyODc5ZGNiNjIxYzBmNDIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVkYTYxOGI4ODk3NTI4MjY5ZjMxMWRlYmI1NTVmMGQ3ZjhiNWE5N2Y2YzI3YjE4OTE3YjE0NDQ5MTZhMDQ2NjQifQ"
         },
         {
-          "resource": "repo://src/app/navigation/RootNavigator.tsx#L31-L36",
-          "version": "repo-lines-v1:sha256:e4bed4c82e5dfe6a23c9734ea3584db82096f6173ad01447cf21c2c30fdfda43:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMjJjZGIxMDRkNGI4ZjJmNDEyYzBhYjc3NTgwZjgwMzcwZWU3NDE4OWE4NWNmZGIzMDBlM2NmZmQwOWRkMzU3OSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjQ5MjNkZDFiNGFkMjQ1ZTM4ZGJjYTBhMzBjYmY1NzBhZjAyMGNmY2MxOWYyODI3NDFjMmI2NDM3ZDFiYjgxMSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNDA4OWRjNjYyMjhhZTlhZDc2YzdiYjI2ODU3ZjQyZjE3MjRkZmZkZGU2ODUzMTMxYTA1ZTgyMmMyMmNkYTgwYiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMGZhODEwZTIwMzk5Njk5NDFiYjMzODNjMGUzNzMwYjNjNmZjMWI4NDIxMDMzZWFiZjM4MTc2OTY4YjkzZTAzNCJ9"
+          "resource": "repo://src/app/navigation/RootNavigator.tsx#L33-L38",
+          "version": "repo-lines-v1:sha256:75e89e781173faf40bddedf1be924a6a0c87101d91a70ad136e390636a462536:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOTUzYjU2N2Y5YjZhODk5OWIzOTRlMDVhN2ZiYTAwMzMxYTc3OTYyNjc4MDFlY2Q5ODNmMGQ3NTk0MjIwMzdkMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMzVjNzM1MWFhNDljNzE0YWEyMWI0Mzg1MjQxM2MxMDFjN2Q2ZTM4MDc5OTFmYmM0MWIxNzBjZDNmYzg1NmYyNCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNjRlNGRlMTQ3NjQyOThlN2QyNzg5NTA0YzI5ZWI2YWUwZDhjYzRjNzFiMDI1ZmUwZmJiN2M2NmIyOTE2NDIzYyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNDBiNDVhYThhYjc4ZjQ3NmU3YjJkNzQ3NDdhNTQ3ODIxODMwYjU5YWFjNDNlOTA4YjIyM2FmNDdlYzY4ODI2MCJ9"
         }
       ]
     },
@@ -80,7 +80,7 @@
       "evidence": [
         {
           "resource": "repo://app.json#L1-L7",
-          "version": "repo-lines-v1:sha256:4927d53aecf71e4866350f6b4e49b98fe58aab1d295b576d00de2a15b0cff436:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYTZmYjA4ZmRhMWFjYjk1N2I2MTE2YmQzNzgxMWExZmU0MWEwMTYxMWMwNjMxZWRiZjc4NmQ2ODg5YTI3YTU1YyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOWQzNWYyNGY5ODFhNDQzYzA1Mjg2MjhkMzllNzQ2MTJjNzI1NTFhN2ExNDc5NWJiMjEzNjIwNjU3YTM3MmVjZSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOTQzYmE0OWNjYmYwYzVmMmE0ZjU0M2FmMjcyNmUxMDk0MmE5ZjdkZGMyMTFiOGY3ODc3YTFlNmI4ZmFlMDg5NyJ9"
+          "version": "repo-lines-v1:sha256:36d24bc75f65803646a2cf092a1025ddf88bb487c793a1be765db774793ea7ba:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYTZmYjA4ZmRhMWFjYjk1N2I2MTE2YmQzNzgxMWExZmU0MWEwMTYxMWMwNjMxZWRiZjc4NmQ2ODg5YTI3YTU1YyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYWMyODM0N2M5OGYzZGU1OTVmMDkyMGRlNzM0YzBjNDAzMmYwNjk0OGJlYWQ0ZTg1ZDQ1ZjY4MDAxNTdjMGQwMCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOTQzYmE0OWNjYmYwYzVmMmE0ZjU0M2FmMjcyNmUxMDk0MmE5ZjdkZGMyMTFiOGY3ODc3YTFlNmI4ZmFlMDg5NyJ9"
         },
         {
           "resource": "repo://src/app/navigation/RootNavigator.tsx#L163-L227",
@@ -108,7 +108,7 @@
       "evidence": [
         {
           "resource": "repo://package.json#L43-L71",
-          "version": "repo-lines-v1:sha256:ce07ac5681e5ea0bb59702f3b17aa7cb4c0b64b6b7ce30043420bf38d4df0eee:eyJzZWxlY3RlZExpbmVDb3VudCI6MjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJhM2I0NjlkOWUwOTc1NzIyNDY2NjczNGM5ZWY3YjI1NGQ4ODUzNGY1ZDViYjcwOTg5NjA4MDVjNTUzZGMzMDciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY2YWJkZjZkYmQzODlmYTMyNmYyNDY3OTg1YWVkMWUyNWNjNTA3MjI2NDZlYWVjODhhZTQ5NjI3ZWU1M2I1ZGUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlmZDU4MzJmZjg0YThlY2E3YWM2YjZkZjkxZGIxMmI0YWZiZTAxNjgzNDg4MzliZmRkYTQxN2IwODk3MTBiOTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE0ZDQxMDQ3OTQwYmFhYmI4ZTk2NTg1NTA2M2VhNWEyMGQ1OWVlZGQ4YmZjMGE5ZjM3NDFmZWNmNWY5MGI5YTYifQ"
+          "version": "repo-lines-v1:sha256:9e9ebbbb6b8d27b1ece75f9dd7ef6e7c8ab60e146e26bd9b7eaeb9d6ca48c594:eyJzZWxlY3RlZExpbmVDb3VudCI6MzIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJhM2I0NjlkOWUwOTc1NzIyNDY2NjczNGM5ZWY3YjI1NGQ4ODUzNGY1ZDViYjcwOTg5NjA4MDVjNTUzZGMzMDciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY2YWJkZjZkYmQzODlmYTMyNmYyNDY3OTg1YWVkMWUyNWNjNTA3MjI2NDZlYWVjODhhZTQ5NjI3ZWU1M2I1ZGUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlmZDU4MzJmZjg0YThlY2E3YWM2YjZkZjkxZGIxMmI0YWZiZTAxNjgzNDg4MzliZmRkYTQxN2IwODk3MTBiOTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE0ZDQxMDQ3OTQwYmFhYmI4ZTk2NTg1NTA2M2VhNWEyMGQ1OWVlZGQ4YmZjMGE5ZjM3NDFmZWNmNWY5MGI5YTYifQ"
         },
         {
           "resource": "repo://src/features/discover/hooks.ts",
@@ -136,7 +136,7 @@
       "evidence": [
         {
           "resource": "repo://src/app/theme.tsx#L60-L98",
-          "version": "repo-lines-v1:sha256:896f910a0abd036bf5c545b029b637fe0de7796b719624f6b721ea8319e565f6:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEzZmJkODRhZWQ1NmU4M2M0ZTFlNjJhZmI1MmYxNDVmNWVkMjdlZWYzZWViZjFhNjZmNmE4YTExYTdjNzU2YTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNiY2E2YWFjZGFmZjhiMzg4MTBkNzcxNWM0NjUzZWUxZjkxNmEyOWMzZGQwNTZmNTZiYmQyOWVhMWYwNWRkNmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjUzODZiN2EzZmM1OTExNDAxNDUwMDUwZDViYWNmYjY2NTllMzlhN2FhMThhOTQ1M2MwMDRhNzM2MzI4Mzc3MDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjI2OGNiNTg2ZjNkMzM3YzdkNWQzM2E4NjZhMzljYWIyYmZmMmU4N2UxZjQzOTY2NzZmZDY5YzAwNTc2M2M5ZGUifQ"
+          "version": "repo-lines-v1:sha256:1c9f8ae746bacd7a5cad7cbbbc894fd49d4444d244e0af0ea67800154ea7c64f:eyJzZWxlY3RlZExpbmVDb3VudCI6NTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEzZmJkODRhZWQ1NmU4M2M0ZTFlNjJhZmI1MmYxNDVmNWVkMjdlZWYzZWViZjFhNjZmNmE4YTExYTdjNzU2YTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNiY2E2YWFjZGFmZjhiMzg4MTBkNzcxNWM0NjUzZWUxZjkxNmEyOWMzZGQwNTZmNTZiYmQyOWVhMWYwNWRkNmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjUzODZiN2EzZmM1OTExNDAxNDUwMDUwZDViYWNmYjY2NTllMzlhN2FhMThhOTQ1M2MwMDRhNzM2MzI4Mzc3MDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjI2OGNiNTg2ZjNkMzM3YzdkNWQzM2E4NjZhMzljYWIyYmZmMmU4N2UxZjQzOTY2NzZmZDY5YzAwNTc2M2M5ZGUifQ"
         },
         {
           "resource": "repo://src/features/player/context.tsx",
@@ -158,13 +158,31 @@
       "evidence": [
         {
           "resource": "repo://app.json#L25-L76",
-          "version": "repo-lines-v1:sha256:fbcb740c9a6d4fbb4a1cd2257ab6cdf6ebaf0bd209f7d03d1ac507974fe55a88:eyJzZWxlY3RlZExpbmVDb3VudCI6NTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI1NDlkYmQ3YWI3MDE5NTExMjBmZmM2NWQ0NDljZGRjMDcwZmNhYzg5NjliNjAxMmEzOTU1ZmM0MjE0ZDljZjAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4OTNmNDBlMzc4MWViODk2YzgyZDA0NmEwODA2N2ExMWUzNWNkZjJmMWRmYWYyNmZlYTkwYjhkYjY2NzY0MTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkwOTg5YWJkOWUwZWVmMzQ0MDNkOWJiNTI5NTE1ZjQ2ZjYxYTkxZDBjNTZkYzg2MWY3ZWQyOTc0ODFmMjRlNDQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoyLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRmNzM5YTA2YzFjYmIxMjQ0ZTMzNjNkMzhiY2Y5ZmE1MGNlODRmZWQzOTljMjE5M2EzYzdmMDhkNTk5MThiMmEifQ"
+          "version": "repo-lines-v1:sha256:baf6a3294297b5bcc780c47db2a6ee23f7ea73e11da6ed153d802f1a10995e3f:eyJzZWxlY3RlZExpbmVDb3VudCI6NjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI1NDlkYmQ3YWI3MDE5NTExMjBmZmM2NWQ0NDljZGRjMDcwZmNhYzg5NjliNjAxMmEzOTU1ZmM0MjE0ZDljZjAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4OTNmNDBlMzc4MWViODk2YzgyZDA0NmEwODA2N2ExMWUzNWNkZjJmMWRmYWYyNmZlYTkwYjhkYjY2NzY0MTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkwOTg5YWJkOWUwZWVmMzQ0MDNkOWJiNTI5NTE1ZjQ2ZjYxYTkxZDBjNTZkYzg2MWY3ZWQyOTc0ODFmMjRlNDQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoyLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRmNzM5YTA2YzFjYmIxMjQ0ZTMzNjNkMzhiY2Y5ZmE1MGNlODRmZWQzOTljMjE5M2EzYzdmMDhkNTk5MThiMmEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_816a031ccdcc4cde893bf014d166c6aa",
+      "statement": "The withShareExtension.cjs config plugin copies the ios-share-extension template into ios/TubeCastShareExtension at prebuild, writes app-group entitlements for both main app and extension, patches AppDelegate.swift to consume a TubeCastPendingOpenUrl stored in the app group UserDefaults (injecting it into launchOptions, re-checking on applicationDidBecomeActive, and consuming it before direct open-url delivery to avoid duplicates), and creates/patches the TubeCastShareExtension Xcode app_extension target with API-only mode, deployment target 18.0, and a hardcoded DEVELOPMENT_TEAM fallback for headless EAS builds.",
+      "evidence": [
+        {
+          "resource": "repo://app.json#L62-L85",
+          "version": "repo-lines-v1:sha256:df579e2edce838b902f61f3607d6da82c4b8603ede487e4e164845d352cebd07:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjllMjNhODk5NmE3YWI4NTYyMWE5M2Y2ZDE4ZTgzMmJhNDZhZDQ5NTYyZmZkOGZmMjliOGRmZjliYTdiMDlkODQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4OTNmNDBlMzc4MWViODk2YzgyZDA0NmEwODA2N2ExMWUzNWNkZjJmMWRmYWYyNmZlYTkwYjhkYjY2NzY0MTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM0NWQxYTQzOWI0ZTE4YzBlNmZmNjc3NjVmZWNkZDA5NmRmNTVmZjAwNWM2NjFjYjJiYTY3Nzc4ZTU0YmMyOTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoyLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRmNzM5YTA2YzFjYmIxMjQ0ZTMzNjNkMzhiY2Y5ZmE1MGNlODRmZWQzOTljMjE5M2EzYzdmMDhkNTk5MThiMmEifQ"
+        },
+        {
+          "resource": "repo://plugins/withShareExtension.cjs#L173-L251",
+          "version": "repo-lines-v1:sha256:ab43032512c745aae9e3341efb6294aec773929e733987a9feb4320d0c7237a3:eyJzZWxlY3RlZExpbmVDb3VudCI6NzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJlZmE1OWUwZDMwOTJmMTU5MmJiNTMzOGU1MmMxMDYxNzI2NzlhNzRkYTk2MTMzOGQ3YmVlYjRiMTAwZGRjOTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFhMWQxYTYzMzkwMjI5Yzc5ODM0N2U4M2EwNDA1NDQxYzk0MDAwMzUyODRhZDE2OGMxYmY2Y2RmMWQ3MGEzNzAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZiNTgwZTk2NGY4M2E0NzNmNDNkNDQzODQ2Mjk0OWQ2OGI1NjAwZmRhNzg3ZjE2Mzc0NWQwMGRlODljYmYzNmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://plugins/withShareExtension.cjs#L19-L130",
+          "version": "repo-lines-v1:sha256:bddf6e30dacb8d86c7a1828e7cc039ddb7a692976b0ac991c30d81ecacf8fa52:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEyLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIwYmQzNjgyZDhhMzFiMjQ0MzJlYzY0ZTFlY2U3OTU0OTMzOWZhMGM1YzhjNzI3ZjBhNzYyYzE5Mzg0OGQ5MzRhIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0MTJjYTM0NWNjZjc1YmY5YzA4MDZiY2U2OTViZThkZTgwOGI3OTk4NDI1MWE3YTU0ZDIwMmNmNjEwMWRkNDUxIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJjYzE2MjFjMjI4OTYyZTE1Y2Q1OTRiMTY3ZmEzZWZkOWUzOWU3NDhlYzY4ZTAyNDMyMzljY2FlNGQzMTc5OTM4IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIzZjVhOTZmMDJhMGY4YzI2NWE3NGY1YjUxYWI4ZWM4MDE3MDVmMGFjOWVhZGI4YjI2NmFiNDQyNmU3ZjNiMWZhIn0"
         }
       ]
     }
   ],
   "verification": {
     "by": "openwiki/0.5.0",
-    "at": "2026-09-01T21:28:30.610Z"
+    "at": "2026-09-02T21:24:07.674Z"
   }
 }

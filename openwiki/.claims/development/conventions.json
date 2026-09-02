@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:66dfa3eb31f3a0317054549b24c4de67560c2c02ebd33d11c6530856441259eb",
+  "pageVersion": "sha256:28ded4a030ade11e32c0649583282bdf987b080bf14bcf861287d866a7f09cda",
   "claims": [
     {
       "id": "claim_17f4948a5c8845cbb0240c75badc314e",
@@ -91,8 +91,8 @@
           "version": "repo-lines-v1:sha256:cd4638170f6f198c2b37431eb05f09d0acdb0632a41b1b6fe11c69fee8c83294:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM1MDFmNDE1ZjEwNjgwYmQxNzgwNDkyMTcxZmI4NWU3OTU1MDk2N2IzNjlhYjU3NWE2MmJiZTVmNzFlM2EyYjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE2ZGJiZTFjZDRhNDk4ZjZmZTk5ZjhhNTlmMGYxYjZlOWQwYjk0MTE4ODBjMmExMmQwMTQ0NGZkMTM0MTU2NDIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjkwMWZkNmYyMTYxNTVlN2RlNzBiNmIzYzdlODJjNzAwOGE0ZTdhOWMwYzdhZTk4ZjdkYTA4MWQ1YTNjNDhmOTYifQ"
         },
         {
-          "resource": "repo://src/i18n/translations.ts#L1-L37",
-          "version": "repo-lines-v1:sha256:28d5319713ea05214d6fa9df9cdf822d47a82846498cd58a8aa5787594e05258:eyJzZWxlY3RlZExpbmVDb3VudCI6MzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBkZDhkNDYzNmM0MWQwZDhhNDExOTEzYzcyNTQyZjg0NGFjYzMzNGIwM2YxNzMwYTcxODEyMGE3Yzg2MzYxMzAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRkNWNkMmZiNGYzZGY4ODQ1MTUyNTViMzk1MjNmMmY4YjU0NzJiZWVhOWY1NjZmZmNhMjA0ZGI4MDI1NjEwNDEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE3NGVlOGE4ZDFhYTg0NTM5MWJjNjc5ZWI3MGNlN2Y0NmEzY2Q2ZmIyZDE2ZmNjYTY3ZmExNzhmNGY4YzFlMGUifQ"
+          "resource": "repo://src/i18n/translations.ts#L1-L40",
+          "version": "repo-lines-v1:sha256:842a61447b202b34ea097392c3e093d5ace76481011069fa5f88b3b94219c2fc:eyJzZWxlY3RlZExpbmVDb3VudCI6NDAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBkZDhkNDYzNmM0MWQwZDhhNDExOTEzYzcyNTQyZjg0NGFjYzMzNGIwM2YxNzMwYTcxODEyMGE3Yzg2MzYxMzAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE3NGVlOGE4ZDFhYTg0NTM5MWJjNjc5ZWI3MGNlN2Y0NmEzY2Q2ZmIyZDE2ZmNjYTY3ZmExNzhmNGY4YzFlMGUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
         }
       ]
     },
@@ -129,10 +129,28 @@
           "version": "repo-file-v1:sha256:99ec1c84ee351367190459a76e437f96c8fe7787c49996ac2213a3aa21ce31b6"
         }
       ]
+    },
+    {
+      "id": "claim_261a48586d8e4f6d8a82afb09cb37a95",
+      "statement": "The app review prompt strings live in a dedicated appReview namespace in both locale blocks of src/i18n/translations.ts (title, message, rate, feedback, later), alongside new settings keys rateApp, privacyPolicy, terms, and support; the kickstart exchange banner and mini player added in the same window introduce no translation keys, and MINI_PLAYER_HEIGHT in src/shared/layoutConstants.ts is a pure constant (64) with no React Native imports so node tests can import it directly.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/kickstartExchange/KickstartBanner.tsx#L25-L44",
+          "version": "repo-lines-v1:sha256:c8df0c73f864ea171b0ecd7116d6aa22b20ee7d3e0081c015b7193bd59076b5b:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJhYzdjNzA1MTJjZTFiZjJlZGEwYTczYzQ0OTA5NTY1NTA3YzAwMmJkNzRhODQzODM1MzhhMWRmOGI2ZGI1NjQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI0OWZlMzVhMTU1YWE1MDZkM2QyZDQxMTBiNjc0OWNkN2NiMTgzMDIwOGRlNWE2ZTU2YjQzYWFmNjM0MWViZDgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjcyMzM0MTJhYTY2ZDQ2ODQ0OGNmYjY5MjVmYWE4ZTQ4MTE3ZTJhYjRmNzQ4NTBmNDVmZTMxNDgzZDhkZTkwYzkifQ"
+        },
+        {
+          "resource": "repo://src/i18n/translations.ts#L16-L18",
+          "version": "repo-lines-v1:sha256:f3f6ffaf9a0a16379f69bb9a297ad52d7331e9a74f69f0e52928930eb10d574e:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjQzMWNkY2QxNmU2ODNhYzUxMGI5NGNiOGZiOGRmNDFkMjI1ZjgxMzNlNjlkNmY4YzljNGYyM2U5NzI5NWQ4NyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMmNiNDllYzViYzk4MmYxY2M1YTM5ZTdjZjUzNDc3MzQzM2RmNjk1NmE3ZThlZDRjMmU1MDEzYzcxMjY1NGQ2ZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYmUzNDUxY2MwNTA5ZDNlZjc0ZThkNjM5OTM3ZmM4MmMxMTIxZmE5NzYxMzQ1YzQ1ODIzOTFmZTJlYzk5OWUwYiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNWJjMzg1ZGFiN2Y5OTI4YWNiODMwNzE0MGVkNmE4MjJmYzllMjMwNjNjMmUwMTgwMzg1ZjBhOWQ1MmMzZDVlNCJ9"
+        },
+        {
+          "resource": "repo://src/shared/layoutConstants.ts",
+          "version": "repo-file-v1:sha256:06c0903bef586f21a08f23dc8f2a0af075994310e492634df745c398aea99aec"
+        }
+      ]
     }
   ],
   "verification": {
     "by": "openwiki/0.5.0",
-    "at": "2026-09-01T21:28:30.610Z"
+    "at": "2026-09-02T21:24:07.674Z"
   }
 }

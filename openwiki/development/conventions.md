@@ -3,9 +3,6 @@ type: Development Guide
 title: Development Conventions
 description: Commit message rules enforced by commitlint and the husky commit-type-guard hook, how commit types drive version bumps, demo-asset guards, i18n requirements, and code organization conventions for TubeCast.
 tags: [development, conventions, commits, versioning, i18n, git]
-verified:
-  - by: openwiki/0.5.0
-    at: 2026-09-01T21:28:30.610Z
 sources:
   - id: openwiki-source-cf2bedd52c170bfab2bbf723
     resource: repo://.husky/commit-msg
@@ -25,15 +22,22 @@ sources:
     resource: repo://src/features/demoMode/config.ts
   - id: openwiki-source-b16234b5752aa15156e9c2c9
     resource: repo://src/features/demoMode/data.ts
+  - id: openwiki-source-efb26d30d2af248771673784
+    resource: repo://src/features/kickstartExchange/KickstartBanner.tsx
   - id: openwiki-source-07e1d31091696bf83c1af37c
     resource: repo://src/i18n/formatters.ts
   - id: openwiki-source-73242ed06ac96308eb582d63
     resource: repo://src/i18n/index.tsx
   - id: openwiki-source-0400e6ad3746e82a131d5687
     resource: repo://src/i18n/translations.ts
+  - id: openwiki-source-05113320c446ad5aa2268a11
+    resource: repo://src/shared/layoutConstants.ts
   - id: openwiki-source-c457d3d1a63d5dc86f0da7ef
     resource: repo://src/types.ts
-generated: { by: "openwiki/0.5.0", at: "2026-09-01T21:28:30.610Z" }
+generated: { by: "openwiki/0.5.0", at: "2026-09-02T21:24:07.674Z" }
+verified:
+  - by: openwiki/0.5.0
+    at: 2026-09-02T21:24:07.674Z
 ---
 
 # Development Conventions
@@ -118,7 +122,7 @@ Demo mode itself is gated by `EXPO_PUBLIC_SCREENSHOT_DEMO_MODE` (truthy: `1`/`tr
 
 All user-facing strings must go through the i18n layer in `src/i18n/` rather than being hardcoded:
 
-- **`translations.ts`** — the single `resources` object with one `translation` namespace per locale. The currently supported locales are **English (`en`)** and **Simplified Chinese (`zh-CN`)**; `resolveLanguage` collapses any `zh-*` system tag to `zh-CN`. (Traditional Chinese is not currently a locale; adding `zh-TW` would mean adding a parallel resource block and extending `AppLanguage`/`resolveLanguage`.) When adding a UI string, add the key to **every** locale's resource block so no locale falls back to English.
+- **`translations.ts`** — a single `resources` object exported `as const`, with one flat `translation` namespace per locale grouping keys by feature area (`nav`, `common`, `home`, `discover`, `progress`, `feed`, `channel`, `playlist`, `player`, `share`, `audioExport`, `publisher`, `settings`, `appReview`, `errors`). The currently supported locales are **English (`en`)** and **Simplified Chinese (`zh-CN`)**; `resolveLanguage` collapses any `zh-*` system tag to `zh-CN`. (Traditional Chinese is not currently a locale; adding `zh-TW` would mean adding a parallel resource block and extending `AppLanguage`/`resolveLanguage`.) When adding a UI string, add the key to **every** locale's resource block so no locale falls back to English. Recent additions in this update window follow that pattern: the App Store review prompt introduced the `appReview` namespace (`title`, `message`, `rate`, `feedback`, `later` in both `en` and `zh-CN`) plus new `settings` keys (`rateApp`, `privacyPolicy`, `terms`, `support`). The kickstart exchange banner and the mini player added in the same window introduce **no** translation keys — the banner's content comes entirely from the `@tomyail/react-native-kickstart-exchange` SDK, and the mini player is sized by the pure constant `MINI_PLAYER_HEIGHT` (64) in `src/shared/layoutConstants.ts`, which deliberately avoids React Native imports so node tests can import it directly.
 - **`index.tsx`** — initializes `i18next` with `react-i18next` (`fallbackLng: "en"`, JSON v4 compatibility) and exposes `I18nProvider` + `useAppLanguage()`. Language preference is persisted in AsyncStorage under `settings_language` (allowed values `system`, `en`, `zh-CN`; anything else is treated as `system`). With preference `system`, the device locale from `expo-localization` is resolved to `en` or `zh-CN`. In screenshot demo mode the provider ignores the stored preference and uses `EXPO_PUBLIC_SCREENSHOT_DEMO_LANGUAGE` instead. The provider renders nothing until i18n is ready, preventing flash-of-wrong-language.
 - **`formatters.ts`** — locale-aware helpers (`formatFileSize` uses `Intl.NumberFormat` with the resolved locale; `formatDuration` produces `m:ss` / `h:mm:ss`) so number formatting matches the selected language.
 - Interpolation uses i18next `{{placeholders}}` (e.g., `failedAt: "Failed while {{phase}}"`, pluralized `ago.minute_one/minute_other`), and commit subjects themselves may be written in Chinese.
@@ -192,3 +196,19 @@ Pre-commit self-check (from `AGENTS.md`):
 - **Git hooks:** `.husky/commit-msg`, `.husky/pre-commit`
 - **i18n:** `src/i18n/`
 - **Release workflow:** [/openwiki/operations/release.md](/openwiki/operations/release.md)
+
+<!-- openwiki: mermaid parse failed and this diagram was converted to a text fence so it does not break rendering. Fix the diagram source and restore the mermaid fence. Parser error: Heuristic: an unescaped angle bracket inside a label breaks rendering; rephrase the label. -->
+```text
+flowchart TD
+    A["git commit"] --> B[".husky/commit-msg"]
+    B --> C["commitlint format check<br/>type whitelist, header 100 max"]
+    C -->|fail| X["commit rejected"]
+    C -->|pass| D{"type is feat or fix?"}
+    D -->|no| OK["commit allowed"]
+    D -->|yes| E["commit-type-guard lists staged files"]
+    E --> F{"any app-source file staged?"}
+    F -->|yes| OK
+    F -->|all tooling| X
+```
+
+The commit-msg hook gates every commit through format validation and, for bump-triggering types, a staged-file classification check.

@@ -3,9 +3,6 @@ type: feature
 title: Playback & Library
 description: How the app plays converted audio — player context, state machine, source resolution (cache/remote/demo), progress persistence, background playback, mini player — plus the playlist/track library model, reorder, bulk delete, and unplayed filters.
 tags: [playback, player-state-machine, playlist, caching, progress-persistence, expo-audio]
-verified:
-  - by: openwiki/0.5.0
-    at: 2026-09-01T21:28:30.610Z
 sources:
   - id: openwiki-source-ad9a6a9aa0ff64c915ac5bbb
     resource: repo://src/app/navigation/RootNavigator.tsx
@@ -31,7 +28,10 @@ sources:
     resource: repo://test/player/source.test.ts
   - id: openwiki-source-61eeaa810bdca37f50b146f5
     resource: repo://test/player/state.test.ts
-generated: { by: "openwiki/0.5.0", at: "2026-09-01T21:28:30.610Z" }
+generated: { by: "openwiki/0.5.0", at: "2026-09-02T21:24:07.674Z" }
+verified:
+  - by: openwiki/0.5.0
+    at: 2026-09-02T21:24:07.674Z
 ---
 
 # Playback & Library
@@ -145,7 +145,7 @@ When the playlist's copy of the active track changes (e.g. cache finished), the 
 
 ## Mini player
 
-`MiniPlayer` (`src/components/MiniPlayer.tsx`) is rendered by `RootNavigator` above the tab bar whenever `activeTrack` exists. It subscribes to `usePlaybackProgress()` for the elapsed/total time and progress bar, shows a loading spinner while `playbackLoading` (button disabled), and navigates to the full `Player` screen (`{ jobId: activeTrack.jobId }`) on tap. `Screen` components reserve bottom padding when a mini player is visible so content is not obscured.
+`MiniPlayer` (`src/components/MiniPlayer.tsx`) is rendered by `RootNavigator` above the tab bar (positioned at `bottom: tabBarHeight`) whenever `activeTrack` exists. It subscribes to `usePlaybackProgress()` for the elapsed/total time and progress bar (fill width is `currentTime / duration`, clamped to 1), shows a thumbnail via `expo-image` (falling back to a musical-note icon), a `MarqueeText` scrolling title (title or `sourceUrl` fallback), a play/pause button that shows an `ActivityIndicator` while `playbackLoading` (button disabled), and navigates to the full `Player` screen (`{ jobId: activeTrack.jobId }`) on tap. It sizes itself with the shared `MINI_PLAYER_HEIGHT` constant (which it re-exports for layout consumers), and `Screen` components reserve bottom padding when a mini player is visible so content is not obscured.
 
 ## Tests
 

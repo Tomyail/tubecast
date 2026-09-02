@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:92b579919c204a18c8ed806ad80e0b35e340fcfff864d77b079c54cfed667ca4",
+  "pageVersion": "sha256:b2c7b7537ee6efbb0a3cd76138b00e194d7b37d5ed2fec2b30f70ce1d60f61bd",
   "claims": [
     {
       "id": "claim_c35d6de9e9894840bc044d305ce88c24",
@@ -22,7 +22,7 @@
       "evidence": [
         {
           "resource": "repo://eas.json",
-          "version": "repo-file-v1:sha256:6a80e329c59a016dc6443b39e1ae46dd75a56b4af78c1c6a6349f3c3f0cb9d3d"
+          "version": "repo-file-v1:sha256:2e16d421cc6d73efe050b50f0d34ec9769ed65a854ca5e42844d4af57d59b649"
         }
       ]
     },
@@ -89,10 +89,24 @@
           "version": "repo-lines-v1:sha256:3b11566b34c6c423e896cdb31a801787b00b12410c792fa7a0638749416c3092:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYxNGJkNGYxYzY5Y2FkZDJkN2E5NmIzODU4ZjRhOGU1NTRhYjBiMjI2NDRiYWViNjU1ZjJhMzM4OWVkOWZjMjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc3OTgxMWM1ZmJlMjVjM2Q0ZTVmM2QxZmQzNWFiOWRhNmJjZjhhNjhjNWVkZjlkNmJhOTdmNjg2ODZjMzk2ODAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNlYzlhNDNmZTY1NGViMjkyNTljYWQ2OTNiODE1M2Y4NzgzN2I3Yzk5MDBhOGM4OGVlYjU4NTcyOGI3MTI4OWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU5YWE5MzhkZDNkOWU2M2I0YmRiZDMxY2VlMTNlNTg0OTNhYmVhZjE4NzE1YjE4ZjUxY2Q4MGYwYjdjMDRlNmYifQ"
         }
       ]
+    },
+    {
+      "id": "claim_c6002a4674f44ae7b5f5e327e0b0d1b1",
+      "statement": "release:testflight (release.mjs testflight) is a legacy local entry that only runs testflight-prepare (prebuild + Xcode version sync) followed by testflight-tag; it does not build, upload, or distribute. The full CI-driven TestFlight flow is triggered solely by release:testflight-bump pushing a testflight/<version>-<build> tag.",
+      "evidence": [
+        {
+          "resource": "repo://package.json#L26-L33",
+          "version": "repo-lines-v1:sha256:b07cbd07aeb20d2550dea26fdfff8cb233ce7b0499bec0db4cbee27e06336678:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjMzZTVjYjQ5Y2RiYTFhYjNkMjMxYzAwN2RmM2RiYTU4MzY0MmMxYjJhYTQ3YzYxMWFjZjFhZDllOWIyNzIxZiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjdjNDNkYmYxYWMzNjAyODZmNzI5NTkyMmZlMGE1NGY3MGEyMzBkNTBmNjk5NmM2NzJkZWQwOTQxODE2Y2MwYyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNzA5OTNmYmQwNWE0ZGQ5ZDg2NWE3ZGU5ZDNjNzIzMGYzZWY4OWQ2NzViYTJkNTIxNjc4MWU0NDMxZjA5NzE0MCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZGVlMmExMDc4MzA1NGEzZDgxNDVhYjUyYTYzODRiN2MxMDM2ZWYwM2EzMWRlZWMwZTk4MmZlZWY5NzA4NjUwOSJ9"
+        },
+        {
+          "resource": "repo://scripts/release.mjs#L382-L385",
+          "version": "repo-lines-v1:sha256:cc0507be98dc0a3a5671bd7107cdd7ae7d63ec48c10f81ddffdfca0cef3eb94a:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYzQzNTAyNjljMTFlMWYxOWE0ZTFhOWY2ZjNhMjgxYmY5MjJkYzhkMDRiZmExYzE0YzRjOTkxMzgxYTk0OTJkZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOGFiZjI5ODM4YWRkZGY2OWNlMWVjZjU0NjhiZWIyNTNlZmI0NzY1YTIxYmVmYzQ0OWRhZDg0YjE5ZGFjOTA0OSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMGJkNTdmNDk3MzZlOWRmYjRhYmE5MjIwYzRmYWViMGNlNjlmZTcyNGI2M2NmM2JlNWY4NDZiNDI2NzdiMTkyNiJ9"
+        }
+      ]
     }
   ],
   "verification": {
     "by": "openwiki/0.5.0",
-    "at": "2026-09-01T21:28:30.610Z"
+    "at": "2026-09-02T21:24:07.674Z"
   }
 }

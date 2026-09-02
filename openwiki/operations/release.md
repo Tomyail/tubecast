@@ -3,9 +3,6 @@ type: Operations Playbook
 title: Release Operations
 description: TubeCast release workflows, including the CI-driven TestFlight pipeline (EAS Build + Submit, fastlane distribute), tag-first trigger design, LLM-generated bilingual release notes, App Store metadata, and version management.
 tags: [operations, release, testflight, eas, github-actions, app-store, fastlane, versioning]
-verified:
-  - by: openwiki/0.5.0
-    at: 2026-09-01T21:28:30.610Z
 sources:
   - id: openwiki-source-182be48333368e42e9b0f245
     resource: repo://.github/workflows/release-testflight.yml
@@ -15,11 +12,16 @@ sources:
     resource: repo://eas.json
   - id: openwiki-source-7af97a29763d6f133e4b4851
     resource: repo://fastlane/Fastfile
+  - id: openwiki-source-5b54a58d1b51cd490b0e7162
+    resource: repo://package.json
   - id: openwiki-source-3ee71b00dc0356f536efb762
     resource: repo://scripts/generate-testflight-notes.mjs
   - id: openwiki-source-99267eb31f174540a6c513b1
     resource: repo://scripts/release.mjs
-generated: { by: "openwiki/0.5.0", at: "2026-09-01T21:28:30.610Z" }
+generated: { by: "openwiki/0.5.0", at: "2026-09-02T21:24:07.674Z" }
+verified:
+  - by: openwiki/0.5.0
+    at: 2026-09-02T21:24:07.674Z
 ---
 
 # Release Operations
@@ -116,9 +118,11 @@ pnpm release:testflight-distribute
 # Tag and fill GitHub prerelease notes (skips tag creation if it already exists)
 pnpm release:testflight-tag
 
-# Full TestFlight flow (bump + build + upload + distribute)
+# Legacy local entry: prebuild + testflight-tag (prepare + GitHub prerelease notes)
 pnpm release:testflight
 ```
+
+For same-version hotfixes the normal entry point is `pnpm release:testflight-bump` alone — the pushed tag drives the whole CI pipeline (see [TestFlight Workflow](#testflight-workflow)).
 
 Source: `/scripts/release.mjs`
 
@@ -195,7 +199,7 @@ Before the workflow can run end-to-end:
 - **EAS Build** — `eas login` / `eas init` writes `expo.extra.eas.projectId` into `app.json`; `eas credentials` for iOS → Build Credentials lets EAS manage the Apple signing certificate/provisioning profile (no `fastlane match` needed). The `expo.extra.eas.build.experimental.ios.appExtensions` entry in `app.json` is required so `eas credentials` also provisions the `TubeCastShareExtension` target (EAS does not discover hand-added extension targets on its own).
 - **EAS Submit** — `eas credentials` for iOS → App Store Connect: Manage your API Key, stored server-side by EAS (not a GitHub secret).
 - **GitHub secrets** — `EXPO_TOKEN` (Expo service-account token), `APP_STORE_CONNECT_API_KEY_KEY_ID` / `APP_STORE_CONNECT_API_KEY_ISSUER_ID` / `APP_STORE_CONNECT_API_KEY_P8` (used only by the fastlane distribute step), and `ANTHROPIC_API_KEY` (reused from the OpenWiki workflow).
-- **`eas.json`** — `submit.production.ios.ascAppId` (the app's numeric App Store Connect ID, `6783834717`) is required by `eas submit`. Note `cli.appVersionSource: "local"` and `build.production.autoIncrement: false`: the version and buildNumber are owned by `app.json` and the local bump commands, never auto-incremented by EAS.
+- **`eas.json`** — `submit.production.ios.ascAppId` (the app's numeric App Store Connect ID, `6783834717`) is required by `eas submit`. Note `cli.appVersionSource: "local"` and `build.production.autoIncrement: false`: the version and buildNumber are owned by `app.json` and the local bump commands, never auto-incremented by EAS. Build profiles are `preview` (internal distribution, device builds) and `production` (production environment, `ios.image: auto`); CI builds with `--profile production`.
 
 Source: `.github/workflows/release-testflight.yml`, `eas.json`, `scripts/generate-testflight-notes.mjs`
 
@@ -425,4 +429,29 @@ See `/openwiki/development/conventions.md` for commit message rules and the `/AG
 - **Export options:** `/fastlane/ExportOptions.plist`
 - **Commit conventions:** `/AGENTS.md`
 - **Conventional Commits:** See `/openwiki/development/conventions.md`
+See `/openwiki/development/conventions.md`
+- Ensure buildNumber matches uploaded build
+
+### Demo Mode Not Working
+
+- Confirm `EXPO_PUBLIC_SCREENSHOT_DEMO_MODE=1` is set
+- Check Metro bundler was restarted after setting env var
+- Verify demo assets are accessible at the URL
+
+### Version Bump Issues
+
+- Check commits follow Conventional Commits format
+- Verify `package.json` version is synced with `app.json`
+- Run `pnpm release:version` to trigger version bump manually
+
+## References
+
+- **Release script:** `/scripts/release.mjs`
+- **Fastlane config:** `/fastlane/Fastfile`
+- **App metadata:** `/fastlane/metadata/`
+- **Export options:** `/fastlane/ExportOptions.plist`
+- **Commit conventions:** `/AGENTS.md`
+- **Conventional Commits:** See `/openwiki/development/conventions.md`
+See `/openwiki/development/conventions.md`
+ns.md`
 See `/openwiki/development/conventions.md`

@@ -4,7 +4,7 @@ okf_version: "0.2"
 
 # Files
 
-- [TubeCast Documentation](quickstart.md) - TubeCast is an independent Expo / React Native client for iOS and Android that turns YouTube channels into a personal, audio-first listening library.
+- [TubeCast Documentation](quickstart.md)
 
 # Directories
 

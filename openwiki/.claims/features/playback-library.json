@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:877ed582c108ffc8dd35e8d7512bc08f97d5a625052dda0f0431ec11f86042cd",
+  "pageVersion": "sha256:c9b42b8fbe35b28707aa5eec43e194d0bf9d3e6604b3e35887a16a1097931275",
   "claims": [
     {
       "id": "claim_1a64cf625afb44feb3a6b277b6cddee9",
@@ -288,11 +288,11 @@
     },
     {
       "id": "claim_bb96e1897ffb476db0b274c84674d3e9",
-      "statement": "PlayerProvider and PlaylistProvider are mounted app-globally in AppProviders, making usePlayer and usePlaylist available across screens.",
+      "statement": "PlayerProvider and PlaylistProvider are mounted app-globally in AppProviders (PlaylistProvider wrapping PlayerProvider inside SettingsProvider), making usePlayer and usePlaylist available across screens.",
       "evidence": [
         {
-          "resource": "repo://src/app/providers/AppProviders.tsx#L8-L34",
-          "version": "repo-lines-v1:sha256:2a6409cefc811f92c6676d89ce78f7fc08bbf96bc69d103f99d28845c3c50fee:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM0NmY4YWY0NDgzM2I2ZjE5NzkxYjljZjczNTI2Yzc5ZGY0ZTg3ZGFmMGJhMzQxYjk2NTIzNTRhMmNlYWViNGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIwNmE4YzYwYjk0ZjcwMGY1ODhlNmQ1MWM1MDZlZjJmMjA0MzM5MzE3ODA4YWNjY2I4NDIyNzkyZWVkODQwM2QiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE5ODY0OTFiNDk2NDE3YTViYmYxMThiNzI5OThmYTczMGIyNjNlNWZiYmZhNWE0ZTEzODhlZjMyMDM0YzQxZmUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxNDhiMjU0MzkyZTA5MGVkZWIwNzNjZWU3ZTQ5M2UwMjc3YmVjNWU3NzAzNjFkMWViYjAxMjM2NTkwODMwNzYifQ"
+          "resource": "repo://src/app/providers/AppProviders.tsx#L33-L39",
+          "version": "repo-lines-v1:sha256:d04b80c8539414cb32c6ebbadb1ae91585d07fa602ee5b4404e66edb6b53345c:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMzY3ZmY2ZmFjYzFlMzNmZjVmZDc5NzgyNmY3ZjI4YTNiM2IyN2YxYWJhODdhZGYwODE2ZjEzNTcwNWYzMmJjNSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNjYxZTU0OGMyYWQ4MmNlNzkxNGVmMjU5YTI2Nzc1OGI3Y2EwYWQzZTE4MGM4NjcwNDVlYzZhYzA1NjIzMDUxMyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMWNiZjI5NmRiOWRiMDI5MzJkM2E4NzA2NDAxZGUzOWEyNzIyZmM3NTkyMDEzZDJhMzUwNWJhM2EzZjgxZjVjNSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNGZlZjhkYmM4ZDMyMDAzZTQxN2Y5ZDk1ZGYxNjEwOGVhNjliOTI5MDg1OWM0ZGU2NTk3YTk5MzJlOGRiNjhiMiJ9"
         }
       ]
     },
@@ -309,10 +309,24 @@
           "version": "repo-lines-v1:sha256:bf3d224eb710215a4c0cabf71bb2c15d5392cda04e5d25f833642e97e2599102:eyJzZWxlY3RlZExpbmVDb3VudCI6OTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVlNzk1NDgwZjUwYzE4Y2U4N2ZjNDA2MzRjZWI1OGUzMTNjMzFiN2FiZGRjN2VkZTdhM2NlM2I1MjRmNmM3NTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU3ZTBkYTllMTgxY2U2NDNmNDg5OWI5NzFkYTVlOGFhMzYwOWIzY2ViYzFhOGZiMjVlMzQ5MDM3ZGY1MGI2NmEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjVjMjFjNDU1OGQ4MGRmYTA3OWU3MTJkNDQ3M2VlOWJjMTliNTMxMDk4NGViMjdlZmNjYjkyMmM1MzdmODAzODYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoyLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ4MTdmYmI3M2M5MmIzNmQ1ZTQ4OTZmZjUxYzFiNThlZWMzMzBiYmU5NjFiYTA1ZmM2MjA1Zjg2N2VhMWJjZjYifQ"
         }
       ]
+    },
+    {
+      "id": "claim_8e7a628dbda04248b06c212d4f51f672",
+      "statement": "MiniPlayer is rendered by RootNavigator positioned at bottom: tabBarHeight whenever activeTrack exists; it shows an expo-image thumbnail (with musical-note fallback), a MarqueeText scrolling title, elapsed/total time and progress fill from usePlaybackProgress, a disabled play/pause button with ActivityIndicator while playbackLoading, and navigates to the Player screen with { jobId: activeTrack.jobId } on tap. It re-exports the shared MINI_PLAYER_HEIGHT constant used for bottom-padding reservations.",
+      "evidence": [
+        {
+          "resource": "repo://src/app/navigation/RootNavigator.tsx#L150-L150",
+          "version": "repo-lines-v1:sha256:f8a5e71720c93c2f876831215d1005aa66523328ce87382861ced6992c18b979:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjhhNWU3MTcyMGM5M2MyZjg3NjgzMTIxNWQxMDA1YWE2NjUyMzMyOGNlODczODI4NjFjZWQ2OTkyYzE4Yjk3OSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZjhhNWU3MTcyMGM5M2MyZjg3NjgzMTIxNWQxMDA1YWE2NjUyMzMyOGNlODczODI4NjFjZWQ2OTkyYzE4Yjk3OSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTgxNWY3MmIwOTQ4YTgwYmYzMmI1YThhYTU3ODhhNzYxZWJkMTYzZmJiZWMxOTE2OTVmMTA3OWRkYmFlZGIzZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOTI4YmQ1MDExZmVkOWVmOGYyZWMwNjkxM2VjZjM3ZDM3YjRjNjkzNDYzNzFlZWVhNmI0NTlkOWE5YTcyOWYxMyJ9"
+        },
+        {
+          "resource": "repo://src/components/MiniPlayer.tsx#L18-L79",
+          "version": "repo-lines-v1:sha256:5483f82302cd56c005e6b2bd7a677e9ad521e57d41f9eb6808e13676be4704f9:eyJzZWxlY3RlZExpbmVDb3VudCI6NjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk4MjUxN2U3YzUzOWY1OWJmZDU3ZmY4NzVhNmQ5OTRlNjJmNGMxNTE1YTI2MDQ5OWFkODk4OWIwNTM3YWU3ZTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA0ODZiMTVlZjk5YzcwMzk3MjA4ZDUzNzM3YjZhYmFkNjZhNmNhOGJiYjg0Yjg5YzA3MDEzYzJjNDhkYmM5MjEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImJhMWU2Y2Y2ZDUzNDU5NzA0YTZhYTk4OGNjYjhhNTIzNzBmMTQ3MzQ1MjNlN2VmOTJiNTk5ZTIxY2NmZDJkNGMifQ"
+        }
+      ]
     }
   ],
   "verification": {
     "by": "openwiki/0.5.0",
-    "at": "2026-09-01T21:28:30.610Z"
+    "at": "2026-09-02T21:24:07.674Z"
   }
 }
