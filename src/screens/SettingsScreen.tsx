@@ -101,7 +101,7 @@ export default function SettingsScreen() {
         </Touchable>
       </Section>
 
-      <KickstartBanner colors={colors} />
+      <KickstartBanner />
 
       <Section title={t("settings.about")} colors={colors}>
         <View style={styles.aboutHeader}>

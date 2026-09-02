@@ -18,12 +18,12 @@ export function useKickstartExchangeApiKey(): string | null {
 // Kickstart Exchange banner（iOS 18+）：以 inline 形式渲染在 Settings 页面的
 // ScrollView 中，放在「存储空间」和「关于」两个 section 之间，随页面滚动，
 // 不遮挡播放器（Screen 已为 MiniPlayer 预留底部空间）。
-export default function KickstartBanner({ colors }: { colors: { border: string } }) {
+export default function KickstartBanner() {
   const apiKey = useKickstartExchangeApiKey();
   if (!apiKey) return null;
 
   return (
-    <View style={[styles.banner, { borderColor: colors.border }]}>
+    <View style={styles.banner}>
       <KickstartExchangeBanner
         apiKey={apiKey}
         style={styles.nativeBanner}
@@ -34,11 +34,9 @@ export default function KickstartBanner({ colors }: { colors: { border: string }
 }
 
 const styles = StyleSheet.create({
-  // 与 Settings 的 section group 一致的圆角/描边；高度为紧凑常量（见 layout.ts）。
+  // 只负责给原生 SDK 卡片提供紧凑的布局空间；边框由 SDK 自己绘制，避免双层边框。
   banner: {
     height: KICKSTART_BANNER_NATIVE_HEIGHT,
-    borderRadius: 16,
-    borderWidth: StyleSheet.hairlineWidth,
     overflow: "hidden",
   },
   nativeBanner: {
