@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:28ded4a030ade11e32c0649583282bdf987b080bf14bcf861287d866a7f09cda",
+  "pageVersion": "sha256:cc9360b947e96f5bbb95dec1b851d2952860ce0ac66c55d24a34acdebe618b4e",
   "claims": [
     {
       "id": "claim_17f4948a5c8845cbb0240c75badc314e",
@@ -52,7 +52,7 @@
     },
     {
       "id": "claim_2f48aeb00af3425eb7d27f3ef484d70d",
-      "statement": "AGENTS.md is the canonical agent/collaborator brief restating the commit format, file-based type table, version bump table, and pre-commit self-check; CLAUDE.md only points to AGENTS.md.",
+      "statement": "AGENTS.md is the canonical agent/collaborator brief restating the commit format, file-based type table, version bump table, and pre-commit self-check; CLAUDE.md contains only a minimal OpenWiki include block referencing AGENTS.md via @AGENTS.md.",
       "evidence": [
         {
           "resource": "repo://AGENTS.md",
@@ -60,7 +60,7 @@
         },
         {
           "resource": "repo://CLAUDE.md",
-          "version": "repo-file-v1:sha256:31060379798cd019458c941e0c10846d7b7ad856616f025414ea67f326bfe1d6"
+          "version": "repo-file-v1:sha256:cd617c809957b5aeb601ce9856109475f6da8ed78835148d17c3097dd4daa848"
         }
       ]
     },
@@ -150,7 +150,7 @@
     }
   ],
   "verification": {
-    "by": "openwiki/0.5.0",
-    "at": "2026-09-02T21:24:07.674Z"
+    "by": "openwiki/0.5.2",
+    "at": "2026-09-15T21:48:37.541Z"
   }
 }

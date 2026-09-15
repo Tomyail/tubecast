@@ -34,10 +34,10 @@ sources:
     resource: repo://src/shared/layoutConstants.ts
   - id: openwiki-source-c457d3d1a63d5dc86f0da7ef
     resource: repo://src/types.ts
-generated: { by: "openwiki/0.5.0", at: "2026-09-02T21:24:07.674Z" }
+generated: { by: "openwiki/0.5.2", at: "2026-09-15T21:48:37.541Z" }
 verified:
-  - by: openwiki/0.5.0
-    at: 2026-09-02T21:24:07.674Z
+  - by: openwiki/0.5.2
+    at: 2026-09-15T21:48:37.541Z
 ---
 
 # Development Conventions
@@ -129,7 +129,7 @@ All user-facing strings must go through the i18n layer in `src/i18n/` rather tha
 
 ## AGENTS.md / CLAUDE.md Agent Guidance
 
-`AGENTS.md` is the canonical brief for humans and AI coding agents working in the repo: it restates the commit format, the file-based type decision table, the version bump table, and the pre-commit self-check. `CLAUDE.md` simply points to `AGENTS.md`. The OpenWiki section within `AGENTS.md` additionally instructs agents to treat source and tests as authoritative, prefer the narrowest quiet validation, and never hand-edit generated `openwiki/` pages.
+`AGENTS.md` is the canonical brief for humans and AI coding agents working in the repo: it restates the commit format, the file-based type decision table, the version bump table, and the pre-commit self-check. `CLAUDE.md` contains only a minimal OpenWiki include block (`@AGENTS.md`), so Claude reads the same brief without duplication. The OpenWiki section within `AGENTS.md` additionally instructs agents to treat source and tests as authoritative, prefer the narrowest quiet validation, and never hand-edit generated `openwiki/` pages.
 
 ## Code Organization
 
@@ -197,11 +197,10 @@ Pre-commit self-check (from `AGENTS.md`):
 - **i18n:** `src/i18n/`
 - **Release workflow:** [/openwiki/operations/release.md](/openwiki/operations/release.md)
 
-<!-- openwiki: mermaid parse failed and this diagram was converted to a text fence so it does not break rendering. Fix the diagram source and restore the mermaid fence. Parser error: Heuristic: an unescaped angle bracket inside a label breaks rendering; rephrase the label. -->
-```text
+```mermaid
 flowchart TD
     A["git commit"] --> B[".husky/commit-msg"]
-    B --> C["commitlint format check<br/>type whitelist, header 100 max"]
+    B --> C["commitlint format check: type whitelist, header 100 max"]
     C -->|fail| X["commit rejected"]
     C -->|pass| D{"type is feat or fix?"}
     D -->|no| OK["commit allowed"]
