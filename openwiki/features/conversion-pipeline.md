@@ -4,8 +4,8 @@ title: Conversion Pipeline
 description: End-to-end YouTube-to-audio flow — URL submission (paste or deep link), server job lifecycle and polling, progress display, local audio caching, track creation, and audio export, with remote-config kill switches.
 tags: [conversion, jobs, caching, audio-export, remote-config]
 verified:
-  - by: openwiki/0.5.0
-    at: 2026-09-01T21:28:30.610Z
+  - by: openwiki/0.5.2
+    at: 2026-09-16T21:47:02.391Z
 sources:
   - id: openwiki-source-ad9a6a9aa0ff64c915ac5bbb
     resource: repo://src/app/navigation/RootNavigator.tsx

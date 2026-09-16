@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:0c6b2a8c300c78b954988e1f9e972f0221151acb2358af6d23e7aa95f7f59c36",
+  "pageVersion": "sha256:1c7536f228b099f8e91dd40b7f9024a67f6a8b9a062e16ee7ae6908336c15ba6",
   "claims": [
     {
       "id": "claim_05bcf4c14acd468f812c524be362bf66",
@@ -95,10 +95,44 @@
           "version": "repo-lines-v1:sha256:f6410e116ab37a7810c7e5f420589344e9614bad3bc238a12684b55e5f9c91e6:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjY0MTBlMTE2YWIzN2E3ODEwYzdlNWY0MjA1ODkzNDRlOTYxNGJhZDNiYzIzOGExMjY4NGI1NWU1ZjljOTFlNiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZjY0MTBlMTE2YWIzN2E3ODEwYzdlNWY0MjA1ODkzNDRlOTYxNGJhZDNiYzIzOGExMjY4NGI1NWU1ZjljOTFlNiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYjBjNDliNmY2MzA0YjlhYjcwMjBjOGJlYTJkOGYxZGU2NmJhZmYxNGQ5NmI4ZTU2ZDM0ZjNmZTNmODVjNmY4ZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNGQxMDAwZWE0Mzc2ZmQ4NDA0NTlmMjc0YzgwOGNmZWM3MDQzMTYxZjQxMmM3YmZhMGYwODFhNzJkZDU2NDY1NCJ9"
         }
       ]
+    },
+    {
+      "id": "claim_3642ec8c536e4435b4cce9ade956e29f",
+      "statement": "The task-routing map links to all planned wiki pages (architecture/overview, features/overview, features/conversion-pipeline, features/playback-library, features/subscriptions-feed, development/conventions, development/testing, operations/demo-mode-screenshots, operations/release), and src/features contains the feature modules appReview, audioExport, demoMode, discover, jobs, kickstartExchange, player, playlist, remoteConfig, settings, shareLinks, and youtubeFeed.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/kickstartExchange/config.ts",
+          "version": "repo-file-v1:sha256:af49e87907f07ea64f0c3bf59d5cd36982099f7b9bfaa02d55ca1fa50f34eac8"
+        }
+      ]
+    },
+    {
+      "id": "claim_75cad2b70be941dab568225ab41747a0",
+      "statement": "pnpm release:ios runs scripts/release.mjs assert-no-demo-assets, then expo prebuild --platform ios --no-install, then expo run:ios --device --configuration Release; Android release builds use expo prebuild --platform android plus ./gradlew assembleRelease.",
+      "evidence": [
+        {
+          "resource": "repo://README.md#L78-L98",
+          "version": "repo-lines-v1:sha256:a3f0b35ab639201e8c828ef4c2a03be597d1c29e8a0a530a3b3fc1ba80c33dcc:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNkZTQ1Y2MxOTFjZWQ1YzY2OTAxMThkZTdiYjUxZjlhN2RjOWI2NzEzODU1ZGU1ZDMzNWNhZmFmNTQ2YmZjMGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ3YzA2YzU2MWQ1YzMyNzM0MzY4NTI2OGE0NmIzMzkxZjM5OThlZWU4OTBkMmJlNTFmMGQyMWNjNGE1M2FlNmQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNkZWIzYzQ5NzE4OWRkM2EwMDI4ZjA2OWQ1YzdjYWJlNWUyZmFjYjAxYzU0ZmVmYWNhZTJhMjliOGI2N2QxODUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM4YWRiNTg0OWMxYWY1OTRkZjc4ZjBiN2IxOGYxOWM0Yjg3MDNiMmMwN2JiM2IyZTQwNTUyZDRkOWJjZDcxOWQifQ"
+        },
+        {
+          "resource": "repo://package.json#L19-L19",
+          "version": "repo-lines-v1:sha256:1d579e7d62076fee7615ac4b345d9fe7d2907273c32e9d5d55fa40c2fab31824:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMWQ1NzllN2Q2MjA3NmZlZTc2MTVhYzRiMzQ1ZDlmZTdkMjkwNzI3M2MzMmU5ZDVkNTVmYTQwYzJmYWIzMTgyNCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMWQ1NzllN2Q2MjA3NmZlZTc2MTVhYzRiMzQ1ZDlmZTdkMjkwNzI3M2MzMmU5ZDVkNTVmYTQwYzJmYWIzMTgyNCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOTY4MTQxOGIwODcwNTMyNGIzMDE0MWVhNDQ0ZjYyNWRjNjc5MGNhMGJlODYyOTFiNzc4YzFhNzc2OWY0NTA3ZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNDg3ZDY4ZDE2YzU1YmNhZTIwY2IxNTRiNWI4YzY5MTk2OTNhNTZhNjNkMzQ5ZDAyNWVhZWRlNmU2MmVmNTY3NyJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_b4ef24bb44794e36922e846feb7a0ef9",
+      "statement": "The app depends on @tomyail/react-native-kickstart-exchange 0.2.0 for iOS share-extension data exchange.",
+      "evidence": [
+        {
+          "resource": "repo://package.json#L51-L51",
+          "version": "repo-lines-v1:sha256:449748f772ed77afecdac7bba7086e98f00e964ae7a28458b13669dd04025782:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNDQ5NzQ4Zjc3MmVkNzdhZmVjZGFjN2JiYTcwODZlOThmMDBlOTY0YWU3YTI4NDU4YjEzNjY5ZGQwNDAyNTc4MiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDQ5NzQ4Zjc3MmVkNzdhZmVjZGFjN2JiYTcwODZlOThmMDBlOTY0YWU3YTI4NDU4YjEzNjY5ZGQwNDAyNTc4MiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiY2U4ZWEyNWEzYzRkYTViN2E0YzJhZTBiMTU2NzNkYWM1NWJjM2MzM2M2Zjg3ODZhNGEyMjc0ZGQ1MDlhZTFhMiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiODRhOTY3YWFiNTUzNTIwZDAxZWJhNTNhZDhmMjRhZjZlNTY2M2E0YmU1MmNmNDZiNGE4ODcxNzgzNWVmY2I4NCJ9"
+        }
+      ]
     }
   ],
   "verification": {
-    "by": "openwiki/0.5.0",
-    "at": "2026-09-02T21:24:07.674Z"
+    "by": "openwiki/0.5.2",
+    "at": "2026-09-16T21:47:02.391Z"
   }
 }

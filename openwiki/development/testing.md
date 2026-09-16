@@ -1,10 +1,12 @@
 ---
 type: "Reference"
 title: "Testing Guide"
+description: "How the Vitest suite is configured, what the test/ directory covers, and how to run the narrowest focused test for a change."
+tags: [testing, vitest, unit-tests]
 openwiki_generated: true
 verified:
-  - by: openwiki/0.5.0
-    at: 2026-09-01T21:28:30.610Z
+  - by: openwiki/0.5.2
+    at: 2026-09-16T21:47:02.391Z
 sources:
   - id: openwiki-source-5b54a58d1b51cd490b0e7162
     resource: repo://package.json
@@ -12,13 +14,17 @@ sources:
     resource: repo://test/i18n/formatters.test.ts
   - id: openwiki-source-c41be34229ed71a6500d977b
     resource: repo://test/jobs/track.test.ts
+  - id: openwiki-source-125d6720bd16652ecd27e612
+    resource: repo://test/kickstartExchange/banner.test.ts
+  - id: openwiki-source-fa7d93f0813fc94a3fe85681
+    resource: repo://test/kickstartExchange/config.test.ts
   - id: openwiki-source-3e0fc0a51e74f1b15325770b
     resource: repo://test/setup.test.ts
   - id: openwiki-source-e8f6a89d2cc3389051ca4410
     resource: repo://test/youtubeFeed/cache.test.ts
   - id: openwiki-source-fbadcd8591b65031efaaedce
     resource: repo://vitest.config.ts
-generated: { by: "openwiki/0.5.0", at: "2026-09-01T21:28:30.610Z" }
+generated: { by: "openwiki/0.5.2", at: "2026-09-16T21:47:02.391Z" }
 ---
 
 
@@ -78,6 +84,7 @@ npx vitest run test/jobs/
 npx vitest run test/player/
 npx vitest run test/playlist/
 npx vitest run test/i18n/
+npx vitest run test/kickstartExchange/
 
 # One test case by name across the suite
 npx vitest run -t "formats duration"

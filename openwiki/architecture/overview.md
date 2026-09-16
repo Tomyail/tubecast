@@ -4,9 +4,11 @@ title: Architecture Overview
 description: TubeCast Expo/React Native app architecture, including the provider stack, nested navigation and tubecast:// deep-link handling, React Query data layer, AsyncStorage persistence model, and the iOS share-extension config plugin.
 tags: [architecture, navigation, providers, deep-linking, react-query, asyncstorage, expo, config-plugin, share-extension]
 verified:
-  - by: openwiki/0.5.0
-    at: 2026-09-02T21:24:07.674Z
+  - by: openwiki/0.5.2
+    at: 2026-09-16T21:47:02.391Z
 sources:
+  - id: openwiki-source-21055b2dc45cbca67910dcc8
+    resource: repo://app.config.js
   - id: openwiki-source-793969521ec720f036ecaf07
     resource: repo://app.json
   - id: openwiki-source-f35da1e74133517d40998acd
@@ -25,6 +27,10 @@ sources:
     resource: repo://src/app/theme.tsx
   - id: openwiki-source-64602d346c7f8791d46c2a9f
     resource: repo://src/features/discover/hooks.ts
+  - id: openwiki-source-08140b0b026a34cde5d2e598
+    resource: repo://src/features/kickstartExchange/config.ts
+  - id: openwiki-source-efb26d30d2af248771673784
+    resource: repo://src/features/kickstartExchange/KickstartBanner.tsx
   - id: openwiki-source-b5aec4b320e01b6025149936
     resource: repo://src/features/player/context.tsx
   - id: openwiki-source-e75f9fb0e074869a28cb19f0
@@ -37,9 +43,11 @@ sources:
     resource: repo://src/features/youtubeFeed/cache.ts
   - id: openwiki-source-0153bfa9d1d97b64a1431674
     resource: repo://src/screens/ConvertScreen.tsx
+  - id: openwiki-source-454e0cb599eb098ff2a3d20e
+    resource: repo://src/screens/SettingsScreen.tsx
   - id: openwiki-source-c457d3d1a63d5dc86f0da7ef
     resource: repo://src/types.ts
-generated: { by: "openwiki/0.5.0", at: "2026-09-02T21:24:07.674Z" }
+generated: { by: "openwiki/0.5.2", at: "2026-09-16T21:47:02.391Z" }
 ---
 
 # Architecture Overview
@@ -160,9 +168,15 @@ AsyncStorage is the sole on-device key/value store; each feature owns namespaced
 
 ## Native Layer
 
-### app.json
+### app.json / app.config.js
+
+Expo resolves the app config through `app.config.js`, which spreads `app.json`'s `expo` block and injects `extra.buildCommit`: the current git commit, read from `EXPO_PUBLIC_GIT_COMMIT`, `EAS_BUILD_GIT_COMMIT_HASH`, or `GITHUB_SHA`, falling back to `git rev-parse HEAD` (or `"unknown"` outside a repo).
 
 From `app.json`: background audio playback is enabled via the `expo-audio` plugin (`enableBackgroundPlayback: true`); Android declares `RECORD_AUDIO`, `MODIFY_AUDIO_SETTINGS`, `FOREGROUND_SERVICE`, and `FOREGROUND_SERVICE_MEDIA_PLAYBACK` permissions; both iOS and Android use bundle id `com.tomyail.tubecast` with iOS deployment target 18.0 (pinned both directly and via `expo-build-properties`, because the Kickstart Exchange SDK requires it). The EAS `extra` block declares the `TubeCastShareExtension` app extension target (`com.tomyail.tubecast.ShareExtension`) with app group entitlement `group.com.tomyail.tubecast`.
+
+### Kickstart Exchange dependency
+
+The app depends on `@tomyail/react-native-kickstart-exchange` (0.2.0), a native SDK that renders an ad banner card. It is used in exactly one place: `features/kickstartExchange/KickstartBanner.tsx`, mounted inline in `SettingsScreen` between the storage and about sections. The banner is iOS-only (the SDK renders on iOS 18+, which is one reason the deployment target is pinned to 18.0); the API key resolves via the pure function `resolveKickstartExchangeApiKey` — live key from build-time `EXPO_PUBLIC_KICKSTART_EXCHANGE_KEY`, falling back to the SDK `"preview"` key only in dev builds without a key, and returning `null` (banner hidden) in production without a key or in screenshot demo mode, so the app never crashes or shows an empty card. The card is themed to match the app: `colorScheme` is forced from the app's own light/dark preference and colors come from the app theme tokens — this is why `theme.tsx` propagates `Appearance.setColorScheme`, so the native SwiftUI card follows TubeCast's theme choice even when it differs from the OS setting.
 
 ### Share extension config plugin (`plugins/withShareExtension.cjs`)
 

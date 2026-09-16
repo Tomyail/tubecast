@@ -4,8 +4,8 @@ title: Subscriptions & Feed
 description: Channel subscriptions, feed browsing, publisher preview, discover home content, local AsyncStorage-backed caches and submitted-job tracking, and the iOS share extension entry point that deep-links YouTube URLs into the app.
 tags: [feed, subscriptions, share-extension, asyncstorage, react-query, deep-links]
 verified:
-  - by: openwiki/0.5.0
-    at: 2026-09-01T21:28:30.610Z
+  - by: openwiki/0.5.2
+    at: 2026-09-16T21:47:02.391Z
 sources:
   - id: openwiki-source-1cff145e46cee334f9f5cf55
     resource: repo://ios-share-extension/ShareViewController.swift

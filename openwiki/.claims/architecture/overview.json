@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:c4c157cd03e2bea5b380a8e89ca8770cffc2949310b40eb9a84fe4c9e8189b4a",
+  "pageVersion": "sha256:e67c5e081262eca4fb3b18f11ac535ed4443720d1f97b1b4c4e78f9b0d81b1f8",
   "claims": [
     {
       "id": "claim_63399ea69c3c407889da257c4b2c1ff2",
@@ -179,10 +179,76 @@
           "version": "repo-lines-v1:sha256:bddf6e30dacb8d86c7a1828e7cc039ddb7a692976b0ac991c30d81ecacf8fa52:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEyLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiIwYmQzNjgyZDhhMzFiMjQ0MzJlYzY0ZTFlY2U3OTU0OTMzOWZhMGM1YzhjNzI3ZjBhNzYyYzE5Mzg0OGQ5MzRhIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0MTJjYTM0NWNjZjc1YmY5YzA4MDZiY2U2OTViZThkZTgwOGI3OTk4NDI1MWE3YTU0ZDIwMmNmNjEwMWRkNDUxIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJjYzE2MjFjMjI4OTYyZTE1Y2Q1OTRiMTY3ZmEzZWZkOWUzOWU3NDhlYzY4ZTAyNDMyMzljY2FlNGQzMTc5OTM4IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIzZjVhOTZmMDJhMGY4YzI2NWE3NGY1YjUxYWI4ZWM4MDE3MDVmMGFjOWVhZGI4YjI2NmFiNDQyNmU3ZjNiMWZhIn0"
         }
       ]
+    },
+    {
+      "id": "claim_c1559e29c06a448ea3222a29a054cab0",
+      "statement": "Expo resolves the app config through app.config.js, which spreads app.json's expo block and injects extra.buildCommit taken from EXPO_PUBLIC_GIT_COMMIT, EAS_BUILD_GIT_COMMIT_HASH, or GITHUB_SHA, falling back to git rev-parse HEAD and finally \"unknown\".",
+      "evidence": [
+        {
+          "resource": "repo://app.config.js",
+          "version": "repo-file-v1:sha256:2bc97050b28ad00402a7c7a0960dda48e9e5c9c2f84f73a43e65fa84d1f64d3d"
+        }
+      ]
+    },
+    {
+      "id": "claim_89e941d276214a80a020671717b04495",
+      "statement": "The app depends on @tomyail/react-native-kickstart-exchange 0.2.0, a native SDK used only by KickstartBanner, which renders an ad banner inline in SettingsScreen; the SDK renders on iOS 18+, which is one reason the iOS deployment target is pinned to 18.0.",
+      "evidence": [
+        {
+          "resource": "repo://package.json#L51-L51",
+          "version": "repo-lines-v1:sha256:449748f772ed77afecdac7bba7086e98f00e964ae7a28458b13669dd04025782:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNDQ5NzQ4Zjc3MmVkNzdhZmVjZGFjN2JiYTcwODZlOThmMDBlOTY0YWU3YTI4NDU4YjEzNjY5ZGQwNDAyNTc4MiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDQ5NzQ4Zjc3MmVkNzdhZmVjZGFjN2JiYTcwODZlOThmMDBlOTY0YWU3YTI4NDU4YjEzNjY5ZGQwNDAyNTc4MiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiY2U4ZWEyNWEzYzRkYTViN2E0YzJhZTBiMTU2NzNkYWM1NWJjM2MzM2M2Zjg3ODZhNGEyMjc0ZGQ1MDlhZTFhMiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiODRhOTY3YWFiNTUzNTIwZDAxZWJhNTNhZDhmMjRhZjZlNTY2M2E0YmU1MmNmNDZiNGE4ODcxNzgzNWVmY2I4NCJ9"
+        },
+        {
+          "resource": "repo://src/features/kickstartExchange/KickstartBanner.tsx",
+          "version": "repo-file-v1:sha256:477ecfac82363207d9a6b36b59782d59d52e08e3b3f590e0ca6d339ce906a5fa"
+        },
+        {
+          "resource": "repo://src/screens/SettingsScreen.tsx#L8-L8",
+          "version": "repo-lines-v1:sha256:beab00cb648a7d2ad6cfadc81197c3fc54d98dd7bcb55b884829c07b6554a336:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYmVhYjAwY2I2NDhhN2QyYWQ2Y2ZhZGM4MTE5N2MzZmM1NGQ5OGRkN2JjYjU1Yjg4NDgyOWMwN2I2NTU0YTMzNiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYmVhYjAwY2I2NDhhN2QyYWQ2Y2ZhZGM4MTE5N2MzZmM1NGQ5OGRkN2JjYjU1Yjg4NDgyOWMwN2I2NTU0YTMzNiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiODM5MDc1YjgxNjExMTY0ZjExNzQyYjE5YzZjNjBmMWIxNzA2NmEyMzQzMWUyNDdkNjRiMDRlY2U2OWY0Njk5MiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiM2I0N2QwYmM1NzAyNGUwZDI1MzQ2NjEwZTY4YmQ1MGVlODdlMDk0Y2I4NWM4ZTRkZWRlZGYwMDIwMTYxMjA5MCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_85d3e9e3526f4c94a352b5b9231e9392",
+      "statement": "Kickstart banner API key resolution (resolveKickstartExchangeApiKey) is iOS-only, uses the build-time EXPO_PUBLIC_KICKSTART_EXCHANGE_KEY live key, falls back to the SDK \"preview\" key only in dev builds without a key, and returns null (banner hidden) in production without a key or in screenshot demo mode, so the app never crashes.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/kickstartExchange/KickstartBanner.tsx#L10-L17",
+          "version": "repo-lines-v1:sha256:8ef735c2dd6310ab805d57837c4aaa611f65db19e2aff8efefb9e9f460ad6875:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjI4MjZmMTljYjhmNDQ1ZjMyNGRjNDJlZDI0NWMxZWU1MGRjYWMxOTBlNTViOTEyNTRhNTcyMzcwNTQ3Y2U5ZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZjEyYTVjN2U5N2JhNGQ0NWQwMGFjZmZmZWYzMjUyMGJkYzBlOWRlMjZlZmNhZTBjZWY0ZWUzMmQ0NWFhMDVkZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOGIyZGUyYzU4MWM1YjNkNDM2OWRiZTQ3NzQxYWM4ZTVjMWIwY2UzYTdiYTBjNjU0YTFkZjUyZjlmMmI5NzNiYyJ9"
+        },
+        {
+          "resource": "repo://src/features/kickstartExchange/config.ts",
+          "version": "repo-file-v1:sha256:af49e87907f07ea64f0c3bf59d5cd36982099f7b9bfaa02d55ca1fa50f34eac8"
+        }
+      ]
+    },
+    {
+      "id": "claim_ad5efa4c66414aca939bbc796d9f0fa7",
+      "statement": "The Kickstart banner is themed from app theme tokens with colorScheme forced from the app's own light/dark preference; theme.tsx propagates Appearance.setColorScheme so the native card follows the app's theme even when it differs from the OS setting.",
+      "evidence": [
+        {
+          "resource": "repo://src/app/theme.tsx#L90-L99",
+          "version": "repo-lines-v1:sha256:3b2db9f73e428020595fb657a797336dbec01e632a9330d9f80a99344b87c644:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImExZWZkZTFhY2U2NjU4Mzk3NTQyZDVkM2YzOGZjNDhlOTYwMmU5MzIzNDQ2ZTAxMmYzYjE1MjNmMDVjZDIzODQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhmNmQwMWQwYmNiNWIyZTQ5ZWQyYmMxYzRmNWVmNDdiYzBlNDFhNmQ2NWM2MGJlYzVjYjljMDhmNjIyZDI0YzAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkxMDc3YWE0ZTQ3YmZhOWFhNDE0MjBiMGI1ZmE3MzViYTEyZDZkNDY5NTE5MGY1YmU5MmE2MDgzOGMwZjY3ODAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI5YzVkZjJlYzNlMGU0ZDRhOGRmZjZiZTI0Njg4MWQ5NDA0MzhmMmJjOTA1ZWJjZTE0MjcxYjc2N2I5YjZjYjIifQ"
+        },
+        {
+          "resource": "repo://src/features/kickstartExchange/KickstartBanner.tsx#L25-L43",
+          "version": "repo-lines-v1:sha256:e14277b9f9df050542478290bdf96e8c6433300d91bf80c811d49533e04da51a:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJhYzdjNzA1MTJjZTFiZjJlZGEwYTczYzQ0OTA5NTY1NTA3YzAwMmJkNzRhODQzODM1MzhhMWRmOGI2ZGI1NjQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk1ZWYwMWJjMDhkYmMzYjYzZTRlNzVlYTNkMjZhNWI5NDE4OTE4NzdlMjdhZDg5MTMyOWM4NDExZDdkOGRjNGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI0OWZlMzVhMTU1YWE1MDZkM2QyZDQxMTBiNjc0OWNkN2NiMTgzMDIwOGRlNWE2ZTU2YjQzYWFmNjM0MWViZDgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI2YjA2ZTZiNWMzZGQyZTAzOGFlNDE2MmU2NTYwYjlmMzRhNGRkODdmM2Q4OTI1YjlhMjIxNTlmN2IwNDFhMjgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_6b818c3f5f4747ca8194326eb100f877",
+      "statement": "RemoteConfigProvider starts from hardcoded defaults (linkProcessingEnabled and audioExportEnabled both true) and on mount tries an ordered, deduplicated list of cache-busted config URLs — EXPO_PUBLIC_MOBILE_CONFIG_URL if set, then the fallback SERVER_URL /api/mobile-config — keeping the defaults for the whole session if all fetches fail.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/remoteConfig/context.tsx#L25-L55",
+          "version": "repo-lines-v1:sha256:7a6682669e756be22984e413194928b81b5b69556129f641c2cbd5ac4ff2eddb:eyJzZWxlY3RlZExpbmVDb3VudCI6MzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU5NjZmYmZhODg5OThkYTc0NjU2YzUwMTk0OTU2YzI1ZjA4NDk0NTc2NjBjMDA5ZmU2M2QxZTlmYTlkYzkzMWMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNjN2NkZGUwZDkyN2NlNGM0YzI0MDIzZDkxNDcwZjNjMzllNGE3NWRiNzhjNjFkM2I5ODBlYzJhNmE5OTc3OGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZkZWM3ZGU5ZGRjZjU0ODJmODNjZDRkYjE4ZTVhNTI0OWNlNDRmMmQ5NDlmZThmMGY3NzhlZmQxYjI3YTJhZGIifQ"
+        }
+      ]
     }
   ],
   "verification": {
-    "by": "openwiki/0.5.0",
-    "at": "2026-09-02T21:24:07.674Z"
+    "by": "openwiki/0.5.2",
+    "at": "2026-09-16T21:47:02.391Z"
   }
 }

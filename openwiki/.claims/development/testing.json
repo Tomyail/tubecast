@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:9b692641322a88fdc1e682ea893259d71e70e5a2a4ab3dcf162ad0226356c89f",
+  "pageVersion": "sha256:973b493cefed726bf4cbf5125f64334f3ad26494f2292dd24338a9ce4a55f42f",
   "claims": [
     {
       "id": "claim_e66fee25e1b04c6bab8740b0f29147e4",
@@ -59,10 +59,24 @@
           "version": "repo-lines-v1:sha256:4d546da3025f1da930b1e32c6b8baed1f65105d0b3183292bfd762ab795b4a5e:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYWI5NTA2YjIxZjQ4M2RjOTVkZjJmMmIzNWY3MGMwYTQ0M2IwNTNhN2I5NjQ5Zjc3NDY3ZTY4OGEzMzIwMDQwNCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiY2FmOWE1OWRhZjIxZjlkM2QyMWJlMGMxOWI3NDE5OTJmNmI2ZTA5YjlkNWIyNDY4YTE4OGFmYzZkMjYzYjZiNyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTU5NDY2NDVjMTlmYjU4NzBiZmU5NjMyZmYzNWE4ZDZlMWM1MzRkMWIyY2EyYmFmOGRmODY0YmM2ZTBjMjc3NSJ9"
         }
       ]
+    },
+    {
+      "id": "claim_8eb6968e3ff94d9193cbebfb35d55268",
+      "statement": "test/kickstartExchange/ contains banner.test.ts (asserts KICKSTART_BANNER_NATIVE_HEIGHT is 100 for the SDK card) and config.test.ts (covers resolveKickstartExchangeApiKey platform/dev/preview-key fallback rules, including never resolving a key on non-iOS platforms and the stable \"preview\" literal).",
+      "evidence": [
+        {
+          "resource": "repo://test/kickstartExchange/banner.test.ts",
+          "version": "repo-file-v1:sha256:8cc1314bfbc9b9dfc628f9f1316c1c4599940b53b9a2d87ece183d114cb99d86"
+        },
+        {
+          "resource": "repo://test/kickstartExchange/config.test.ts",
+          "version": "repo-file-v1:sha256:437504441e88b9b3f9083f6c03f600d749045f3fe53086eedb0730e4ad53f4dd"
+        }
+      ]
     }
   ],
   "verification": {
-    "by": "openwiki/0.5.0",
-    "at": "2026-09-01T21:28:30.610Z"
+    "by": "openwiki/0.5.2",
+    "at": "2026-09-16T21:47:02.391Z"
   }
 }

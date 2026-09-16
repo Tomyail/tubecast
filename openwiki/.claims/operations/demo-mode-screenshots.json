@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:d09b71b379c7b264b39c6ae2f57931b7b5079d27594e0ea35f33469fef407076",
+  "pageVersion": "sha256:5016c67b3efc69d283442ee9798332afbf6dc4e7fd6d3ec15f6af125ad295fd3",
   "claims": [
     {
       "id": "claim_baaf228ca0524c859ef6b049b7893ee9",
@@ -123,10 +123,28 @@
           "version": "repo-lines-v1:sha256:9152caec5b118cd86a214fd3049e8cb2d78b429e1c24e9bbd8fad86f382439be:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYTgwMzkwZmQ2M2U0OGVjZWU0MTQzZjY2ODVkODI4ZWQwYmQwM2QzOGIwOTE2MGQ0YWNiZDNiMTgyYTE4NGM2MiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNjY4NWI0OGQxMTRmNWIwYjM1MGQ1M2FhZWYyN2UzOWExNzA1ODJiODAxOGNlMzZmZjI2YzA4YjAwY2VmYmYzZiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZDEyMjNkYjk2ZDdjMTFhNjgzODRjNjk2OGQzZjAzN2UzM2JlZmRkY2FhZTY5ODI5NDMwMGU2OWRjMTBiZTNlNSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOWZkNTgzMmZmODRhOGVjYTdhYzZiNmRmOTFkYjEyYjRhZmJlMDE2ODM0ODgzOWJmZGRhNDE3YjA4OTcxMGI5MSJ9"
         }
       ]
+    },
+    {
+      "id": "claim_d5d16570be414ab9951e5c788a3206c2",
+      "statement": "In screenshot demo mode, UI that would pollute captures is suppressed: useKickstartExchangeApiKey in src/features/kickstartExchange/KickstartBanner.tsx returns null (hiding the Kickstart Exchange banner), and AppReviewPrompt in src/features/appReview/AppReviewPrompt.tsx returns early so the review alert never shows and no tracking state is loaded or persisted.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/appReview/AppReviewPrompt.tsx#L39-L49",
+          "version": "repo-lines-v1:sha256:7e1c726327835c01a99a84a748f332fbf46a4b90a9cfe21502e71ee481e2ad0e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI4NzliOWVlYTg0YTBjOTBkOWQxYzljNWFjNjkwZTJlN2M2MDI2YTIwYzUwYzc2YjdhZmNmNDk4OGRjOWY0NjUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4OTNmNDBlMzc4MWViODk2YzgyZDA0NmEwODA2N2ExMWUzNWNkZjJmMWRmYWYyNmZlYTkwYjhkYjY2NzY0MTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImEzNTk5MTk1ZTQwOTZiYWQ0NmVkOWNiZjMyYWE2YTRkNGU0NzVmMGQxYTg3YTdmY2Q2MDk0ZTAwYWE0ZTY4NGYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ3M2U2Zjk1MGNiY2M5NTc4NmEwYzk1MmY5YTliMjU4MjdjMDc2Y2FjMjY4MDAwNDc1ZTAwODhhY2E4YmU2MTcifQ"
+        },
+        {
+          "resource": "repo://src/features/appReview/AppReviewPrompt.tsx#L82-L90",
+          "version": "repo-lines-v1:sha256:53be8d0524ff8283311dca3babfe6491a47e3b1bbb01788e281205c8c57f8a07:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNTk2NmZiZmE4ODk5OGRhNzQ2NTZjNTAxOTQ5NTZjMjVmMDg0OTQ1NzY2MGMwMDlmZTYzZDFlOWZhOWRjOTMxYyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZTNmMjFhNTdjN2FiMjAyY2EyMjU4OTMyMDEzOWJmMzdlMDRkMjcwOGViOTlhNDE3Yjg2MTQ2YzI5M2I5N2YwMiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNDY5ODhkN2VjYWRkZTAzNzE0NDVhNzNlNTBlZGZhMDYzMmJjODE5MjJiMTgyMzg4NzcwZDliZDZhNTA4OGE4MCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMmRlNjBlNDEyYWYxNjVlYTQ4OWJhZTZhNGRmMDYyMzJhY2Y5ZTJhYjAzNzFmNWFiY2MwNjcxZWRhODZmYTJlMyJ9"
+        },
+        {
+          "resource": "repo://src/features/kickstartExchange/KickstartBanner.tsx#L10-L17",
+          "version": "repo-lines-v1:sha256:8ef735c2dd6310ab805d57837c4aaa611f65db19e2aff8efefb9e9f460ad6875:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjI4MjZmMTljYjhmNDQ1ZjMyNGRjNDJlZDI0NWMxZWU1MGRjYWMxOTBlNTViOTEyNTRhNTcyMzcwNTQ3Y2U5ZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZjEyYTVjN2U5N2JhNGQ0NWQwMGFjZmZmZWYzMjUyMGJkYzBlOWRlMjZlZmNhZTBjZWY0ZWUzMmQ0NWFhMDVkZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOGIyZGUyYzU4MWM1YjNkNDM2OWRiZTQ3NzQxYWM4ZTVjMWIwY2UzYTdiYTBjNjU0YTFkZjUyZjlmMmI5NzNiYyJ9"
+        }
+      ]
     }
   ],
   "verification": {
-    "by": "openwiki/0.5.0",
-    "at": "2026-09-01T21:28:30.610Z"
+    "by": "openwiki/0.5.2",
+    "at": "2026-09-16T21:47:02.391Z"
   }
 }

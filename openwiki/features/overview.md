@@ -1,12 +1,22 @@
 ---
 type: Feature Module Collection
 title: Feature Modules
-description: TubeCast feature modules under /src/features/ — player, playlist, YouTube feed, jobs, discover, demo mode, remote config, share links, settings, and audio export — with responsibilities, key files, and pointers to deeper per-system pages.
+description: TubeCast feature modules under /src/features/ — player, playlist, YouTube feed, jobs, discover, demo mode, remote config, share links, settings, audio export, app review, and the Kickstart Exchange banner — with responsibilities, key files, and pointers to deeper per-system pages.
 tags: [features, modules, react-native, expo]
 verified:
-  - by: openwiki/0.5.0
-    at: 2026-09-01T21:28:30.610Z
+  - by: openwiki/0.5.2
+    at: 2026-09-16T21:47:02.391Z
 sources:
+  - id: openwiki-source-c470db6d17f627b4291de651
+    resource: repo://src/app/providers/AppProviders.tsx
+  - id: openwiki-source-7fd8970d1b544911785edd93
+    resource: repo://src/features/appReview/AppReviewPrompt.tsx
+  - id: openwiki-source-23829ba29b9d6ef3561daac2
+    resource: repo://src/features/appReview/logic.ts
+  - id: openwiki-source-a269adfe113b4257c77b1f75
+    resource: repo://src/features/appReview/requestReview.ts
+  - id: openwiki-source-c1bed6e675eb7e7248e2cb07
+    resource: repo://src/features/appReview/storage.ts
   - id: openwiki-source-337908bfa1c86939a89f6320
     resource: repo://src/features/audioExport/hooks.ts
   - id: openwiki-source-e71f3ac1cc8f93872433e109
@@ -15,6 +25,12 @@ sources:
     resource: repo://src/features/discover/index.ts
   - id: openwiki-source-4aa6e82d7406c1e3fd4b1bc3
     resource: repo://src/features/jobs/hooks.ts
+  - id: openwiki-source-08140b0b026a34cde5d2e598
+    resource: repo://src/features/kickstartExchange/config.ts
+  - id: openwiki-source-efb26d30d2af248771673784
+    resource: repo://src/features/kickstartExchange/KickstartBanner.tsx
+  - id: openwiki-source-c69e1005d6da42cb454d7ed1
+    resource: repo://src/features/kickstartExchange/layout.ts
   - id: openwiki-source-b5aec4b320e01b6025149936
     resource: repo://src/features/player/context.tsx
   - id: openwiki-source-6b261541fb6a29f9101f2b32
@@ -35,7 +51,7 @@ sources:
     resource: repo://src/screens/PlaylistScreen.tsx
   - id: openwiki-source-454e0cb599eb098ff2a3d20e
     resource: repo://src/screens/SettingsScreen.tsx
-generated: { by: "openwiki/0.5.0", at: "2026-09-01T21:28:30.610Z" }
+generated: { by: "openwiki/0.5.2", at: "2026-09-16T21:47:02.391Z" }
 ---
 
 # Feature Modules
@@ -187,6 +203,31 @@ Audio file export and sharing.
 Gated at the UI level by the remote-config flag `audioExportEnabled`.
 
 Source: `/src/features/audioExport/hooks.ts`
+
+### App Review (`/src/features/appReview/`)
+
+Neutral in-app review prompt for iOS production usage.
+
+**Key files:**
+- `logic.ts` — Pure trigger logic: shows the prompt only on iOS, outside screenshot demo mode, after ≥ 3 distinct played content items and ≥ 2 sessions; never re-prompts after the user engages (rate/feedback), and throttles for 30 days after any prompt ("later" included)
+- `storage.ts` — Persists `AppReviewPromptState` to AsyncStorage under `app_review_prompt_state_v1`; corrupt storage silently degrades to the initial state
+- `AppReviewPrompt.tsx` — UI-less component mounted inside the providers: counts one session per app activation, counts distinct played content via `usePlayer`, and shows a native Alert with Rate / Feedback / Later
+- `requestReview.ts` — Prefers the native `expo-store-review` rating card, falling back to opening the App Store page; `openAppStoreReview` is used by the manual Settings entry because Apple may silently suppress the native card
+
+Source: `/src/features/appReview/logic.ts`
+
+### Kickstart Exchange (`/src/features/kickstartExchange/`)
+
+Inline ad/referral banner rendered on the Settings screen (iOS only).
+
+**Key files:**
+- `config.ts` — `resolveKickstartExchangeApiKey`: uses the build-time `EXPO_PUBLIC_KICKSTART_EXCHANGE_KEY` when set; falls back to the SDK `"preview"` key only in non-production builds; returns `null` (banner hidden, never crashes) on non-iOS or production without a key
+- `KickstartBanner.tsx` — Wraps `KickstartExchangeBanner` from `@tomyail/react-native-kickstart-exchange`; hidden in screenshot demo mode and themed via `useAppTheme` tokens (`colorScheme`, surface/border/tint colors) so the card matches other Settings cards
+- `layout.ts` — `KICKSTART_BANNER_NATIVE_HEIGHT = 100` fixed container height
+
+The banner renders inline in the Settings ScrollView (between the storage and about sections) and scrolls with the page rather than overlaying the mini player.
+
+Source: `/src/features/kickstartExchange/config.ts`
 
 ## Feature Module Patterns
 

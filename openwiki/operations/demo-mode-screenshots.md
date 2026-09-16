@@ -4,8 +4,8 @@ title: Demo Mode & Store Screenshots
 description: How EXPO_PUBLIC_SCREENSHOT_DEMO_MODE produces deterministic screenshot builds, why demo cover art is URL-referenced instead of bundled, and how raw captures are composed and pushed to App Store Connect via fastlane.
 tags: [demo-mode, screenshots, fastlane, app-store, release, assets]
 verified:
-  - by: openwiki/0.5.0
-    at: 2026-09-01T21:28:30.610Z
+  - by: openwiki/0.5.2
+    at: 2026-09-16T21:47:02.391Z
 sources:
   - id: openwiki-source-7af97a29763d6f133e4b4851
     resource: repo://fastlane/Fastfile
@@ -17,13 +17,17 @@ sources:
     resource: repo://scripts/generate-store-screenshots.swift
   - id: openwiki-source-99267eb31f174540a6c513b1
     resource: repo://scripts/release.mjs
+  - id: openwiki-source-7fd8970d1b544911785edd93
+    resource: repo://src/features/appReview/AppReviewPrompt.tsx
   - id: openwiki-source-e71f3ac1cc8f93872433e109
     resource: repo://src/features/demoMode/config.ts
   - id: openwiki-source-b16234b5752aa15156e9c2c9
     resource: repo://src/features/demoMode/data.ts
+  - id: openwiki-source-efb26d30d2af248771673784
+    resource: repo://src/features/kickstartExchange/KickstartBanner.tsx
   - id: openwiki-source-73242ed06ac96308eb582d63
     resource: repo://src/i18n/index.tsx
-generated: { by: "openwiki/0.5.0", at: "2026-09-01T21:28:30.610Z" }
+generated: { by: "openwiki/0.5.2", at: "2026-09-16T21:47:02.391Z" }
 ---
 
 # Demo Mode & Store Screenshots
@@ -47,7 +51,11 @@ Every consumer checks the constant directly at its integration point:
 | `src/features/playlist/context.tsx`, `src/features/player/context.tsx` | Return demo tracks / player state instead of real storage and playback |
 | `src/features/discover/hooks.ts`, `src/features/youtubeFeed/hooks.ts` | Serve demo discover/feed data |
 | `src/screens/HomeScreen.tsx`, `src/screens/ConvertScreen.tsx` | Deterministic home state; shows a conversion-proof component when a URL is entered |
+| `src/features/kickstartExchange/KickstartBanner.tsx` | `useKickstartExchangeApiKey()` returns `null`, hiding the ad banner from Settings screenshots |
+| `src/features/appReview/AppReviewPrompt.tsx` | The review prompt never triggers and no tracking state is loaded or persisted |
 | `src/i18n/index.tsx` | Forces the language to `EXPO_PUBLIC_SCREENSHOT_DEMO_LANGUAGE` (`zh-CN` → `zh-CN`, anything else → `en`), bypassing the stored `settings_language` preference |
+
+Beyond data stubbing, demo mode also suppresses user-facing UI that would pollute captures: the Kickstart Exchange banner is hidden by returning a `null` API key, and the app-review prompt bails out early so it neither shows the rating alert nor reads/writes its persisted state.
 
 The npm scripts that set the flag are defined in `package.json`:
 
@@ -130,16 +138,17 @@ All three use `deliver` with `skip_binary_upload: true`, `submit_for_review: fal
 
 ## End-to-end flow
 
-<!-- openwiki: mermaid parse failed and this diagram was converted to a text fence so it does not break rendering. Fix the diagram source and restore the mermaid fence. Parser error: Heuristic: a semicolon inside a label breaks rendering; rephrase the label. -->
-```text
+```mermaid
 flowchart LR
-    A["EXPO_PUBLIC_SCREENSHOT_DEMO_MODE=1\nexpo run:ios --configuration Release"] --> B["Simulator/device renders\ndeterministic demo UI\n(URL-referenced covers)"]
-    B --> C["Raw captures into\nscreenshot-assets/store-ui/&lt;locale&gt;/"]
-    C --> D["scripts/generate-store-screenshots.swift\ncompose marketing frames"]
-    D --> E["fastlane/screenshots/&lt;locale&gt;/"]
-    E --> F["fastlane screenshots_push\n(deliver, skip binary)"]
-    G["scripts/release.mjs\nassert-no-demo-assets"] -.->|blocks if assets/demo-covers exists| H["Release IPA build"]
+    A["Set EXPO_PUBLIC_SCREENSHOT_DEMO_MODE then run ios:screenshots:release"] --> B["Demo build renders deterministic UI with URL-referenced covers"]
+    B --> C["Raw captures into screenshot-assets store-ui locale folders"]
+    C --> D["generate-store-screenshots.swift composes marketing frames"]
+    D --> E["fastlane screenshots locale folders"]
+    E --> F["fastlane screenshots_push via deliver without binary upload"]
+    G["release.mjs assert-no-demo-assets"] -.->|blocks if assets/demo-covers exists| H["Release IPA build"]
 ```
+
+End-to-end pipeline from the demo-mode build flag through composition to the App Store Connect upload, plus the release-time guard.
 
 ## Related pages
 

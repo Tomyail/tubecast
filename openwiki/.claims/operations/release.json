@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:b2c7b7537ee6efbb0a3cd76138b00e194d7b37d5ed2fec2b30f70ce1d60f61bd",
+  "pageVersion": "sha256:58721989cc2ac68c296ee43c5753bf635f6668a834b96b2ac63e0598a1715529",
   "claims": [
     {
       "id": "claim_c35d6de9e9894840bc044d305ce88c24",
@@ -103,10 +103,60 @@
           "version": "repo-lines-v1:sha256:cc0507be98dc0a3a5671bd7107cdd7ae7d63ec48c10f81ddffdfca0cef3eb94a:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYzQzNTAyNjljMTFlMWYxOWE0ZTFhOWY2ZjNhMjgxYmY5MjJkYzhkMDRiZmExYzE0YzRjOTkxMzgxYTk0OTJkZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOGFiZjI5ODM4YWRkZGY2OWNlMWVjZjU0NjhiZWIyNTNlZmI0NzY1YTIxYmVmYzQ0OWRhZDg0YjE5ZGFjOTA0OSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMGJkNTdmNDk3MzZlOWRmYjRhYmE5MjIwYzRmYWViMGNlNjlmZTcyNGI2M2NmM2JlNWY4NDZiNDI2NzdiMTkyNiJ9"
         }
       ]
+    },
+    {
+      "id": "claim_35e78b87329a45f983892c8fe58b5459",
+      "statement": "scripts/release.mjs invokes every fastlane lane through `mise exec -- bundle exec fastlane <lane>` with cwd at the mobile root, so the same invocation works locally and in CI; the Ruby fastlane version is pinned by the Gemfile to >= 2.220, < 3.0.",
+      "evidence": [
+        {
+          "resource": "repo://Gemfile",
+          "version": "repo-file-v1:sha256:133931af0ed98c698fa8d1b80d4a588ffef985c03b40b42fe062f87883617137"
+        },
+        {
+          "resource": "repo://scripts/release.mjs#L49-L51",
+          "version": "repo-lines-v1:sha256:298b801741d2d72663f9dd91a6fdb1759aa3355d3902460e73ff37c6663bc70e:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMDU1YjIyZmU0Njg2YjNiMTk1ZDEwMzQ1YWMzZjc5ZDg2MmJlNzUwYmE3NTExYTUwNmEzZGJjMDVkYjFkOTIwZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOGY2N2YwMzYyYWRhYWM0Y2RlNjdiZWNmMjlkYTAxYmM0ZGNiMDVmZGQwMjkxMzY2YzExY2YxOTZmZDJhZGE0YiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiODJhYzU5NWRmYzgyODY1ODljNDUzOGU0NTcyNGY1M2QzMTBlMzA3OWEyNWNhNmU2NjQyOTdmMThiMGJmZDkzMyJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_84ed323291f34f8f87ac041f62b24ebb",
+      "statement": "generate-testflight-notes.mjs calls an Anthropic-compatible /v1/messages endpoint to rewrite .testflight-changelog.md into a bilingual EN/中文 \"What to Test\" note: CI pins RELEASE_NOTES_MODEL_ID=glm-5.2 and ANTHROPIC_BASE_URL to open.bigmodel.cn, while local defaults fall back RELEASE_NOTES_MODEL_ID → OPENWIKI_MODEL_ID → glm-5.2 with base URL api.anthropic.com; it requires strict JSON with en/zh fields and fails otherwise, writing the one-shot .testflight-whats-new file that the fastlane testflight_distribute lane reads as fallback and deletes after use.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/release-testflight.yml#L83-L88",
+          "version": "repo-lines-v1:sha256:3c9857326ce4e203b4621ff2b6738ca1625dcafc4ea2a77cf843ba66d97b5ffc:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNzNjMTJjMDE5MDk5NTlhNjJiY2Y2NmFiMjMwM2RiYTkxZTFmZGQyYmEwNThlZjA4Nzk2OTAxYTE3YjZkZGUyOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMTk4ZDljYzFkNWI2ZDVmMGNhNmQ2MTNjZDc1YTE4Zjg0MmUzNjhiMWVjN2UwNTcwMzNhZjlmMDI3Mjk1YWI5YyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNmM1YTMzMTg2ZTBiZTVjYTA0YTcwMDFhMGNkODdlMjlmNTJlMjA1YWVhOWY5MzgzZjdkZTJkMzNiYjA5YTk3YyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiY2Y0ZjRiMzMzOGU4NDNkODIwNDExZTdiNTRiYzcxNWFhMWMxOTI5MGMxMmViZjA1MjY1ZjMxMzBkZjAxODgwZSJ9"
+        },
+        {
+          "resource": "repo://fastlane/Fastfile#L93-L97",
+          "version": "repo-lines-v1:sha256:54e1408db5d529f13af1bbec6d63392d30b8b3f414355ab16559c0b0f293e019:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYTcyNDcyYjU4NzFmYmMwYTE5MzJiYjJlNTAyMTU2ZjMzMmFmNzQ3MzNiY2FmZWRiMjA0ZjM5NTE5YjNhMzVkZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYjg5ODY4MGE2YWRlZGE2YmQ1MjExNTAwMjRlYTg4OWNiYjdmMzExNzM4NmJkMWUzNWQ4MmY4M2RlNGYwYzQxOSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMTU0NTczM2I4YzcxMGE3MzJkMDcwNGRiODc5NzE1NzAzZGYyZDdlNWRkZTMwNTdjYWVmODY3Yzk5MDc0MTE2MCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNGNhYmEyOWM0Y2Y2YTBlMjBjOTZkZDg4NjBjMDg0MzYzM2M2ZDA0NDE2YjUyZDNhNWY2YWMwNmJlY2I5NjQ0ZCJ9"
+        },
+        {
+          "resource": "repo://scripts/generate-testflight-notes.mjs#L21-L30",
+          "version": "repo-lines-v1:sha256:7cb1a1036154aec9292f9666fea6d9b8e7364510f5f0fb04a6dd6ac1cb5373ce:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM1MDNjYjdkYjI1ZDdhNjAwZDJmZDJlYjQ2NmQ5NzJhODFiMWI4NjViM2YyODMyOWRmYmZiZWNiMzA5NTMwN2IiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI4ZTVkMGZmMjhkZGY5ZGFlMjgxYTYwZTVhZGVhZjc1NTM2NzQyNDRmODE1MjE1N2Y2ZDRjZmM1OWQyODUwMmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY0Yzk3MmVlNjY3MjcyZWU1OTk1YTI5YTEzM2IxMjZjNDFmMjk5YjMwYmFjM2VkM2YzZTg2NTg5ZDcxOWY0OGYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZlZTM5YzQzNjgwNmE0Yzg1NzdmZTgyMjkxNTBhMjdmNGVhMWZkM2Y0MmI4ZGY4ZmEzY2U1YjZhMTJiYjkzOGIifQ"
+        },
+        {
+          "resource": "repo://scripts/generate-testflight-notes.mjs#L41-L98",
+          "version": "repo-lines-v1:sha256:a2e398d17be3662dc72b078ab93efc064331edb5a21e7cf3a0f07a02c8e9217d:eyJzZWxlY3RlZExpbmVDb3VudCI6NTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA0NzgwYWI3OTEzY2Y0MmUzOGIyOGQ2ZmM3ZTZjYjEzZGE5MzM1MGMzMGRlZWRmN2FmYTI3MWFiOGUyZDhmYzAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA0OWJiNjg2MTMyNDU4ZWUwMzM3ZTBlZmYxY2U2M2YwNDRkY2QzMmI4MGM2OGZmNGM3YmI4ODM5Mzg2N2JkZDMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU2OTlkODlmMTRkZDI4ZTdhOTZlYTQzYzJmYWM1YjMwMDNlM2RjZGZmZGI4ODYyMDUxMGJmYzg4ZjYyYTVhM2IiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZiYWFiODNkYTI4MzA1ZTM0YzY3MDFkZjgyOGY2MzEzMmI4ZWI3M2UxOTZjYmE0MjE5MDhkYWI2YzkxZDQ1YzUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a8d82eb7187143ebae593f3dd7402534",
+      "statement": "The `release:ios` package.json script chains release.mjs assert-no-demo-assets (which fails if assets/demo-covers exists, preventing demo covers from being bundled into the IPA), expo prebuild --no-install, and a Release-configuration device run.",
+      "evidence": [
+        {
+          "resource": "repo://package.json#L19-L19",
+          "version": "repo-lines-v1:sha256:1d579e7d62076fee7615ac4b345d9fe7d2907273c32e9d5d55fa40c2fab31824:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMWQ1NzllN2Q2MjA3NmZlZTc2MTVhYzRiMzQ1ZDlmZTdkMjkwNzI3M2MzMmU5ZDVkNTVmYTQwYzJmYWIzMTgyNCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMWQ1NzllN2Q2MjA3NmZlZTc2MTVhYzRiMzQ1ZDlmZTdkMjkwNzI3M2MzMmU5ZDVkNTVmYTQwYzJmYWIzMTgyNCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOTY4MTQxOGIwODcwNTMyNGIzMDE0MWVhNDQ0ZjYyNWRjNjc5MGNhMGJlODYyOTFiNzc4YzFhNzc2OWY0NTA3ZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNDg3ZDY4ZDE2YzU1YmNhZTIwY2IxNTRiNWI4YzY5MTk2OTNhNTZhNjNkMzQ5ZDAyNWVhZWRlNmU2MmVmNTY3NyJ9"
+        },
+        {
+          "resource": "repo://scripts/release.mjs#L59-L69",
+          "version": "repo-lines-v1:sha256:02d0d0929b797b3b0fe9ef9cda719d2b9991f95d7126ccf83a34eec0b4f818b3:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRlZTc3OWI3M2VmMjJiMWU4MTliNzM3OTRmZjAwZDMxNmRjN2FiN2NjOTcyYzA0ZWExNDQxMjYyYTUyYTY3OTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE1MTlmOGIwYzY4NDE3ZGQyYmFkYjc4Yzk1MWViNWMzMzRkNmJlODI5ZmM5MjJjZWNlZTQyZmFhNGM0ZDgyY2UiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImJkNGFhYTI0YTVlZDk0Y2YwNTkxNDQ1ZTgxYzAwMjI0YzQ0MWQ2ZWY3OWJkMDZiZDc0YmYzM2VmNzMzMmM4NjAifQ"
+        }
+      ]
     }
   ],
   "verification": {
-    "by": "openwiki/0.5.0",
-    "at": "2026-09-02T21:24:07.674Z"
+    "by": "openwiki/0.5.2",
+    "at": "2026-09-16T21:47:02.391Z"
   }
 }

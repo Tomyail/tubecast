@@ -37,7 +37,7 @@ sources:
 generated: { by: "openwiki/0.5.2", at: "2026-09-15T21:48:37.541Z" }
 verified:
   - by: openwiki/0.5.2
-    at: 2026-09-15T21:48:37.541Z
+    at: 2026-09-16T21:47:02.391Z
 ---
 
 # Development Conventions

@@ -30,8 +30,8 @@ sources:
     resource: repo://test/player/state.test.ts
 generated: { by: "openwiki/0.5.0", at: "2026-09-02T21:24:07.674Z" }
 verified:
-  - by: openwiki/0.5.0
-    at: 2026-09-02T21:24:07.674Z
+  - by: openwiki/0.5.2
+    at: 2026-09-16T21:47:02.391Z
 ---
 
 # Playback & Library

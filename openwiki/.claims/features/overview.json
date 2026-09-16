@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:f874da66a9b2733e33ef7e273916d62bc06f5d82d6540b031bdc188bbd45fc1a",
+  "pageVersion": "sha256:7ccc34e8207d71637bfde64532a4d93a18a989a10fb10c02f83598281f4fe809",
   "claims": [
     {
       "id": "claim_2cf905015deb4179a75975e97bd69268",
@@ -135,10 +135,80 @@
           "version": "repo-file-v1:sha256:cf6e4114f2a3a0778bad1c9c071ebe0c3024a72078336966a97a4be5093ffa22"
         }
       ]
+    },
+    {
+      "id": "claim_28189c03bac84f1db62208a9b5a7ee2c",
+      "statement": "The appReview module's prompt (logic.ts shouldShowReviewPrompt) fires only on iOS outside screenshot demo mode, requires at least 3 distinct played content ids and 2 sessions, never re-prompts after engagement (rate/feedback), and throttles any re-prompt for 30 days.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/appReview/logic.ts#L4-L75",
+          "version": "repo-lines-v1:sha256:18e2193fe4ab3650165b21ca8734c96b676976a949ce1daa9c90f0e1353f33af:eyJzZWxlY3RlZExpbmVDb3VudCI6NzIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVmNTBkY2I3YjczOTZjMWRiYjBiZmY4OWI2YTE3OGFiNmFmZTA2NzRlMTgzZmJlMzVlZTA1ZWMyMjkzOGY4NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQzZTJiMzMxYmYzYmRiNGRkZmU5MzE5ZTgxMDA4M2ZiZmQ2ODM0Y2IyMmMyZmQyOTBmMmNmMDY0MzFiYTM3M2YiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNhZTkxZGZiYmViNjZjZGJlYmEzMDQzNGU3OTgyZjYzZDBkYjgyNTUwZGZhMGNiMjk1YmFjY2YzNjZmMDc1MmUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_81dd980f109243ac967d2a3da3b5716e",
+      "statement": "AppReviewPromptState is persisted to AsyncStorage under app_review_prompt_state_v1, with corrupt/missing storage silently degrading to the initial state.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/appReview/storage.ts#L4-L26",
+          "version": "repo-lines-v1:sha256:481772bf6d612d22de0ec82d564f801d7d61514ba0cc16c9d779d2322437038c:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJhYTVhNmQ0YmQ0MDcyNjA4YjEyOGIxODM4ZDQ2OTIzNGJlOWI2ZTRiMDhlYjJmMzBkODI2MDMyNGNlMTFjNmEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI3ZTU3ODhkNWQ5ZDczZDI0YTgxZGJjMGE1YTc0YmZhODJjOWMzYjNhZjk5ZTUyYWY3OTZlOTBiNDY4YThhM2QiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQ1ZDU2ZjRkZWMxZDIyNWMwODYwZGZmNGFmNDg3Y2M3OWNmMWM2N2I5ZDViZDc2ZmI1YTFjZTQwZDE4OWY1NjQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM1MzBlNTJhYTNlZTNjYWYzOTdiYWI2MjVjZTk0MTNjOTA2NmQzNTQ1MTgyNTFmZTBiOGY1NmJmNjkxNDRjMzkifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_11b5f71725d64c6b8f4fd3ab9ec2ac5a",
+      "statement": "AppReviewPrompt is a UI-less component mounted in the app providers that counts one session per activation, counts distinct played content via usePlayer, and shows a native Alert; requestReview prefers the expo-store-review native card, falling back to opening the App Store page.",
+      "evidence": [
+        {
+          "resource": "repo://src/app/providers/AppProviders.tsx",
+          "version": "repo-file-v1:sha256:53045ba83af846697a8c23491393bc1dcc834c91223a4fe185e5a2d5a97170b1"
+        },
+        {
+          "resource": "repo://src/features/appReview/AppReviewPrompt.tsx#L22-L74",
+          "version": "repo-lines-v1:sha256:06ac6b391a2f9edddc532151077aaad0936f7cb1e7afdb3844a16cd8a3da5646:eyJzZWxlY3RlZExpbmVDb3VudCI6NTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQyNDYwMTRiOWE0NjYyMGFiOGJhMGE4ZTdkYmQyN2ViYWU5ZjZjNWM1MDVmYjlhOWUxZjg2ZjQyM2NhODc4NGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyYTJjYjI1YTEyMmI0NDIyMWE2MjM0ZWM2NjBhN2I1ZmI3ZjliZGU3YjNiOWUyYjNjNTU5YTBkOTZmYWM3MzkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ0YTMwODA1NzJmNTQwZTIyZjEwNzY3YmM2OTZmZTJkNDlmMmEyMDU1MTE3MGM2MzlkZjJkMTFlZWViNjEwZTAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjkxMGMzNzA4NTdmNzI2MWVlOWZmMDc2MWUzNmI3ZDkzODhhNDlhYTU2MTUxOGY0NGVlNmJiNDk0OGRhNWZiMjIifQ"
+        },
+        {
+          "resource": "repo://src/features/appReview/requestReview.ts#L23-L33",
+          "version": "repo-lines-v1:sha256:18e63dcbde9fb5984caddc3dbc0c491f6deaf23c93249ce3221cf7d78a4e410d:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEzZjc5ZmY3NGRkOTRmYTdjYTVmZDA2OWVmZjFmOTFlYTQ5ZGQ3Y2ZjYmMxNWU3OTlkYmQ0MDFlYzViNGY0YzAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZhNGQwMTRlYzBjMzM3YjhmZjU1YjczOWJmMTY1NTM5NmQ0MzQwZGIxYzc4NGY5YTAzOTVjNGY4ZWUwMzJlMTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImYwZWNmZGE1NWU2YzFmMWYzNDhiNTlmNTkyMzU1MTg3MjJiN2RhNjRiMzMxZWU0NDZjNTdlM2FiODlmMTE4ZTAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_ecc81a98a5fb48439b18db2ebaf9c17a",
+      "statement": "Kickstart Exchange API key resolution is iOS-only: it uses the build-time EXPO_PUBLIC_KICKSTART_EXCHANGE_KEY when set, falls back to the SDK \"preview\" key only in non-production builds, and returns null (banner hidden, no crash) otherwise; the banner is also hidden in screenshot demo mode.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/kickstartExchange/KickstartBanner.tsx#L10-L17",
+          "version": "repo-lines-v1:sha256:8ef735c2dd6310ab805d57837c4aaa611f65db19e2aff8efefb9e9f460ad6875:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjI4MjZmMTljYjhmNDQ1ZjMyNGRjNDJlZDI0NWMxZWU1MGRjYWMxOTBlNTViOTEyNTRhNTcyMzcwNTQ3Y2U5ZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZjEyYTVjN2U5N2JhNGQ0NWQwMGFjZmZmZWYzMjUyMGJkYzBlOWRlMjZlZmNhZTBjZWY0ZWUzMmQ0NWFhMDVkZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOGIyZGUyYzU4MWM1YjNkNDM2OWRiZTQ3NzQxYWM4ZTVjMWIwY2UzYTdiYTBjNjU0YTFkZjUyZjlmMmI5NzNiYyJ9"
+        },
+        {
+          "resource": "repo://src/features/kickstartExchange/config.ts#L18-L30",
+          "version": "repo-lines-v1:sha256:84fb43c39b514499d30fe6dcf9a4fba4f6bc106899e70bf8171185859a124581:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI2NGFlZjM3OGRhZjIzNDg5MzBlOTVmOGFlOTI1MWRjNGRhYTA0MTYyNTkyMThlOTM4NThmNWE1NTk4ZDAzMzYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjExNGY4NWM5NzI4M2RhMzc2NjI2MTU5YWU4ZjBkZjg1MjliYjRjMTliNTU5ZDIzOGFjNDhmMzE0ZTRiNzdkZmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c67aeafb0a3841258562b0f1377f910c",
+      "statement": "KickstartBanner wraps KickstartExchangeBanner from @tomyail/react-native-kickstart-exchange, renders inline in the Settings screen ScrollView in a fixed 100pt container (KICKSTART_BANNER_NATIVE_HEIGHT), and is themed via useAppTheme tokens so it visually matches other Settings cards.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/kickstartExchange/KickstartBanner.tsx#L25-L54",
+          "version": "repo-lines-v1:sha256:86f894ed65cbd22118508f9ceb4bb77827b61b29d464d7dc409db05684991e28:eyJzZWxlY3RlZExpbmVDb3VudCI6MzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJhYzdjNzA1MTJjZTFiZjJlZGEwYTczYzQ0OTA5NTY1NTA3YzAwMmJkNzRhODQzODM1MzhhMWRmOGI2ZGI1NjQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRkNWNkMmZiNGYzZGY4ODQ1MTUyNTViMzk1MjNmMmY4YjU0NzJiZWVhOWY1NjZmZmNhMjA0ZGI4MDI1NjEwNDEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI0OWZlMzVhMTU1YWE1MDZkM2QyZDQxMTBiNjc0OWNkN2NiMTgzMDIwOGRlNWE2ZTU2YjQzYWFmNjM0MWViZDgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY2ZjViNDBiMTU4NDU3ZDE3ODY0ZjIxNzkwNzg2ZGQ1YTJlY2RiNjRiNjZhNjUxZjc4OGQ0ZTI1Y2QzMzAzZDIifQ"
+        },
+        {
+          "resource": "repo://src/features/kickstartExchange/layout.ts",
+          "version": "repo-file-v1:sha256:c87faed28400169d284499fac1d41559dc5e12be025f61b77b65c3c2d0271616"
+        },
+        {
+          "resource": "repo://src/screens/SettingsScreen.tsx",
+          "version": "repo-file-v1:sha256:9202263fa0f1f897d40bfb58d394a316a8e628787cf6da4753a865e8605e3ea1"
+        }
+      ]
     }
   ],
   "verification": {
-    "by": "openwiki/0.5.0",
-    "at": "2026-09-01T21:28:30.610Z"
+    "by": "openwiki/0.5.2",
+    "at": "2026-09-16T21:47:02.391Z"
   }
 }

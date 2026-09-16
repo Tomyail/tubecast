@@ -1,10 +1,11 @@
 ---
 type: "Reference"
 title: "TubeCast Documentation"
-openwiki_generated: true
+description: "Entry point for the TubeCast wiki: toolchain, how to run the app, and a task-routing map to the architecture, features, development, and operations pages."
+tags: [quickstart, toolchain, task-routing, expo, react-native]
 verified:
-  - by: openwiki/0.5.0
-    at: 2026-09-02T21:24:07.674Z
+  - by: openwiki/0.5.2
+    at: 2026-09-16T21:47:02.391Z
 sources:
   - id: openwiki-source-8037e2358a2c4f9b2c722a11
     resource: repo://AGENTS.md
@@ -12,9 +13,10 @@ sources:
     resource: repo://package.json
   - id: openwiki-source-23775c3de52f3ab95a13cb8b
     resource: repo://README.md
-generated: { by: "openwiki/0.5.0", at: "2026-09-02T21:24:07.674Z" }
+  - id: openwiki-source-08140b0b026a34cde5d2e598
+    resource: repo://src/features/kickstartExchange/config.ts
+generated: { by: "openwiki/0.5.2", at: "2026-09-16T21:47:02.391Z" }
 ---
-
 
 # TubeCast Documentation
 
@@ -32,23 +34,30 @@ This wiki is an optional **just-in-time evidence index**, not required startup r
 | If you're working on... | Start here |
 |---|---|
 | App entry points (`App.tsx`, `index.ts`), provider stack, theming, navigation, native layer (config plugins, iOS share extension) | [Architecture Overview](architecture/overview.md) |
-| Playback engine (expo-audio), MiniPlayer, library/download management, playback state flow through providers to screens | [Playback & Library](features/playback-library.md) |
+| Map of feature modules under `src/features` (appReview, audioExport, demoMode, discover, jobs, kickstartExchange, player, playlist, remoteConfig, settings, shareLinks, youtubeFeed) | [Feature Modules](features/overview.md) |
+| Feed → job → cache conversion flow: jobs API, progress tracking, audio conversion/cache lifecycle, errors | [Conversion Pipeline](features/conversion-pipeline.md) |
+| Playback engine (expo-audio), player state machine, progress persistence, playlist library, cache status lifecycle | [Playback & Library](features/playback-library.md) |
+| YouTube subscriptions, feed fetching and caching, discover surfaces | [Subscriptions & Feed](features/subscriptions-feed.md) |
 | Commit conventions, version-bump rules, i18n, code organization | [Development Conventions](development/conventions.md) |
-| Vitest setup, choosing the narrowest focused test | [Testing Guide](development/testing.md) |
-| Release and distribution: `scripts/release.mjs` commands, EAS build profiles, fastlane store metadata, TestFlight flow, changelog/versioning | [Release Operations](operations/release.md) |
+| Vitest setup, test layout under `test/`, choosing the narrowest focused test | [Testing Guide](development/testing.md) |
+| `EXPO_PUBLIC_SCREENSHOT_DEMO_MODE` operation, demo tracks, store screenshot generation (`scripts/generate-store-screenshots.swift`) | [Demo Mode & Store Screenshots](operations/demo-mode-screenshots.md) |
+| Release and distribution: `scripts/release.mjs` commands, fastlane store metadata, TestFlight flow, changelog/versioning | [Release Operations](operations/release.md) |
 
 ## Canonical Toolchain
 
 - **pnpm** — the package manager; `package.json` pins `packageManager: pnpm@10.28.1`.
 - **Expo ~56 / React Native 0.85** — the SDK and runtime (`expo ~56.0.12`, `react-native 0.85.3`, `react 19.2.3`).
-- **Requirements**: Node.js 20 or later, pnpm 10.
+- **Requirements**: Node.js 20 or later, pnpm 10, and Expo Go for quick runs or Xcode / Android Studio for native builds.
 
 ```bash
 pnpm install
 pnpm start        # Expo dev server (Expo Go)
 pnpm ios          # native iOS dev build
 pnpm android      # native Android dev build
+pnpm test         # Vitest unit tests
 ```
+
+Screenshot demo mode variants (`start:screenshots`, `ios:screenshots`, `ios:screenshots:release`, `ios:screenshots:ipad`) set `EXPO_PUBLIC_SCREENSHOT_DEMO_MODE=1`; see [Demo Mode & Store Screenshots](operations/demo-mode-screenshots.md).
 
 ## Project Structure
 
@@ -57,11 +66,13 @@ mobile/
 ├── src/
 │   ├── app/              # Navigation, theme, providers
 │   ├── components/       # Shared UI components
-│   ├── features/         # Feature modules (player, playlist, youtubeFeed, demoMode)
+│   ├── features/         # Feature modules (appReview, audioExport, demoMode, discover,
+│   │                     #   jobs, kickstartExchange, player, playlist, remoteConfig,
+│   │                     #   settings, shareLinks, youtubeFeed)
 │   ├── screens/          # Screen components
-│   ├── i18n/             # Internationalization
+│   ├── i18n/             # Internationalization (i18next, EN / zh-CN)
 │   └── shared/           # Shared utilities (apiClient, errors, imageSource)
-├── scripts/              # Release and build scripts (release.mjs)
+├── scripts/              # Release, versioning, and screenshot scripts (release.mjs)
 ├── fastlane/             # App Store metadata and screenshots
 ├── ios/                  # iOS native project (generated via expo prebuild)
 ├── screenshot-assets/    # Demo mode assets (URL-referenced, not bundled)
@@ -73,10 +84,11 @@ mobile/
 - **React Navigation** — bottom tabs and native stack navigation
 - **@tanstack/react-query** — data fetching and caching
 - **expo-audio** — background audio playback with lock-screen controls
+- **@tomyail/react-native-kickstart-exchange** — iOS share-extension data exchange
 - **Vitest** — unit tests (`pnpm test`)
-- **Fastlane** — App Store metadata, screenshots, TestFlight distribution
+- **Fastlane** (via `mise exec`) — App Store metadata, screenshots, TestFlight distribution
 - **commitlint / husky / commit-and-tag-version** — commit and version-bump automation
 
 ## Local Builds
 
-TubeCast builds locally; it does not require EAS. `pnpm release:ios` asserts no demo assets are bundled, runs `expo prebuild` for iOS, then installs a Release build on a connected device. Android release builds use `expo prebuild --platform android` and `./gradlew assembleRelease`. See [Release Operations](operations/release.md) for the full TestFlight pipeline.
+TubeCast builds locally; it does not require EAS. `pnpm release:ios` runs `scripts/release.mjs assert-no-demo-assets`, then `expo prebuild --platform ios --no-install`, then installs a Release build on a connected device. Android release builds use `expo prebuild --platform android` and `./gradlew assembleRelease`. See [Release Operations](operations/release.md) for the full TestFlight pipeline.

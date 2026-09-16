@@ -12,16 +12,18 @@ sources:
     resource: repo://eas.json
   - id: openwiki-source-7af97a29763d6f133e4b4851
     resource: repo://fastlane/Fastfile
+  - id: openwiki-source-d5a1739d11bdad59b9de4986
+    resource: repo://Gemfile
   - id: openwiki-source-5b54a58d1b51cd490b0e7162
     resource: repo://package.json
   - id: openwiki-source-3ee71b00dc0356f536efb762
     resource: repo://scripts/generate-testflight-notes.mjs
   - id: openwiki-source-99267eb31f174540a6c513b1
     resource: repo://scripts/release.mjs
-generated: { by: "openwiki/0.5.0", at: "2026-09-02T21:24:07.674Z" }
+generated: { by: "openwiki/0.5.2", at: "2026-09-16T21:47:02.391Z" }
 verified:
-  - by: openwiki/0.5.0
-    at: 2026-09-02T21:24:07.674Z
+  - by: openwiki/0.5.2
+    at: 2026-09-16T21:47:02.391Z
 ---
 
 # Release Operations
@@ -76,6 +78,9 @@ The script handles three release phases:
 ```bash
 # Bump buildNumber, generate changelog, create tag
 pnpm release:version
+
+# Local release build: demo-asset guard + expo prebuild + run on device (Release config)
+pnpm release:ios
 
 # Generate expo prebuild (writes buildNumber to native)
 pnpm release:archive
@@ -184,7 +189,7 @@ The fastlane `testflight_distribute` step is kept, because it is a pure App Stor
 
 ### LLM-generated "What to Test" notes
 
-`scripts/generate-testflight-notes.mjs` reads `.testflight-changelog.md` (the raw conventional-commit list produced by `release.mjs testflight-changelog`) and calls an LLM (Anthropic-compatible API, configured to `glm-5.2` via `RELEASE_NOTES_MODEL_ID` and `ANTHROPIC_BASE_URL`) to rewrite it into a bilingual EN/中文 "What to Test" summary. The output is written to `.testflight-whats-new`, which is the fallback file the `testflight_distribute` fastlane lane reads when `TESTFLIGHT_CHANGELOG` is unset. The file is one-shot: the lane deletes it after reading, so each distribution needs a fresh one.
+`scripts/generate-testflight-notes.mjs` reads `.testflight-changelog.md` (the raw conventional-commit list produced by `release.mjs testflight-changelog`) and calls an LLM (Anthropic-compatible `/v1/messages` API) to rewrite it into a bilingual EN/中文 "What to Test" summary. CI pins `RELEASE_NOTES_MODEL_ID=glm-5.2` and `ANTHROPIC_BASE_URL=https://open.bigmodel.cn/api/anthropic` (Zhipu's Anthropic-compatible endpoint); locally the script defaults to `api.anthropic.com` and falls back `RELEASE_NOTES_MODEL_ID` → `OPENWIKI_MODEL_ID` → `glm-5.2`. It requires the LLM to return strict JSON with `en`/`zh` fields and fails loudly otherwise. The output is written to `.testflight-whats-new`, which is the fallback file the `testflight_distribute` fastlane lane reads when `TESTFLIGHT_CHANGELOG` is unset. The file is one-shot: the lane deletes it after reading, so each distribution needs a fresh one.
 
 Locally you can preview the output without writing the file:
 
@@ -205,7 +210,7 @@ Source: `.github/workflows/release-testflight.yml`, `eas.json`, `scripts/generat
 
 ### Local fastlane fallback
 
-If EAS is unavailable, the original local fastlane path still works as a manual fallback. `release:testflight-prepare`, `release:testflight-build`, `release:testflight-upload`, `release:testflight-distribute`, and `release:testflight-tag` together reproduce the build → upload → distribute → tag sequence locally:
+If EAS is unavailable, the original local fastlane path still works as a manual fallback. `release:testflight-prepare`, `release:testflight-build`, `release:testflight-upload`, `release:testflight-distribute`, and `release:testflight-tag` together reproduce the build → upload → distribute → tag sequence locally. `release.mjs` invokes every fastlane lane through `mise exec -- bundle exec fastlane <lane>` (Ruby/fastlane versions pinned via `mise` and the `Gemfile`/`Gemfile.lock`, fastlane `>= 2.220, < 3.0`), so the same invocation works locally and in CI:
 
 ```bash
 pnpm release:testflight         # full local fastlane flow
@@ -429,29 +434,3 @@ See `/openwiki/development/conventions.md` for commit message rules and the `/AG
 - **Export options:** `/fastlane/ExportOptions.plist`
 - **Commit conventions:** `/AGENTS.md`
 - **Conventional Commits:** See `/openwiki/development/conventions.md`
-See `/openwiki/development/conventions.md`
-- Ensure buildNumber matches uploaded build
-
-### Demo Mode Not Working
-
-- Confirm `EXPO_PUBLIC_SCREENSHOT_DEMO_MODE=1` is set
-- Check Metro bundler was restarted after setting env var
-- Verify demo assets are accessible at the URL
-
-### Version Bump Issues
-
-- Check commits follow Conventional Commits format
-- Verify `package.json` version is synced with `app.json`
-- Run `pnpm release:version` to trigger version bump manually
-
-## References
-
-- **Release script:** `/scripts/release.mjs`
-- **Fastlane config:** `/fastlane/Fastfile`
-- **App metadata:** `/fastlane/metadata/`
-- **Export options:** `/fastlane/ExportOptions.plist`
-- **Commit conventions:** `/AGENTS.md`
-- **Conventional Commits:** See `/openwiki/development/conventions.md`
-See `/openwiki/development/conventions.md`
-ns.md`
-See `/openwiki/development/conventions.md`
