@@ -3,9 +3,6 @@ type: "Reference"
 title: "TubeCast Documentation"
 description: "Entry point for the TubeCast wiki: toolchain, how to run the app, and a task-routing map to the architecture, features, development, and operations pages."
 tags: [quickstart, toolchain, task-routing, expo, react-native]
-verified:
-  - by: openwiki/0.5.2
-    at: 2026-09-16T21:47:02.391Z
 sources:
   - id: openwiki-source-8037e2358a2c4f9b2c722a11
     resource: repo://AGENTS.md
@@ -15,7 +12,10 @@ sources:
     resource: repo://README.md
   - id: openwiki-source-08140b0b026a34cde5d2e598
     resource: repo://src/features/kickstartExchange/config.ts
-generated: { by: "openwiki/0.5.2", at: "2026-09-16T21:47:02.391Z" }
+generated: { by: "openwiki/0.6.0", at: "2026-09-23T21:51:54.008Z" }
+verified:
+  - by: openwiki/0.6.0
+    at: 2026-09-23T21:51:54.008Z
 ---
 
 # TubeCast Documentation
@@ -24,10 +24,12 @@ TubeCast is an independent Expo / React Native client for iOS and Android that t
 
 ## How to Use This Wiki
 
-This wiki is an optional **just-in-time evidence index**, not required startup reading. It mirrors the framing declared in `/AGENTS.md`:
+This wiki is an optional **just-in-time evidence index**, not required startup reading. It mirrors the framing declared in `/AGENTS.md` (OpenWiki block):
 
-- **Source code and tests are authoritative.** Treat the wiki as a navigation aid; when a page and the source disagree, the source wins.
-- **Prefer the narrowest quiet validation** that proves the changed behavior, and preserve complete failure output. Each page lists focused validation commands where applicable — run those, not a broad repo-wide sweep, unless a specific boundary (public API, generated artifact, release) requires more.
+- **Don't enumerate, preload, or search wikis at task start.** Use retrieval only when the user asks, when unfamiliar architecture or dependency behavior materially affects the task, or when source inspection leaves an important uncertainty — then stop once the question is grounded.
+- **Source code and tests are authoritative.** Treat the wiki as a navigation aid; when a page and the source disagree, the source wins. A brief's unknowns and review items are verification gaps, not automatic requirements.
+- **Prefer the narrowest quiet validation** that proves the changed behavior, and preserve complete failure output. Each page lists focused validation commands where applicable — run those, not a broad repo-wide sweep.
+- The wiki is refreshed by a scheduled OpenWiki GitHub Actions workflow; do not hand-edit generated pages unless explicitly asked.
 
 ## Task-Routing Map
 

@@ -34,10 +34,10 @@ sources:
     resource: repo://src/shared/layoutConstants.ts
   - id: openwiki-source-c457d3d1a63d5dc86f0da7ef
     resource: repo://src/types.ts
-generated: { by: "openwiki/0.5.2", at: "2026-09-15T21:48:37.541Z" }
+generated: { by: "openwiki/0.6.0", at: "2026-09-23T21:51:54.008Z" }
 verified:
-  - by: openwiki/0.5.2
-    at: 2026-09-16T21:47:02.391Z
+  - by: openwiki/0.6.0
+    at: 2026-09-23T21:51:54.008Z
 ---
 
 # Development Conventions
@@ -63,7 +63,7 @@ The type is determined by **which files are changed**, not by how the author fee
 
 | Scenario | Type | Example |
 |----------|------|---------|
-| **App source code changes** (`src/`, `App.tsx`, `index.ts`, `assets/`, `ios-share-extension/`, `plugins/`) — user-facing features | `feat` | `feat(player): add lock-screen progress scrubbing` |
+| **App source code changes** (`src/`, `App.tsx`, `index.ts`, `assets/`, `ios-share-extension/`; the type-guard script also treats `plugins/` and any file not matching a tooling rule as app source) — user-facing features | `feat` | `feat(player): add lock-screen progress scrubbing` |
 | **App source code changes** — bug fixes | `fix` | `fix(share): dismiss share sheet after creating moment` |
 | **App source code** — performance or refactor (no behavior change) | `perf` / `refactor` | `perf(list): virtualize playlist rendering` |
 | Documentation | `docs` | `docs: add fastlane release guide` |
@@ -90,7 +90,7 @@ Commit quality is enforced at commit time by the `.husky/commit-msg` hook, which
 
 2. **Layer 3 — file-based type validation (`scripts/commit-type-guard.mjs`).** Parses the commit header for its type; if the type is anything other than `feat` or `fix` (the only bump-triggering types), it exits immediately. Otherwise it lists staged files via `git diff --cached --name-only --diff-filter=ACM` and classifies each path as tooling or app source:
    - **Tooling paths** (cannot use `feat`/`fix`): directories `scripts/`, `fastlane/`, `.github/`, `.husky/`, `.vscode/`, `.codex/`, `docs/`, `test/`/`tests/`/`__tests__/`, `e2e/`, `build/`, `vendor/`, `ios/`, `android/`; root config files (`package.json`, `app.json`, `tsconfig.json`, `eas.json`, `.versionrc`, `commitlint.config.*`, babel/metro/vitest configs, `mise.toml`, `Gemfile*`, `CHANGELOG.md`, `README.md`, etc.); and any file with a tooling extension (`md`, `mjs`, `cjs`, `yml`, `yaml`, `toml`, `rb`, `lock`, `snap`, `plist`).
-   - **App source** (may use `feat`/`fix`): `src/`, `App.tsx`, `index.ts`, `assets/`, `ios-share-extension/`, `plugins/`, and anything else not matching the tooling rules.
+   - **App source** (may use `feat`/`fix`): `src/`, `App.tsx`, `index.ts`, `assets/`, `ios-share-extension/`, `plugins/` (per the script's own classification comment), and anything else not matching the tooling rules.
    - If **at least one** staged file is app source, the commit is allowed. If **all** staged files are tooling, the commit is rejected with exit code 1, listing the offending files (up to 8, then an ellipsis count) and directing the author to rewrite as `build:`/`ci:`/`chore:`/`docs:`. If the staged file list cannot be read (e.g., amend with no changes) or is empty, the guard lets the commit through.
 
 The `.husky/pre-commit` hook is intentionally left empty (a commented-out `pnpm test`), so no lint/tests block commits by default; enable it there when needed.

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:05c0175979beea2d2c18506675a94c5aa233339f8870ad9cae8f52938026ba2b",
+  "pageVersion": "sha256:d97f82a1b6b4e9e8bc302f90413dc93ff6435b4d71c416662e2995b5b421353a",
   "claims": [
     {
       "id": "claim_17f4948a5c8845cbb0240c75badc314e",
@@ -52,11 +52,11 @@
     },
     {
       "id": "claim_2f48aeb00af3425eb7d27f3ef484d70d",
-      "statement": "AGENTS.md is the canonical agent/collaborator brief restating the commit format, file-based type table, version bump table, and pre-commit self-check; CLAUDE.md contains only a minimal OpenWiki include block referencing AGENTS.md via @AGENTS.md.",
+      "statement": "AGENTS.md is the canonical agent/collaborator brief restating the commit format, the file-based type decision table (app source: src/, App.tsx, index.ts, assets/, ios-share-extension/), the commit-and-tag-version bump mapping with the RELEASE_AS override, and the pre-commit self-check; it also carries an appended OpenWiki usage section directing just-in-time retrieval and no hand-editing of generated pages, while CLAUDE.md contains only a minimal OpenWiki include block referencing AGENTS.md via @AGENTS.md.",
       "evidence": [
         {
           "resource": "repo://AGENTS.md",
-          "version": "repo-file-v1:sha256:e88a3df85974f521a1de4f759b82de767f4ee2aec3dee204fbf18534ddb813f6"
+          "version": "repo-file-v1:sha256:774cefac8ea4c96215ee78c57f78f2138bacaa832d160c4158e466a704a54b8b"
         },
         {
           "resource": "repo://CLAUDE.md",
@@ -150,7 +150,7 @@
     }
   ],
   "verification": {
-    "by": "openwiki/0.5.2",
-    "at": "2026-09-16T21:47:02.391Z"
+    "by": "openwiki/0.6.0",
+    "at": "2026-09-23T21:51:54.008Z"
   }
 }
