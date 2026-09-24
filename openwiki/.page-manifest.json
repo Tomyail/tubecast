@@ -9,11 +9,11 @@
       "completedRunId": "f16eb845-5437-4ff7-acdf-21c01ee487b9"
     },
     "/openwiki/development/conventions.md": {
+      "gitHead": "203d7433d0403d1301ac7f94246cd3ab0ed4a0c1",
+      "sourceFingerprint": "sha256:4ce6d1956b3b373fb14c4274da0c6b3d89cc4a42c82583bd93c0461c0cd56c13",
       "pageVersion": "sha256:d97f82a1b6b4e9e8bc302f90413dc93ff6435b4d71c416662e2995b5b421353a",
       "completedBy": "openwiki/0.6.0",
-      "completedRunId": "b5f6f133-481a-4c13-8d58-be36924b6489",
-      "gitHead": "203d7433d0403d1301ac7f94246cd3ab0ed4a0c1",
-      "sourceFingerprint": "sha256:4ce6d1956b3b373fb14c4274da0c6b3d89cc4a42c82583bd93c0461c0cd56c13"
+      "completedRunId": "b5f6f133-481a-4c13-8d58-be36924b6489"
     },
     "/openwiki/development/testing.md": {
       "gitHead": "42765ecdf6e435e88bdeb5a14794aec2904776c2",
@@ -65,11 +65,11 @@
       "completedRunId": "f16eb845-5437-4ff7-acdf-21c01ee487b9"
     },
     "/openwiki/quickstart.md": {
+      "gitHead": "203d7433d0403d1301ac7f94246cd3ab0ed4a0c1",
+      "sourceFingerprint": "sha256:4ce6d1956b3b373fb14c4274da0c6b3d89cc4a42c82583bd93c0461c0cd56c13",
       "pageVersion": "sha256:6a76571209a02e35c257d4706c81b4c3fdbc29765a7033c50170e573095aff07",
       "completedBy": "openwiki/0.6.0",
-      "completedRunId": "b5f6f133-481a-4c13-8d58-be36924b6489",
-      "gitHead": "203d7433d0403d1301ac7f94246cd3ab0ed4a0c1",
-      "sourceFingerprint": "sha256:4ce6d1956b3b373fb14c4274da0c6b3d89cc4a42c82583bd93c0461c0cd56c13"
+      "completedRunId": "b5f6f133-481a-4c13-8d58-be36924b6489"
     }
   }
 }
