@@ -20,7 +20,7 @@ const WHATS_NEW_OUTPUT = path.join(mobileRoot, ".testflight-whats-new");
 
 const ANTHROPIC_BASE_URL = process.env.ANTHROPIC_BASE_URL || "https://api.anthropic.com";
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
-const MODEL_ID = process.env.RELEASE_NOTES_MODEL_ID || process.env.OPENWIKI_MODEL_ID || "glm-5.2";
+const MODEL_ID = process.env.RELEASE_NOTES_MODEL_ID || "glm-5.2";
 
 const PROMPT_INSTRUCTIONS = `你会收到一份 TestFlight 内部工程版 changelog（原始 conventional commit 列表）。
 请把它改写成面向 TestFlight 测试用户的"本次要测什么"（What to Test）说明，要求：
