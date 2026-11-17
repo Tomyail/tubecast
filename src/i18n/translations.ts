@@ -15,7 +15,7 @@ export const resources = {
       publisher: { recentVideos: "Recent Items", subscribe: "Subscribe", subscribed: "Subscribed", unsubscribe: "Unsubscribe", convert: "Add", converting: "Preparing", ready: "Ready", loadFailed: "Failed to load. Tap to retry.", retry: "Retry", empty: "No recent items" },
       settings: { title: "Settings", language: "Language", theme: "Appearance", light: "Light", dark: "Dark", system: "Follow system", chinese: "简体中文", english: "English", checkStorage: "Check Storage", storage: "{{count}} tracks, {{size}}", about: "About", description: "TubeCast — your personal listening library", version: "Version", rateApp: "Rate this app", privacyPolicy: "Privacy Policy", terms: "Terms", support: "Support" },
       appReview: { title: "Enjoying TubeCast?", message: "Your feedback helps us keep improving.", rate: "Rate on the App Store", feedback: "Send Feedback", later: "Not Now" },
-      errors: { generic: "Something went wrong. Please try again.", network: "Network request failed. Please try again.", liveUnsupported: "Live videos are not supported yet.", featureUnavailable: "This feature is temporarily unavailable." },
+      errors: { generic: "Something went wrong. Please try again.", network: "Network request failed. Please try again.", liveUnsupported: "This live stream has not ended yet. Try again after it ends.", featureUnavailable: "This feature is temporarily unavailable." },
     },
   },
   "zh-CN": {
@@ -34,7 +34,7 @@ export const resources = {
       publisher: { recentVideos: "最近内容", subscribe: "订阅", subscribed: "已订阅", unsubscribe: "取消订阅", convert: "添加", converting: "准备中", ready: "就绪", loadFailed: "加载失败，点击重试。", retry: "重试", empty: "最近没有新内容" },
       settings: { title: "设置", language: "语言", theme: "主题", light: "浅色", dark: "深色", system: "跟随系统", chinese: "简体中文", english: "English", checkStorage: "查看存储空间", storage: "{{count}} 首曲目，{{size}}", about: "关于", description: "TubeCast — 你的个人收听库", version: "版本", rateApp: "给 App 评分", privacyPolicy: "隐私政策", terms: "条款", support: "支持" },
       appReview: { title: "喜欢 TubeCast 吗？", message: "你的反馈可以帮助我们继续改进。", rate: "去 App Store 评分", feedback: "反馈问题", later: "以后再说" },
-      errors: { generic: "操作失败，请重试。", network: "网络请求失败，请重试。", liveUnsupported: "暂不支持直播内容。", featureUnavailable: "此功能暂时不可用。" },
+      errors: { generic: "操作失败，请重试。", network: "网络请求失败，请重试。", liveUnsupported: "这场直播还没结束，结束后再试。", featureUnavailable: "此功能暂时不可用。" },
     },
   },
 } as const;
