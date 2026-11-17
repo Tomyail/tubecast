@@ -351,7 +351,6 @@ const VideoCard = memo(function VideoCard({
         </View>
       </View>
       <VideoAction
-        disabled={liveUnsupported}
         isSubmitting={isSubmitting}
         linkProcessingEnabled={linkProcessingEnabled}
         onConvert={() => onConvert(video)}
